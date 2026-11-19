@@ -94,6 +94,41 @@
     color: #334155;
   }
 
+  .code-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 6px;
+  }
+  .code-label-row label { margin: 0; }
+
+  .slot-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .max-pill {
+    background: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .count-pill {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
   .code-row {
     display: flex;
     gap: 8px;
@@ -324,6 +359,13 @@
   }
 
   .admin-card { border-top: 4px solid #0d9488; }
+  .admin-limit-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 12px;
+  }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .high-box {
     background: var(--success-bg);
@@ -369,25 +411,29 @@
   <header>
     <span class="badge-top">TNPSC GROUP II / IIA • LIVE QUIZ</span>
     <h1>TNPSC குழு போட்டித் தேர்வு</h1>
-    <p>குறைந்தது 2 பேர் முதல் நீங்கள் நிர்ணயிக்கும் அதிகபட்ச நபர்கள் வரை ஒரே Test Code-ல் தேர்வு எழுதலாம்.</p>
+    <p>Admin நிர்ணயிக்கும் Maximum எண்ணிக்கைக்கு ஏற்ப பங்கேற்பாளர்கள் Test Code மூலம் சேரலாம்.</p>
   </header>
 
   <!-- 1. Setup / Join -->
   <div class="card" id="setup">
     <h2>தேர்வில் இணையவும்</h2>
-    <p class="muted"><strong>Test Code</strong> மற்றும் <strong>Maximum Participants (Min 2)</strong> ஆகியவற்றை அமைத்து நண்பர்களுடன் பகிர்ந்து கொள்ளுங்கள்.</p>
+    <p class="muted">Admin அமைத்த <strong>Test Code</strong> மற்றும் உங்கள் பெயரை உள்ளிட்டுத் தேர்வில் இணையுங்கள்.</p>
 
-    <label class="field-label">Test Code (நீங்கள் மாற்றிக்கொள்ளலாம்)</label>
+    <div class="code-label-row">
+      <label class="field-label" for="code">Test Code</label>
+      <div class="slot-badges">
+        <span class="max-pill" id="maxBadge">Max: 10</span>
+        <span class="count-pill" id="slotBadge">0/10 joined</span>
+      </div>
+    </div>
+
     <div class="code-row">
       <input id="code" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02 அல்லது GROUP2_A" maxlength="24" autocomplete="off">
       <button type="button" class="mini-btn outline" onclick="generateNewCode()">புதிய Code</button>
     </div>
 
-    <label class="field-label">Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
-    <input id="maxPlayers" type="number" min="2" max="500" value="10" placeholder="எ.கா: 5, 10, 20">
-
     <div class="share-box">
-      <div>Code: <strong id="previewCode">TNPSC01</strong> • Max: <strong id="previewMax">10</strong> பேர்</div>
+      <div>Code: <strong id="previewCode">TNPSC01</strong> • Status: <strong id="previewSlots">0/10 joined</strong></div>
       <button type="button" class="mini-btn" onclick="copyCodeAndLink()">Code &amp; Link Copy</button>
     </div>
     <div id="copyMsg" class="ok-msg"></div>
@@ -431,17 +477,29 @@
 
   <!-- 5. Admin View -->
   <div class="card admin-card" id="adminSection">
-    <h2>Admin View — High &amp; Low Score</h2>
-    <p class="muted">தேர்வு முடிந்த பிறகு Test Code மற்றும் Admin PIN கொடுத்து யார் அதிக மதிப்பெண் (High), யார் குறைந்த மதிப்பெண் (Low) என்பதைப் பார்க்கவும்.</p>
+    <h2>Admin Control &amp; Score Summary</h2>
+    <p class="muted">Admin PIN மற்றும் Test Code கொடுத்து <strong>Maximum Participants (Min 2)</strong> அமைக்கலாம் மற்றும் High / Low Score பார்க்கலாம்.</p>
+
     <label class="field-label">Admin PIN</label>
     <input id="adminPin" type="password" placeholder="Admin PIN உள்ளிடவும்">
+
     <label class="field-label">Test Code</label>
     <input id="adminCode" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02" autocomplete="off">
+
+    <div class="admin-limit-box">
+      <label class="field-label" style="margin-top:0;">Set Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
+      <div class="code-row">
+        <input id="adminMaxPlayers" type="number" min="2" max="1000" value="50" placeholder="எ.கா: 50">
+        <button type="button" class="mini-btn" id="saveLimitBtn">Limit Save</button>
+      </div>
+      <div id="limitMsg" class="ok-msg"></div>
+    </div>
+
     <button class="secondary" id="adminBtn">High / Low Score பார்க்கவும்</button>
     <div id="adminBody"></div>
   </div>
 
-  <div class="footer-note">குறிப்பு: குறைந்தது 2 பேர் முதல் நீங்கள் அமைக்கும் Maximum எண்ணிக்கை வரை சேரலாம்.</div>
+  <div class="footer-note">குறிப்பு: Maximum பங்கேற்பாளர் எண்ணிக்கையை Admin மட்டுமே நிர்ணயிக்க முடியும்.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -461,7 +519,9 @@ const QUESTIONS = [
 ];
 
 const $ = id => document.getElementById(id);
-let client, participant = null, pollInterval = null;
+let client, participant = null, pollInterval = null, slotInterval = null;
+let currentMaxPlayers = 10;
+let currentJoinedCount = 0;
 
 function getQuizConfig() {
   return window.QUIZ_CONFIG || {};
@@ -504,22 +564,33 @@ function escapeHtml(s) {
   }[c]));
 }
 
-function getMaxPlayersValue() {
-  const raw = Number($("maxPlayers")?.value);
-  if (!Number.isFinite(raw) || raw < 2) return 2;
-  return Math.min(500, Math.floor(raw));
+function renderSlotBadges() {
+  const clean = ($("code").value || "").trim().toUpperCase();
+  const left = Math.max(0, currentMaxPlayers - currentJoinedCount);
+  if ($("maxBadge")) $("maxBadge").textContent = `Max: ${currentMaxPlayers}`;
+  if ($("slotBadge")) $("slotBadge").textContent = `${currentJoinedCount}/${currentMaxPlayers} (${left} left)`;
+  if ($("previewCode")) $("previewCode").textContent = clean || "-";
+  if ($("previewSlots")) $("previewSlots").textContent = `${currentJoinedCount}/${currentMaxPlayers} (${left} left)`;
 }
 
-function syncCodePreview() {
+async function refreshTestSlotInfo() {
   const clean = ($("code").value || "").trim().toUpperCase();
-  const maxVal = getMaxPlayersValue();
-  if ($("maxPlayers") && String($("maxPlayers").value) !== "" && Number($("maxPlayers").value) < 2) {
-    $("maxPlayers").value = 2;
-  }
-  if ($("previewCode")) $("previewCode").textContent = clean || "உங்கள் Code-ஐ உள்ளிடவும்";
-  if ($("previewMax")) $("previewMax").textContent = maxVal;
-  if (clean && $("adminCode")) {
+  if ($("adminCode") && clean) {
     $("adminCode").value = clean;
+  }
+  renderSlotBadges();
+
+  const sb = getSupabaseClient();
+  if (!sb || !clean) return;
+
+  const { data, error } = await sb.rpc("quiz_test_info", { p_test_code: clean });
+  if (!error && data) {
+    currentMaxPlayers = Number(data.max_players) || 10;
+    currentJoinedCount = Number(data.joined_count) || 0;
+    if ($("adminMaxPlayers")) {
+      $("adminMaxPlayers").value = currentMaxPlayers;
+    }
+    renderSlotBadges();
   }
 }
 
@@ -530,25 +601,26 @@ window.generateNewCode = function () {
   const newCode = `TNP${num}${suffix}`;
   $("code").value = newCode;
   if ($("adminCode")) $("adminCode").value = newCode;
-  syncCodePreview();
+  currentJoinedCount = 0;
+  renderSlotBadges();
+  refreshTestSlotInfo();
   if ($("copyMsg")) $("copyMsg").textContent = `புதிய Test Code உருவாக்கப்பட்டது: ${newCode}`;
 };
 
 window.copyCodeAndLink = async function () {
   const clean = ($("code").value || "").trim().toUpperCase();
-  const maxVal = getMaxPlayersValue();
   if (!clean) {
     if ($("copyMsg")) $("copyMsg").textContent = "முதலில் ஒரு Test Code உள்ளிடவும்.";
     return;
   }
   const baseUrl = window.location.href.split("?")[0];
-  const joinUrl = `${baseUrl}?code=${encodeURIComponent(clean)}&max=${maxVal}`;
-  const shareText = `TNPSC Quiz Link: ${joinUrl}\nTest Code: ${clean} (Max: ${maxVal} பேர்)`;
+  const joinUrl = `${baseUrl}?code=${encodeURIComponent(clean)}`;
+  const shareText = `TNPSC Quiz Link: ${joinUrl}\nTest Code: ${clean} (Max: ${currentMaxPlayers}, Joined: ${currentJoinedCount}/${currentMaxPlayers})`;
   try {
     await navigator.clipboard.writeText(shareText);
-    if ($("copyMsg")) $("copyMsg").textContent = `Link & Code (${clean}, Max ${maxVal}) Copy செய்யப்பட்டது!`;
+    if ($("copyMsg")) $("copyMsg").textContent = `Link & Code (${clean}) Copy செய்யப்பட்டது!`;
   } catch {
-    if ($("copyMsg")) $("copyMsg").textContent = `Test Code: ${clean} (Max: ${maxVal})`;
+    if ($("copyMsg")) $("copyMsg").textContent = `Test Code: ${clean}`;
   }
 };
 
@@ -611,7 +683,7 @@ async function status() {
     show("results");
   } else {
     const subCount = data?.submitted_count || 0;
-    const totalJoined = data?.total_players || data?.joined_count || getMaxPlayersValue();
+    const totalJoined = data?.total_players || data?.joined_count || currentJoinedCount || 2;
     $("waitStatus").textContent = `சமர்ப்பித்தவர்கள்: ${subCount} / ${totalJoined}`;
   }
 }
@@ -663,23 +735,77 @@ function renderResults(d) {
 
 function bindEvents() {
   if ($("code")) {
-    $("code").addEventListener("input", syncCodePreview);
-  }
-  if ($("maxPlayers")) {
-    $("maxPlayers").addEventListener("input", syncCodePreview);
+    $("code").addEventListener("input", () => {
+      renderSlotBadges();
+      refreshTestSlotInfo();
+    });
   }
 
   const params = new URLSearchParams(window.location.search);
   const urlCode = (params.get("code") || "").trim().toUpperCase();
-  const urlMax = Number(params.get("max"));
   if (urlCode && $("code")) {
     $("code").value = urlCode;
     if ($("adminCode")) $("adminCode").value = urlCode;
   }
-  if (urlMax >= 2 && $("maxPlayers")) {
-    $("maxPlayers").value = Math.min(500, Math.floor(urlMax));
+
+  renderSlotBadges();
+  refreshTestSlotInfo();
+  if (slotInterval) clearInterval(slotInterval);
+  slotInterval = setInterval(() => {
+    if (!$("setup")?.classList.contains("hidden")) {
+      refreshTestSlotInfo();
+    }
+  }, 4000);
+
+  if ($("saveLimitBtn")) {
+    $("saveLimitBtn").onclick = async () => {
+      $("limitMsg").textContent = "";
+      $("limitMsg").className = "ok-msg";
+      if (!configured()) {
+        $("limitMsg").className = "err";
+        $("limitMsg").textContent = "config.js கோப்பில் Supabase URL மற்றும் anon key சரியாக உள்ளதா எனச் சரிபார்க்கவும்.";
+        return;
+      }
+      const sb = getSupabaseClient();
+      const pin = ($("adminPin").value || "").trim();
+      const code = ($("adminCode").value || "").trim().toUpperCase();
+      const rawMax = Number($("adminMaxPlayers").value);
+
+      if (!code || code.length < 3) {
+        $("limitMsg").className = "err";
+        $("limitMsg").textContent = "சரியான Test Code உள்ளிடவும்.";
+        return;
+      }
+      if (!Number.isFinite(rawMax) || rawMax < 2) {
+        $("limitMsg").className = "err";
+        $("limitMsg").textContent = "Maximum participants குறைந்தது 2 ஆக இருக்க வேண்டும்.";
+        return;
+      }
+
+      $("saveLimitBtn").disabled = true;
+      const { data, error } = await sb.rpc("quiz_set_limit", {
+        p_admin_key: pin,
+        p_test_code: code,
+        p_max_players: Math.floor(rawMax)
+      });
+      $("saveLimitBtn").disabled = false;
+
+      if (error) {
+        $("limitMsg").className = "err";
+        $("limitMsg").textContent = error.message;
+        return;
+      }
+
+      currentMaxPlayers = Number(data?.max_players) || Math.floor(rawMax);
+      currentJoinedCount = Number(data?.joined_count) || 0;
+      const left = Math.max(0, currentMaxPlayers - currentJoinedCount);
+
+      if ($("code").value.trim().toUpperCase() === code) {
+        renderSlotBadges();
+      }
+      $("limitMsg").textContent = `Saved! ${code} -> Max: ${currentMaxPlayers} (${currentJoinedCount}/${currentMaxPlayers} joined, ${left} left)`;
+    };
   }
-  syncCodePreview();
 
   if ($("join")) {
     $("join").onclick = async () => {
@@ -690,14 +816,12 @@ function bindEvents() {
       }
       const sb = getSupabaseClient();
       if (!sb) {
-        $("setupMsg").textContent = "Supabase client-ஐத் தொடங்க முடியவில்லை. இணைய இணைப்பைச் சரிபார்க்கவும்.";
+        $("setupMsg").textContent = "Supabase client-ஐத் தொடங்க முடியவில்லை.";
         return;
       }
       const name = ($("name").value || "").trim();
       const code = ($("code").value || "").trim().toUpperCase();
-      const maxPlayers = getMaxPlayersValue();
       $("code").value = code;
-      if ($("maxPlayers")) $("maxPlayers").value = maxPlayers;
       if ($("adminCode")) $("adminCode").value = code;
 
       if (!name || code.length < 3) {
@@ -706,25 +830,25 @@ function bindEvents() {
       }
 
       $("join").disabled = true;
-      let { data, error } = await sb.rpc("quiz_join", {
+      const { data, error } = await sb.rpc("quiz_join", {
         p_test_code: code,
         p_name: name,
-        p_max_players: maxPlayers
+        p_max_players: currentMaxPlayers
       });
-      if (error && /function.*quiz_join/i.test(error.message)) {
-        ({ data, error } = await sb.rpc("quiz_join", {
-          p_test_code: code,
-          p_name: name
-        }));
-      }
       $("join").disabled = false;
 
       if (error) {
         $("setupMsg").textContent = error.message;
+        refreshTestSlotInfo();
         return;
       }
+
       participant = data;
-      $("who").textContent = `👤 ${name} (${code} • Max ${maxPlayers})`;
+      if (data?.max_players) currentMaxPlayers = Number(data.max_players);
+      if (data?.joined_count) currentJoinedCount = Number(data.joined_count);
+      renderSlotBadges();
+
+      $("who").textContent = `👤 ${name} (${code} • ${currentJoinedCount}/${currentMaxPlayers})`;
       renderQuestions();
       hide("setup");
       show("exam");
