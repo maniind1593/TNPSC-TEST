@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TNPSC Live Quiz</title>
+<title>TNPSC Group 4 Live Quiz</title>
 <style>
   body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 14px; background: #f1f5f9; color: #0f172a; }
   .box { max-width: 700px; margin: 12px auto; background: #fff; padding: 18px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
@@ -38,10 +38,10 @@
 
 <!-- USER JOIN SCREEN -->
 <div class="box" id="joinBox">
-  <h1>TNPSC Live Quiz</h1>
-  <p class="muted">தமிழ் மற்றும் ஆங்கிலம் (Bilingual) கேள்விகள் • தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே</p>
+  <h1>TNPSC Group 4 Live Quiz</h1>
+  <p class="muted">Group 4 பாடத்திட்டம் • தமிழ் &amp; ஆங்கிலம் (Bilingual) கேள்விகள் • தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே</p>
   <label>Test Batch / Code</label>
-  <input id="code" type="text" value="TNPSC01">
+  <input id="code" type="text" value="GRP4_01">
   <label>உங்கள் பெயர் (Your Name)</label>
   <input id="name" type="text" placeholder="பெயர் உள்ளிடவும் / Enter your name">
   <button type="button" id="joinBtn">Join Quiz (தேர்வைத் தொடங்குக)</button>
@@ -72,7 +72,7 @@
 
 <!-- SEPARATE ADMIN LOGIN SCREEN -->
 <div class="box hidden" id="adminLoginBox">
-  <h2>Admin Portal Login</h2>
+  <h2>Group 4 Admin Login</h2>
   <p class="muted">Admin PIN உள்ளிட்டு தனியான Admin Control திரையைத் திறக்கவும்.</p>
   <label>Admin PIN</label>
   <input id="pin" type="password" placeholder="Admin PIN உள்ளிடவும்">
@@ -85,20 +85,20 @@
 
 <!-- SEPARATE ADMIN CONTROL SCREEN -->
 <div class="box hidden" id="adminBox">
-  <h2>Admin Control Panel (Daily Subject &amp; AI)</h2>
-  <p class="muted">Subject மற்றும் Test Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A தானாகத் தயாராகும்.</p>
+  <h2>Group 4 Admin Control Panel</h2>
+  <p class="muted">Group 4 Subject மற்றும் Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A தானாகத் தயாராகும்.</p>
 
   <label>Test Batch / Code</label>
-  <input id="adminCode" type="text" value="TNPSC01">
+  <input id="adminCode" type="text" value="GRP4_01">
 
-  <label>Subject (பாடம்)</label>
+  <label>TNPSC Group 4 Subject (பாடம்)</label>
   <select id="subj">
-    <option value="Indian Polity">Indian Polity (இந்திய அரசியலமைப்பு)</option>
-    <option value="Indian National Movement">Indian National Movement (இந்திய தேசிய இயக்கம்)</option>
-    <option value="History and Culture of Tamil Nadu">History and Culture of Tamil Nadu (தமிழக வரலாறு &amp; பண்பாடு)</option>
-    <option value="Geography of India">Geography of India (இந்தியப் புவியியல்)</option>
-    <option value="Indian Economy">Indian Economy (இந்தியப் பொருளாதாரம்)</option>
-    <option value="General Science">General Science (பொது அறிவியல்)</option>
+    <option value="General Tamil">General Tamil &amp; Literature (பொதுத் தமிழ் &amp; இலக்கியம்)</option>
+    <option value="General English">General English &amp; Grammar (பொது ஆங்கிலம்)</option>
+    <option value="Indian Polity & Economy">Polity &amp; Indian Economy (அரசியலமைப்பு &amp; பொருளாதாரம்)</option>
+    <option value="History & TN Culture">History &amp; TN Culture (வரலாறு &amp; தமிழக மரபு)</option>
+    <option value="Geography & Science">Geography &amp; General Science (புவியியல் &amp; அறிவியல்)</option>
+    <option value="Aptitude & Mental Ability">Aptitude &amp; Mental Ability (திறனறிவு &amp; மனக்கணக்கு)</option>
   </select>
 
   <label>ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை</label>
@@ -108,7 +108,7 @@
     <option value="25">25 Questions (25 கேள்விகள்)</option>
   </select>
 
-  <label>AI Provider (ChatGPT / Gemini)</label>
+  <label>AI Provider (Gemini / ChatGPT)</label>
   <select id="aiProvider">
     <option value="gemini">Gemini (Google API)</option>
     <option value="openai">ChatGPT (OpenAI API)</option>
@@ -171,7 +171,7 @@ function openAdminPanel() {
   hide("adminLoginBox");
   show("adminBox");
   if (g("adminCode") && g("code")) {
-    g("adminCode").value = (g("code").value.trim() || "TNPSC01").toUpperCase();
+    g("adminCode").value = (g("code").value.trim() || "GRP4_01").toUpperCase();
   }
   refreshSubjectBatchQuestions();
 }
@@ -198,116 +198,170 @@ function nextRand(stateObj) {
   return stateObj.seed;
 }
 
-var SUBJECT_TEMPLATES = {
-  "Indian Polity": [
+var GROUP4_TEMPLATES = {
+  "General Tamil": [
+    {
+      ta: "திருக்குறளில் உள்ள மொத்த அதிகாரங்களின் எண்ணிக்கை எத்தனை?",
+      en: "What is the total number of chapters (Adhikarams) in Thirukkural?",
+      correctTa: "133 அதிகாரங்கள்",
+      correctEn: "133 Chapters",
+      wrong: [
+        { ta: "108 அதிகாரங்கள்", en: "108 Chapters" },
+        { ta: "150 அதிகாரங்கள்", en: "150 Chapters" },
+        { ta: "170 அதிகாரங்கள்", en: "170 Chapters" }
+      ],
+      whyTa: "திருக்குறளில் 133 அதிகாரங்களும் 1,330 குறள்களும் உள்ளன.",
+      whyEn: "Thirukkural consists of 133 chapters and 1,330 couplets."
+    },
+    {
+      ta: "சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",
+      en: "Which work belongs to the Ettuthokai (Eight Anthologies) of Sangam literature?",
+      correctTa: "புறநானூறு",
+      correctEn: "Purananuru",
+      wrong: [
+        { ta: "சிலப்பதிகாரம்", en: "Silappathikaram" },
+        { ta: "மணிமேகலை", en: "Manimekalai" },
+        { ta: "திருப்பாவை", en: "Thiruppavai" }
+      ],
+      whyTa: "புறநானூறு எட்டுத்தொகை நூல்களில் ஒன்றாகும்.",
+      whyEn: "Purananuru is one of the eight Ettuthokai collections."
+    },
+    {
+      ta: "'தமிழ் தாத்தா' எனப் போற்றப்படுபவர் யார்?",
+      en: "Who is affectionately called 'Tamil Thatha' (Grandfather of Tamil)?",
+      correctTa: "உ.வே. சாமிநாதர்",
+      correctEn: "U. V. Swaminatha Iyer",
+      wrong: [
+        { ta: "மறைமலை அடிகள்", en: "Maraimalai Adigal" },
+        { ta: "திரு.வி. கல்யாணசுந்தரனார்", en: "Thiru. Vi. Ka." },
+        { ta: "பரிதிமாற் கலைஞர்", en: "Parithimar Kalaignar" }
+      ],
+      whyTa: "பல ஓலைச்சுவடிகளைத் தேடி அச்சிட்டுத் தமிழ் இலக்கியத்தைக் காத்தவர் உ.வே.சா.",
+      whyEn: "U. V. Swaminatha Iyer revived palm-leaf Tamil manuscripts."
+    },
+    {
+      ta: "தனித் தமிழ் இயக்கத்தைத் தொடங்கியவர் யார்?",
+      en: "Who started the Pure Tamil Movement (Thani Thamizh Iyakkam)?",
+      correctTa: "மறைமலை அடிகள்",
+      correctEn: "Maraimalai Adigal",
+      wrong: [
+        { ta: "பாரதிதாசன்", en: "Bharathidasan" },
+        { ta: "கண்ணதாசன்", en: "Kannadasan" },
+        { ta: "நாமக்கல் கவிஞர்", en: "Namakkal Kavignar" }
+      ],
+      whyTa: "மறைமலை அடிகள் தனித் தமிழ் இயக்கத்தைத் தொடங்கினார்.",
+      whyEn: "Maraimalai Adigal founded the Pure Tamil Movement."
+    }
+  ],
+  "General English": [
+    {
+      ta: "ஆங்கிலத்தில் 'Benevolent' என்பதன் சரியான பொருள் எது?",
+      en: "Choose the closest synonym for the word 'Benevolent':",
+      correctTa: "தயாள குணமுள்ள / கருணையுள்ள",
+      correctEn: "Kind and charitable",
+      wrong: [
+        { ta: "கோபமான / கடுமையான", en: "Cruel and harsh" },
+        { ta: "சோம்பலான", en: "Lazy and slow" },
+        { ta: "பயந்த சுபாவமுள்ள", en: "Timid and shy" }
+      ],
+      whyTa: "'Benevolent' என்றால் நன்மை செய்யும் / கருணையுள்ள என்று பொருள்.",
+      whyEn: "Benevolent means well-meaning and kindly disposed."
+    },
+    {
+      ta: "சரியான Preposition-ஐத் தேர்ந்தெடுக்கவும்: 'He is good ___ Mathematics.'",
+      en: "Fill in the blank with the correct preposition: 'He is good ___ Mathematics.'",
+      correctTa: "at (good at)",
+      correctEn: "at",
+      wrong: [
+        { ta: "in", en: "in" },
+        { ta: "on", en: "on" },
+        { ta: "for", en: "for" }
+      ],
+      whyTa: "ஒரு பாடத்தில் அல்லது திறனில் சிறப்பாக உள்ளதைக் குறிக்க 'good at' பயன்படுத்த வேண்டும்.",
+      whyEn: "The standard collocation is 'good at' a subject or skill."
+    },
+    {
+      ta: "'Ancient' என்பதன் எதிர்ச்சொல் (Antonym) எது?",
+      en: "Choose the correct antonym for 'Ancient':",
+      correctTa: "பழமையானதல்லாத / நவீன (Modern)",
+      correctEn: "Modern",
+      wrong: [
+        { ta: "பழங்காலத்து", en: "Antique" },
+        { ta: "முந்தைய", en: "Olden" },
+        { ta: "ஆரம்பகால", en: "Primitive" }
+      ],
+      whyTa: "'Ancient' (பழங்கால) என்பதன் எதிர்ச்சொல் 'Modern' (நவீன) ஆகும்.",
+      whyEn: "Modern is the direct opposite of ancient."
+    },
+    {
+      ta: "'Abundant' என்பதன் பொருள் என்ன?",
+      en: "What is the meaning of 'Abundant'?",
+      correctTa: "ஏராளமான / மிகுதியான",
+      correctEn: "Plentiful / Existing in large quantities",
+      wrong: [
+        { ta: "மிகக் குறைவான", en: "Scarce" },
+        { ta: "அரிய", en: "Rare" },
+        { ta: "பலவீனமான", en: "Weak" }
+      ],
+      whyTa: "'Abundant' என்றால் மிகுதியாக / ஏராளமாக உள்ளது என்று பொருள்.",
+      whyEn: "Abundant means existing or available in large quantities."
+    }
+  ],
+  "Indian Polity & Economy": [
     {
       ta: "இந்திய அரசியலமைப்பில் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",
-      en: "Fundamental Rights are enshrined in which Part of the Indian Constitution?",
+      en: "Fundamental Rights are in which Part of the Indian Constitution?",
       correctTa: "பகுதி III (சரத்து 12 - 35)",
       correctEn: "Part III (Articles 12 - 35)",
       wrong: [
-        { ta: "பகுதி II (குடியுரிமை)", en: "Part II (Citizenship)" },
-        { ta: "பகுதி IV (அரசு நெறிமுறை)", en: "Part IV (DPSP)" },
-        { ta: "பகுதி V (மத்திய அரசு)", en: "Part V (The Union)" }
+        { ta: "பகுதி II", en: "Part II" },
+        { ta: "பகுதி IV", en: "Part IV" },
+        { ta: "பகுதி V", en: "Part V" }
       ],
       whyTa: "அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்து 12-35) உள்ளன.",
       whyEn: "Fundamental Rights are covered under Part III (Articles 12-35)."
     },
     {
-      ta: "வாக்குரிமை வயதை 21-லிருந்து 18-ஆகக் குறைத்த அரசியலமைப்புத் திருத்தம் எது?",
-      en: "Which Constitutional Amendment reduced the voting age from 21 to 18?",
-      correctTa: "61வது திருத்தம் (1988)",
-      correctEn: "61st Amendment (1988)",
+      ta: "இந்திய ரிசர்வ் வங்கி (RBI) நாட்டுடைமையாக்கப்பட்ட ஆண்டு எது?",
+      en: "In which year was the Reserve Bank of India (RBI) nationalised?",
+      correctTa: "1949",
+      correctEn: "1949",
       wrong: [
-        { ta: "42வது திருத்தம்", en: "42nd Amendment" },
-        { ta: "44வது திருத்தம்", en: "44th Amendment" },
-        { ta: "73வது திருத்தம்", en: "73rd Amendment" }
+        { ta: "1935", en: "1935" },
+        { ta: "1947", en: "1947" },
+        { ta: "1969", en: "1969" }
       ],
-      whyTa: "61வது அரசியலமைப்புத் திருத்தம் (1988) வாக்கு வயதை 18-ஆகக் குறைத்தது.",
-      whyEn: "The 61st Amendment Act (1988) lowered the voting age to 18."
+      whyTa: "1949 ஜனவரி 1 அன்று RBI நாட்டுடைமையாக்கப்பட்டது.",
+      whyEn: "RBI was nationalised on January 1, 1949."
     },
     {
-      ta: "ஊரக உள்ளாட்சி அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம் எது?",
-      en: "Which Amendment granted constitutional status to Panchayati Raj institutions?",
+      ta: "ஊரக உள்ளாட்சி அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம்?",
+      en: "Which Constitutional Amendment gave status to Panchayati Raj?",
       correctTa: "73வது திருத்தம்",
       correctEn: "73rd Amendment",
       wrong: [
         { ta: "42வது திருத்தம்", en: "42nd Amendment" },
-        { ta: "52வது திருத்தம்", en: "52nd Amendment" },
+        { ta: "44வது திருத்தம்", en: "44th Amendment" },
         { ta: "86வது திருத்தம்", en: "86th Amendment" }
       ],
-      whyTa: "73வது திருத்தச் சட்டம் பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அங்கீகாரம் வழங்கியது.",
-      whyEn: "The 73rd Amendment gave constitutional status to Panchayati Raj."
+      whyTa: "73வது திருத்தச் சட்டம் பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அங்கீகாரம் தந்தது.",
+      whyEn: "The 73rd Amendment granted constitutional status to Panchayati Raj."
     },
     {
-      ta: "மாநிலங்களவையின் அலுவல் வழித் தலைவராகச் செயல்படுபவர் யார்?",
-      en: "Who is the ex-officio Chairman of the Rajya Sabha?",
-      correctTa: "துணைக் குடியரசுத் தலைவர்",
-      correctEn: "Vice President of India",
+      ta: "நிதி ஆயோக் (NITI Aayog)-ன் தலைவர் யார்?",
+      en: "Who is the Chairperson of NITI Aayog?",
+      correctTa: "இந்தியப் பிரதமர்",
+      correctEn: "Prime Minister of India",
       wrong: [
+        { ta: "நிதி அமைச்சர்", en: "Finance Minister" },
         { ta: "குடியரசுத் தலைவர்", en: "President of India" },
-        { ta: "பிரதமர்", en: "Prime Minister" },
-        { ta: "மக்களவை சபாநாயகர்", en: "Lok Sabha Speaker" }
+        { ta: "RBI ஆளுநர்", en: "RBI Governor" }
       ],
-      whyTa: "துணைக் குடியரசுத் தலைவர் மாநிலங்களவையின் அலுவல் வழித் தலைவர் ஆவார்.",
-      whyEn: "The Vice President serves as the ex-officio Chairman of Rajya Sabha."
+      whyTa: "இந்தியப் பிரதமர் நிதி ஆயோக்கின் தலைவராகச் செயல்படுவார்.",
+      whyEn: "The Prime Minister of India chairs NITI Aayog."
     }
   ],
-  "Indian National Movement": [
-    {
-      ta: "இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",
-      en: "In which year was the Indian National Congress founded?",
-      correctTa: "1885",
-      correctEn: "1885",
-      wrong: [
-        { ta: "1905", en: "1905" },
-        { ta: "1919", en: "1919" },
-        { ta: "1942", en: "1942" }
-      ],
-      whyTa: "இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு தொடங்கப்பட்டது.",
-      whyEn: "Indian National Congress was founded in 1885."
-    },
-    {
-      ta: "உப்பு சத்தியாகிரகம் (தண்டி யாத்திரை) எந்த ஆண்டு தொடங்கியது?",
-      en: "In which year did the Salt Satyagraha (Dandi March) begin?",
-      correctTa: "1930",
-      correctEn: "1930",
-      wrong: [
-        { ta: "1920", en: "1920" },
-        { ta: "1927", en: "1927" },
-        { ta: "1942", en: "1942" }
-      ],
-      whyTa: "உப்பு சத்தியாகிரகம் 1930-ஆம் ஆண்டு தொடங்கியது.",
-      whyEn: "Salt Satyagraha began in 1930."
-    },
-    {
-      ta: "'சுயராஜ்யம் எனது பிறப்புரிமை' என்று முழங்கியவர் யார்?",
-      en: "Who declared 'Swaraj is my birthright'?",
-      correctTa: "பாலகங்காதர திலகர்",
-      correctEn: "Bal Gangadhar Tilak",
-      wrong: [
-        { ta: "பகத் சிங்", en: "Bhagat Singh" },
-        { ta: "சுபாஷ் சந்திர போஸ்", en: "Subhas Chandra Bose" },
-        { ta: "லாலா லஜபதி ராய்", en: "Lala Lajpat Rai" }
-      ],
-      whyTa: "பாலகங்காதர திலகர் இம்முழக்கத்தை முன்வைத்தார்.",
-      whyEn: "Bal Gangadhar Tilak gave this famous slogan."
-    },
-    {
-      ta: "இந்திய தேசிய இராணுவத்தை வலுப்படுத்தி வழிநடத்தியவர் யார்?",
-      en: "Who led and strengthened the Indian National Army (INA)?",
-      correctTa: "நேதாஜி சுபாஷ் சந்திர போஸ்",
-      correctEn: "Netaji Subhas Chandra Bose",
-      wrong: [
-        { ta: "ராஷ் பிஹாரி போஸ்", en: "Rash Behari Bose" },
-        { ta: "மோதிலால் நேரு", en: "Motilal Nehru" },
-        { ta: "சி.ஆர். தாஸ்", en: "C. R. Das" }
-      ],
-      whyTa: "நேதாஜி சுபாஷ் சந்திர போஸ் இந்திய தேசிய இராணுவத்திற்குத் தலைமை தாங்கினார்.",
-      whyEn: "Netaji Subhas Chandra Bose led the Indian National Army."
-    }
-  ],
-  "History and Culture of Tamil Nadu": [
+  "History & TN Culture": [
     {
       ta: "வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",
       en: "In which year did the Vellore Mutiny take place?",
@@ -318,8 +372,8 @@ var SUBJECT_TEMPLATES = {
         { ta: "1857", en: "1857" },
         { ta: "1905", en: "1905" }
       ],
-      whyTa: "வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது.",
-      whyEn: "The Vellore Mutiny took place in 1806."
+      whyTa: "வேலூர் சிப்பாய் கிளர்ச்சி 1806 ஜூலை 10 அன்று நடைபெற்றது.",
+      whyEn: "The Vellore Mutiny took place on July 10, 1806."
     },
     {
       ta: "சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",
@@ -335,17 +389,17 @@ var SUBJECT_TEMPLATES = {
       whyEn: "Periyar E. V. Ramasamy founded the Self-Respect Movement."
     },
     {
-      ta: "சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",
-      en: "Which one is among the Ettuthokai works of Sangam literature?",
-      correctTa: "புறநானூறு",
-      correctEn: "Purananuru",
+      ta: "இந்திய தேசிய காங்கிரஸ் தொடங்கப்பட்ட ஆண்டு எது?",
+      en: "In which year was the Indian National Congress founded?",
+      correctTa: "1885",
+      correctEn: "1885",
       wrong: [
-        { ta: "சிலப்பதிகாரம்", en: "Silappathikaram" },
-        { ta: "மணிமேகலை", en: "Manimekalai" },
-        { ta: "பெரியபுராணம்", en: "Periyapuranam" }
+        { ta: "1905", en: "1905" },
+        { ta: "1919", en: "1919" },
+        { ta: "1942", en: "1942" }
       ],
-      whyTa: "புறநானூறு எட்டுத்தொகை நூல்களில் ஒன்றாகும்.",
-      whyEn: "Purananuru is one of the Ettuthokai anthologies."
+      whyTa: "1885-ஆம் ஆண்டு இந்திய தேசிய காங்கிரஸ் தொடங்கப்பட்டது.",
+      whyEn: "Indian National Congress was founded in 1885."
     },
     {
       ta: "நீதிக்கட்சி (Justice Party) தொடங்கப்பட்ட ஆண்டு எது?",
@@ -361,7 +415,7 @@ var SUBJECT_TEMPLATES = {
       whyEn: "The Justice Party was founded in 1916."
     }
   ],
-  "Geography of India": [
+  "Geography & Science": [
     {
       ta: "இந்தியாவின் மிக நீளமான நதி எது?",
       en: "Which is the longest river in India?",
@@ -376,101 +430,6 @@ var SUBJECT_TEMPLATES = {
       whyEn: "The Ganga is the longest river within India."
     },
     {
-      ta: "கருப்பு மண் எந்தப் பயிருக்கு ஏற்றது?",
-      en: "Black soil is especially suitable for which crop?",
-      correctTa: "பருத்தி",
-      correctEn: "Cotton",
-      wrong: [
-        { ta: "தேயிலை", en: "Tea" },
-        { ta: "சணல்", en: "Jute" },
-        { ta: "காபி", en: "Coffee" }
-      ],
-      whyTa: "கருப்பு மண் பருத்தி சாகுபடிக்கு ஏற்றது.",
-      whyEn: "Black soil is ideal for cotton cultivation."
-    },
-    {
-      ta: "தென்னிந்தியாவின் மிக உயரமான சிகரம் எது?",
-      en: "Which is the highest peak in South India?",
-      correctTa: "ஆனைமுடி",
-      correctEn: "Anaimudi",
-      wrong: [
-        { ta: "தொட்டபெட்டா", en: "Doddabetta" },
-        { ta: "மகேந்திரகிரி", en: "Mahendragiri" },
-        { ta: "அகத்தியமலை", en: "Agasthyamalai" }
-      ],
-      whyTa: "ஆனைமுடி சிகரம் தென்னிந்தியாவின் மிக உயரமான சிகரமாகும்.",
-      whyEn: "Anaimudi is the highest peak in South India."
-    },
-    {
-      ta: "இந்தியாவில் அதிக மழை தரும் பருவக்காற்று எது?",
-      en: "Which monsoon brings most of India's rainfall?",
-      correctTa: "தென்மேற்குப் பருவக்காற்று",
-      correctEn: "Southwest Monsoon",
-      wrong: [
-        { ta: "வடகிழக்குப் பருவக்காற்று", en: "Northeast Monsoon" },
-        { ta: "மேற்கத்திய இடையூறு", en: "Western Disturbance" },
-        { ta: "கோடைக் காற்று", en: "Summer Breeze" }
-      ],
-      whyTa: "தென்மேற்குப் பருவக்காற்று முக்கிய மழைப்பொழிவைத் தருகிறது.",
-      whyEn: "The Southwest Monsoon brings the majority of India's rainfall."
-    }
-  ],
-  "Indian Economy": [
-    {
-      ta: "இந்திய ரிசர்வ் வங்கி (RBI) நாட்டுடைமையாக்கப்பட்ட ஆண்டு?",
-      en: "In which year was the Reserve Bank of India nationalised?",
-      correctTa: "1949",
-      correctEn: "1949",
-      wrong: [
-        { ta: "1935", en: "1935" },
-        { ta: "1947", en: "1947" },
-        { ta: "1969", en: "1969" }
-      ],
-      whyTa: "1949 ஜனவரி 1 அன்று RBI நாட்டுடைமையாக்கப்பட்டது.",
-      whyEn: "RBI was nationalised on January 1, 1949."
-    },
-    {
-      ta: "GST இந்தியாவில் நடைமுறைக்கு வந்த ஆண்டு?",
-      en: "When was GST implemented in India?",
-      correctTa: "2017",
-      correctEn: "2017",
-      wrong: [
-        { ta: "2016", en: "2016" },
-        { ta: "2018", en: "2018" },
-        { ta: "2019", en: "2019" }
-      ],
-      whyTa: "GST 2017 ஜூலை 1 அன்று நடைமுறைக்கு வந்தது.",
-      whyEn: "GST came into effect on July 1, 2017."
-    },
-    {
-      ta: "திட்டக் குழுவுக்குப் பதிலாக வந்த அமைப்பு எது?",
-      en: "Which body replaced the Planning Commission of India?",
-      correctTa: "நிதி ஆயோக்",
-      correctEn: "NITI Aayog",
-      wrong: [
-        { ta: "நிதி ஆணையம்", en: "Finance Commission" },
-        { ta: "செபி", en: "SEBI" },
-        { ta: "நபார்டு", en: "NABARD" }
-      ],
-      whyTa: "2015-ல் திட்டக் குழுவுக்குப் பதிலாக நிதி ஆயோக் உருவாக்கப்பட்டது.",
-      whyEn: "NITI Aayog replaced the Planning Commission in 2015."
-    },
-    {
-      ta: "ரூபாய் நோட்டுகளை வெளியிடும் அதிகாரம் யாருக்கு உள்ளது?",
-      en: "Who has the authority to issue currency notes in India?",
-      correctTa: "ரிசர்வ் வங்கி (RBI)",
-      correctEn: "Reserve Bank of India (RBI)",
-      wrong: [
-        { ta: "நிதி அமைச்சகம்", en: "Finance Ministry" },
-        { ta: "ஸ்டேட் பேங்க்", en: "State Bank of India" },
-        { ta: "நாடாளுமன்றம்", en: "Parliament" }
-      ],
-      whyTa: "ரூபாய் நோட்டுகளை வெளியிடும் அதிகாரம் RBI-க்கு உள்ளது.",
-      whyEn: "The Reserve Bank of India has authority to issue currency notes."
-    }
-  ],
-  "General Science": [
-    {
       ta: "மனித உடலில் இன்சுலின் சுரக்கும் உறுப்பு எது?",
       en: "Which organ in the human body secretes insulin?",
       correctTa: "கணையம்",
@@ -484,7 +443,7 @@ var SUBJECT_TEMPLATES = {
       whyEn: "Beta cells of the pancreas secrete insulin."
     },
     {
-      ta: "வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு வரும் நோய்?",
+      ta: "வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு வரும் நோய் எது?",
       en: "Which deficiency disease in children is caused by lack of Vitamin D?",
       correctTa: "ரிக்கெட்ஸ்",
       correctEn: "Rickets",
@@ -497,41 +456,82 @@ var SUBJECT_TEMPLATES = {
       whyEn: "Vitamin D deficiency causes rickets in children."
     },
     {
-      ta: "மின்சாரத்தை நன்கு கடத்தும் உலோகம் எது?",
-      en: "Which metal is the best conductor of electricity?",
-      correctTa: "வெள்ளி",
-      correctEn: "Silver",
+      ta: "தென்னிந்தியாவின் மிக உயரமான சிகரம் எது?",
+      en: "Which is the highest peak in South India?",
+      correctTa: "ஆனைமுடி",
+      correctEn: "Anaimudi",
       wrong: [
-        { ta: "கந்தகம்", en: "Sulphur" },
-        { ta: "பாஸ்பரஸ்", en: "Phosphorus" },
-        { ta: "கார்பன்", en: "Carbon" }
+        { ta: "தொட்டபெட்டா", en: "Doddabetta" },
+        { ta: "மகேந்திரகிரி", en: "Mahendragiri" },
+        { ta: "அகத்தியமலை", en: "Agasthyamalai" }
       ],
-      whyTa: "வெள்ளி மிகச் சிறந்த மின் கடத்தியாகும்.",
-      whyEn: "Silver is the best conductor of electricity."
+      whyTa: "ஆனைமுடி சிகரம் தென்னிந்தியாவின் மிக உயரமான சிகரமாகும்.",
+      whyEn: "Anaimudi is the highest peak in South India."
+    }
+  ],
+  "Aptitude & Mental Ability": [
+    {
+      ta: "200-ன் 25% மதிப்பு என்ன?",
+      en: "What is 25% of 200?",
+      correctTa: "50",
+      correctEn: "50",
+      wrong: [
+        { ta: "25", en: "25" },
+        { ta: "40", en: "40" },
+        { ta: "75", en: "75" }
+      ],
+      whyTa: "200 × (25 / 100) = 50.",
+      whyEn: "25% of 200 is (25/100) × 200 = 50."
     },
     {
-      ta: "ஒளியின் திசைவேகம் எதில் அதிகம்?",
-      en: "In which medium is the speed of light maximum?",
-      correctTa: "வெற்றிடம்",
-      correctEn: "Vacuum",
+      ta: "2, 6, 12, 20, ? என்ற தொடரில் அடுத்து வரும் எண் எது?",
+      en: "Find the next number in the series: 2, 6, 12, 20, ?",
+      correctTa: "30",
+      correctEn: "30",
       wrong: [
-        { ta: "நீர்", en: "Water" },
-        { ta: "கண்ணாடி", en: "Glass" },
-        { ta: "எண்ணெய்", en: "Oil" }
+        { ta: "24", en: "24" },
+        { ta: "28", en: "28" },
+        { ta: "36", en: "36" }
       ],
-      whyTa: "வெற்றிடத்தில் ஒளியின் வேகம் அதிகம்.",
-      whyEn: "Light travels fastest in a vacuum."
+      whyTa: "வித்தியாசங்கள் +4, +6, +8, +10 என அதிகரிக்கின்றன; 20 + 10 = 30.",
+      whyEn: "Differences are +4, +6, +8, +10; 20 + 10 = 30."
+    },
+    {
+      ta: "10, 20, 30 ஆகிய எண்களின் சராசரி (Average) என்ன?",
+      en: "What is the average of 10, 20, and 30?",
+      correctTa: "20",
+      correctEn: "20",
+      wrong: [
+        { ta: "15", en: "15" },
+        { ta: "25", en: "25" },
+        { ta: "30", en: "30" }
+      ],
+      whyTa: "(10 + 20 + 30) / 3 = 60 / 3 = 20.",
+      whyEn: "Sum is 60 divided by 3 numbers = 20."
+    },
+    {
+      ta: "A : B = 2 : 3 எனில், மொத்தம் 50-ல் A-ன் பங்கு எவ்வளவு?",
+      en: "If A : B = 2 : 3, what is A's share out of 50?",
+      correctTa: "20",
+      correctEn: "20",
+      wrong: [
+        { ta: "10", en: "10" },
+        { ta: "25", en: "25" },
+        { ta: "30", en: "30" }
+      ],
+      whyTa: "மொத்தப் பங்கு = 2 + 3 = 5; A-ன் பங்கு = (2/5) × 50 = 20.",
+      whyEn: "Total parts = 5; A's share = (2/5) × 50 = 20."
     }
   ]
 };
 
 function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   var qLimit = Number(totalQuestions) || 10;
-  var cleanSubj = SUBJECT_TEMPLATES[subject] ? subject : "Indian Polity";
-  var cleanBatch = String(batchCode || "TNPSC01").trim().toUpperCase();
+  var cleanSubj = GROUP4_TEMPLATES[subject] ? subject : "General Tamil";
+  var cleanBatch = String(batchCode || "GRP4_01").trim().toUpperCase();
   var dayKey = getTodayDateKey();
   var state = { seed: createSeedNumber(dayKey + "|" + cleanSubj + "|" + cleanBatch) };
-  var templates = SUBJECT_TEMPLATES[cleanSubj];
+  var templates = GROUP4_TEMPLATES[cleanSubj];
   var generated = [];
 
   for (var idx = 0; idx < qLimit; idx++) {
@@ -570,7 +570,7 @@ function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   return generated;
 }
 
-var qs = buildDailyQuestionsForSubject("Indian Polity", "TNPSC01", 10);
+var qs = buildDailyQuestionsForSubject("General Tamil", "GRP4_01", 10);
 var sb = null, me = null, myAns = [], myScore = 0;
 
 function getSB() {
@@ -582,13 +582,13 @@ function getSB() {
 }
 
 function refreshSubjectBatchQuestions() {
-  var subj = g("subj") ? g("subj").value : "Indian Polity";
-  var batch = g("code") ? g("code").value.trim().toUpperCase() : "TNPSC01";
+  var subj = g("subj") ? g("subj").value : "General Tamil";
+  var batch = g("code") ? g("code").value.trim().toUpperCase() : "GRP4_01";
   var countVal = g("qCount") ? Number(g("qCount").value) || 10 : 10;
   qs = buildDailyQuestionsForSubject(subj, batch, countVal);
   if (g("aiMsg")) {
     g("aiMsg").className = "ok";
-    g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Bilingual Q&A தயார்)";
+    g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Group 4 Q&A தயார்)";
   }
 }
 
@@ -626,7 +626,7 @@ async function callOpenAI(apiKey, model, prompt) {
       model: model || "gpt-4o-mini",
       temperature: 0.8,
       messages: [
-        { role: "system", content: "Return ONLY a valid JSON array of bilingual Tamil+English TNPSC questions." },
+        { role: "system", content: "Return ONLY a valid JSON array of bilingual Tamil+English TNPSC Group 4 questions." },
         { role: "user", content: prompt }
       ]
     })
@@ -657,14 +657,14 @@ async function callGemini(apiKey, model, prompt) {
 
 async function genAI(newCode) {
   if (newCode && g("code")) {
-    g("code").value = "TNP" + Math.floor(100 + Math.random() * 900);
+    g("code").value = "GRP4_" + Math.floor(100 + Math.random() * 900);
     if (g("adminCode")) g("adminCode").value = g("code").value;
     refreshSubjectBatchQuestions();
   }
   var key = g("gkey").value.trim();
   if (!key) {
     g("aiMsg").className = "ok";
-    g("aiMsg").textContent = "API Key இல்லாமலேயே " + g("code").value + " க்கு தினசரி Bilingual Q&A தயார்!";
+    g("aiMsg").textContent = "API Key இல்லாமலேயே " + g("code").value + " க்கு தினசரி Group 4 Bilingual Q&A தயார்!";
     return;
   }
   var code = g("code").value.trim().toUpperCase();
@@ -676,9 +676,9 @@ async function genAI(newCode) {
   g("aiBtn1").disabled = true;
   g("aiBtn2").disabled = true;
   g("aiMsg").className = "ok";
-  g("aiMsg").textContent = (prov === "openai" ? "ChatGPT" : "Gemini") + " மூலம் புதிய கேள்விகள் உருவாக்குகிறது...";
+  g("aiMsg").textContent = (prov === "openai" ? "ChatGPT" : "Gemini") + " மூலம் Group 4 கேள்விகள் உருவாக்குகிறது...";
 
-  var prompt = 'Create ' + qLimit + ' bilingual (Tamil + English) TNPSC multiple-choice questions on "' + s + '" for batch "' + code + '" (' + getTodayDateKey() + '). ' +
+  var prompt = 'Create ' + qLimit + ' bilingual (Tamil + English) TNPSC Group 4 multiple-choice questions on "' + s + '" for batch "' + code + '" (' + getTodayDateKey() + '). ' +
     'Return ONLY JSON array: [{"ta":"...","en":"...","opts":[{"ta":"...","en":"..."},{"ta":"...","en":"..."},{"ta":"...","en":"..."},{"ta":"...","en":"..."}],"a":0,"whyTa":"...","whyEn":"..."}]';
 
   try {
@@ -694,11 +694,11 @@ async function genAI(newCode) {
     if (client) await client.rpc("quiz_save_questions", { p_test_code: code, p_questions: qs });
 
     g("aiMsg").className = "ok";
-    g("aiMsg").textContent = code + " க்கு " + qs.length + " புதிய AI Bilingual கேள்விகள் தயார்!";
+    g("aiMsg").textContent = code + " க்கு " + qs.length + " புதிய AI Group 4 கேள்விகள் தயார்!";
   } catch (e) {
     refreshSubjectBatchQuestions();
     g("aiMsg").className = "err";
-    g("aiMsg").textContent = e.message + " (தினசரி Bilingual Q&A தயார்.)";
+    g("aiMsg").textContent = e.message + " (தினசரி Group 4 Q&A தயார்.)";
   } finally {
     g("aiBtn1").disabled = false;
     g("aiBtn2").disabled = false;
@@ -850,7 +850,7 @@ function backToHome() {
 function inviteText() {
   var c = g("code").value.trim().toUpperCase();
   var u = location.href.split("?")[0] + "?code=" + encodeURIComponent(c);
-  return "TNPSC Live Quiz!\nBatch / Code: " + c + "\nJoin: " + u;
+  return "TNPSC Group 4 Live Quiz!\nBatch / Code: " + c + "\nJoin: " + u;
 }
 
 function shareWA() {
@@ -860,7 +860,7 @@ function shareWA() {
 async function shareSocial() {
   var t = inviteText();
   if (navigator.share) {
-    try { await navigator.share({ title: "TNPSC Quiz", text: t }); return; } catch (e) {}
+    try { await navigator.share({ title: "TNPSC Group 4 Quiz", text: t }); return; } catch (e) {}
   }
   try { await navigator.clipboard.writeText(t); g("shareMsg").textContent = "Invite Copy செய்யப்பட்டது!"; }
   catch (e) { g("shareMsg").textContent = t; }
@@ -877,7 +877,7 @@ if (g("shareBtn")) g("shareBtn").addEventListener("click", shareSocial);
 if (g("homeBtn")) g("homeBtn").addEventListener("click", backToHome);
 if (g("code")) g("code").addEventListener("input", refreshSubjectBatchQuestions);
 if (g("adminCode")) g("adminCode").addEventListener("input", function() {
-  if (g("code")) g("code").value = (g("adminCode").value.trim() || "TNPSC01").toUpperCase();
+  if (g("code")) g("code").value = (g("adminCode").value.trim() || "GRP4_01").toUpperCase();
   refreshSubjectBatchQuestions();
 });
 if (g("subj")) g("subj").addEventListener("change", refreshSubjectBatchQuestions);
