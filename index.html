@@ -41,10 +41,10 @@
   <h1>TNPSC Live Quiz</h1>
   <p class="muted">தமிழ் மற்றும் ஆங்கிலம் (Bilingual) கேள்விகள் • தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே</p>
   <label>Test Batch / Code</label>
-  <input id="code" type="text" value="TNPSC01" oninput="refreshSubjectBatchQuestions()">
+  <input id="code" type="text" value="TNPSC01">
   <label>உங்கள் பெயர் (Your Name)</label>
   <input id="name" type="text" placeholder="பெயர் உள்ளிடவும் / Enter your name">
-  <button type="button" onclick="joinQuiz()">Join Quiz (தேர்வைத் தொடங்குக)</button>
+  <button type="button" id="joinBtn">Join Quiz (தேர்வைத் தொடங்குக)</button>
   <div id="joinMsg" class="err"></div>
 </div>
 
@@ -52,7 +52,7 @@
 <div class="box hidden" id="examBox">
   <h2 id="whoTitle">தேர்வு</h2>
   <div id="qArea"></div>
-  <button type="button" class="sec" id="submitBtn" onclick="submitQuiz()">Submit Answers (பதில்களைச் சமர்ப்பிக்கவும்)</button>
+  <button type="button" class="sec" id="submitBtn">Submit Answers (பதில்களைச் சமர்ப்பிக்கவும்)</button>
   <div id="examMsg" class="err"></div>
 </div>
 
@@ -62,9 +62,9 @@
   <div id="banner" class="banner"></div>
   <div id="statsText" style="font-weight:700;margin-bottom:12px;"></div>
   <div class="row">
-    <button type="button" class="wa" onclick="shareWA()">WhatsApp Invite</button>
-    <button type="button" onclick="shareSocial()">Share / Copy Invite</button>
-    <button type="button" class="ghost" onclick="backToHome()">புதிய தேர்வு (Home)</button>
+    <button type="button" class="wa" id="waBtn">WhatsApp Invite</button>
+    <button type="button" id="shareBtn">Share / Copy Invite</button>
+    <button type="button" class="ghost" id="homeBtn">புதிய தேர்வு (Home)</button>
   </div>
   <div id="shareMsg" class="ok"></div>
   <div id="reviewArea" style="margin-top:14px;"></div>
@@ -77,8 +77,8 @@
   <label>Admin PIN</label>
   <input id="pin" type="password" placeholder="Admin PIN உள்ளிடவும்">
   <div class="row">
-    <button type="button" onclick="openAdminPanel()">Admin திறக்கவும்</button>
-    <button type="button" class="ghost" onclick="closeAdminViews()">User திரைக்குச் செல்ல</button>
+    <button type="button" id="adminOpenBtn">Admin திறக்கவும்</button>
+    <button type="button" class="ghost" id="adminBackBtn1">User திரைக்குச் செல்ல</button>
   </div>
   <div id="adminLoginMsg" class="err"></div>
 </div>
@@ -89,10 +89,10 @@
   <p class="muted">Subject மற்றும் Test Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A தானாகத் தயாராகும்.</p>
 
   <label>Test Batch / Code</label>
-  <input id="adminCode" type="text" value="TNPSC01" oninput="syncCodeFromAdmin()">
+  <input id="adminCode" type="text" value="TNPSC01">
 
   <label>Subject (பாடம்)</label>
-  <select id="subj" onchange="changeSubject()">
+  <select id="subj">
     <option value="Indian Polity">Indian Polity (இந்திய அரசியலமைப்பு)</option>
     <option value="Indian National Movement">Indian National Movement (இந்திய தேசிய இயக்கம்)</option>
     <option value="History and Culture of Tamil Nadu">History and Culture of Tamil Nadu (தமிழக வரலாறு &amp; பண்பாடு)</option>
@@ -102,14 +102,14 @@
   </select>
 
   <label>ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை</label>
-  <select id="qCount" onchange="refreshSubjectBatchQuestions()">
+  <select id="qCount">
     <option value="10" selected>10 Questions (10 கேள்விகள்)</option>
     <option value="20">20 Questions (20 கேள்விகள்)</option>
     <option value="25">25 Questions (25 கேள்விகள்)</option>
   </select>
 
   <label>AI Provider (ChatGPT / Gemini)</label>
-  <select id="aiProvider" onchange="onProviderChange()">
+  <select id="aiProvider">
     <option value="gemini">Gemini (Google API)</option>
     <option value="openai">ChatGPT (OpenAI API)</option>
   </select>
@@ -121,21 +121,61 @@
   <input id="aiModel" type="text" value="gemini-3.8-flash" placeholder="எ.கா: gemini-3.8-flash அல்லது gpt-4o-mini">
 
   <div class="row">
-    <button type="button" id="aiBtn1" onclick="genAI(false)">AI கேள்விகள்</button>
-    <button type="button" class="sec" id="aiBtn2" onclick="genAI(true)">புதிய Batch / Test</button>
+    <button type="button" id="aiBtn1">AI கேள்விகள்</button>
+    <button type="button" class="sec" id="aiBtn2">புதிய Batch / Test</button>
   </div>
   <div id="aiMsg" class="ok"></div>
 
-  <button type="button" class="ghost" onclick="closeAdminViews()">User Quiz திரைக்குத் திரும்புக</button>
+  <button type="button" class="ghost" id="adminBackBtn2">User Quiz திரைக்குத் திரும்புக</button>
 </div>
 
 <div class="admin-trigger-wrap" id="adminTrigger">
-  <button type="button" class="ghost" onclick="showAdminLogin()">Admin</button>
+  <button type="button" class="ghost" id="adminBtn">Admin</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="config.js" onerror="window.__cfgMissing=true"></script>
 <script>
+function g(id) { return document.getElementById(id); }
+function show(id) { if (g(id)) g(id).classList.remove("hidden"); }
+function hide(id) { if (g(id)) g(id).classList.add("hidden"); }
+
+function showAdminLogin() {
+  hide("joinBox");
+  hide("examBox");
+  hide("resBox");
+  hide("adminBox");
+  hide("adminTrigger");
+  show("adminLoginBox");
+  if (g("adminLoginMsg")) g("adminLoginMsg").textContent = "";
+  if (g("pin")) g("pin").focus();
+}
+
+function closeAdminViews() {
+  hide("adminLoginBox");
+  hide("adminBox");
+  show("joinBox");
+  show("adminTrigger");
+}
+
+function openAdminPanel() {
+  var cfg = window.QUIZ_CONFIG || {};
+  var entered = g("pin") ? g("pin").value.trim() : "";
+  var expected = String(cfg.ADMIN_PIN || "Admin2026").trim();
+  if (!entered || entered !== expected) {
+    if (g("adminLoginMsg")) {
+      g("adminLoginMsg").textContent = "சரியான Admin PIN உள்ளிடவும் (Default: Admin2026).";
+    }
+    return;
+  }
+  hide("adminLoginBox");
+  show("adminBox");
+  if (g("adminCode") && g("code")) {
+    g("adminCode").value = (g("code").value.trim() || "TNPSC01").toUpperCase();
+  }
+  refreshSubjectBatchQuestions();
+}
+
 function getTodayDateKey() {
   var now = new Date();
   var yyyy = now.getFullYear();
@@ -487,4 +527,366 @@ var SUBJECT_TEMPLATES = {
 
 function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   var qLimit = Number(totalQuestions) || 10;
-  var cleanSub
+  var cleanSubj = SUBJECT_TEMPLATES[subject] ? subject : "Indian Polity";
+  var cleanBatch = String(batchCode || "TNPSC01").trim().toUpperCase();
+  var dayKey = getTodayDateKey();
+  var state = { seed: createSeedNumber(dayKey + "|" + cleanSubj + "|" + cleanBatch) };
+  var templates = SUBJECT_TEMPLATES[cleanSubj];
+  var generated = [];
+
+  for (var idx = 0; idx < qLimit; idx++) {
+    var tpl = templates[nextRand(state) % templates.length];
+    var cycleNum = Math.floor(idx / templates.length) + 1;
+
+    var allOpts = [{ ta: tpl.correctTa, en: tpl.correctEn, isCorrect: true }];
+    for (var w = 0; w < tpl.wrong.length; w++) {
+      allOpts.push({ ta: tpl.wrong[w].ta, en: tpl.wrong[w].en, isCorrect: false });
+    }
+
+    for (var i = allOpts.length - 1; i > 0; i--) {
+      var j = nextRand(state) % (i + 1);
+      var tmp = allOpts[i];
+      allOpts[i] = allOpts[j];
+      allOpts[j] = tmp;
+    }
+
+    var ansIdx = 0;
+    for (var k = 0; k < allOpts.length; k++) {
+      if (allOpts[k].isCorrect) {
+        ansIdx = k;
+        break;
+      }
+    }
+
+    generated.push({
+      ta: tpl.ta + " [" + cycleNum + "-" + (idx + 1) + "]",
+      en: tpl.en + " [" + cycleNum + "-" + (idx + 1) + "]",
+      opts: allOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
+      a: ansIdx,
+      whyTa: tpl.whyTa + " (" + dayKey + " • " + cleanBatch + ")",
+      whyEn: tpl.whyEn + " (" + dayKey + " • " + cleanBatch + ")"
+    });
+  }
+  return generated;
+}
+
+var qs = buildDailyQuestionsForSubject("Indian Polity", "TNPSC01", 10);
+var sb = null, me = null, myAns = [], myScore = 0;
+
+function getSB() {
+  if (sb) return sb;
+  var cfg = window.QUIZ_CONFIG || {};
+  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || !window.supabase) return null;
+  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  return sb;
+}
+
+function refreshSubjectBatchQuestions() {
+  var subj = g("subj") ? g("subj").value : "Indian Polity";
+  var batch = g("code") ? g("code").value.trim().toUpperCase() : "TNPSC01";
+  var countVal = g("qCount") ? Number(g("qCount").value) || 10 : 10;
+  qs = buildDailyQuestionsForSubject(subj, batch, countVal);
+  if (g("aiMsg")) {
+    g("aiMsg").className = "ok";
+    g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Bilingual Q&A தயார்)";
+  }
+}
+
+function onProviderChange() {
+  var prov = g("aiProvider").value;
+  var cfgModel = (window.QUIZ_CONFIG && window.QUIZ_CONFIG.GEMINI_MODEL) || "gemini-3.8-flash";
+  if (prov === "openai") {
+    g("keyLabel").textContent = "ChatGPT / OpenAI API Key (sk-...)";
+    g("gkey").placeholder = "sk-... (OpenAI API Key உள்ளிடவும்)";
+    if (!g("aiModel").value.trim() || g("aiModel").value.indexOf("gemini") === 0) {
+      g("aiModel").value = "gpt-4o-mini";
+    }
+  } else {
+    g("keyLabel").textContent = "Gemini API Key (AIza...)";
+    g("gkey").placeholder = "AIza... (Gemini API Key உள்ளிடவும்)";
+    g("aiModel").value = cfgModel;
+  }
+}
+
+function extractJsonArray(rawText) {
+  var clean = String(rawText || "").replace(/```json|```/gi, "").trim();
+  var start = clean.indexOf("[");
+  var end = clean.lastIndexOf("]");
+  if (start !== -1 && end !== -1 && end > start) {
+    clean = clean.slice(start, end + 1);
+  }
+  return JSON.parse(clean);
+}
+
+async function callOpenAI(apiKey, model, prompt) {
+  var r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + apiKey },
+    body: JSON.stringify({
+      model: model || "gpt-4o-mini",
+      temperature: 0.8,
+      messages: [
+        { role: "system", content: "Return ONLY a valid JSON array of bilingual Tamil+English TNPSC questions." },
+        { role: "user", content: prompt }
+      ]
+    })
+  });
+  var d = await r.json();
+  if (!r.ok) throw new Error((d && d.error && d.error.message) || "OpenAI Error");
+  return d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || "[]";
+}
+
+async function callGemini(apiKey, model, prompt) {
+  var cleanModel = String(model || "gemini-3.8-flash").replace(/^models\//, "");
+  var endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" +
+    encodeURIComponent(cleanModel) + ":generateContent?key=" + encodeURIComponent(apiKey);
+  var r = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", temperature: 0.8 }
+    })
+  });
+  var d = await r.json();
+  if (!r.ok) throw new Error((d && d.error && d.error.message) || "Gemini Error");
+  return d && d.candidates && d.candidates[0] && d.candidates[0].content &&
+    d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
+    d.candidates[0].content.parts[0].text || "[]";
+}
+
+async function genAI(newCode) {
+  if (newCode && g("code")) {
+    g("code").value = "TNP" + Math.floor(100 + Math.random() * 900);
+    if (g("adminCode")) g("adminCode").value = g("code").value;
+    refreshSubjectBatchQuestions();
+  }
+  var key = g("gkey").value.trim();
+  if (!key) {
+    g("aiMsg").className = "ok";
+    g("aiMsg").textContent = "API Key இல்லாமலேயே " + g("code").value + " க்கு தினசரி Bilingual Q&A தயார்!";
+    return;
+  }
+  var code = g("code").value.trim().toUpperCase();
+  var s = g("subj").value;
+  var prov = g("aiProvider").value;
+  var model = g("aiModel").value.trim();
+  var qLimit = g("qCount") ? Number(g("qCount").value) || 10 : 10;
+
+  g("aiBtn1").disabled = true;
+  g("aiBtn2").disabled = true;
+  g("aiMsg").className = "ok";
+  g("aiMsg").textContent = (prov === "openai" ? "ChatGPT" : "Gemini") + " மூலம் புதிய கேள்விகள் உருவாக்குகிறது...";
+
+  var prompt = 'Create ' + qLimit + ' bilingual (Tamil + English) TNPSC multiple-choice questions on "' + s + '" for batch "' + code + '" (' + getTodayDateKey() + '). ' +
+    'Return ONLY JSON array: [{"ta":"...","en":"...","opts":[{"ta":"...","en":"..."},{"ta":"...","en":"..."},{"ta":"...","en":"..."},{"ta":"...","en":"..."}],"a":0,"whyTa":"...","whyEn":"..."}]';
+
+  try {
+    var raw = prov === "openai"
+      ? await callOpenAI(key, model || "gpt-4o-mini", prompt)
+      : await callGemini(key, model || "gemini-3.8-flash", prompt);
+
+    var arr = extractJsonArray(raw);
+    if (!Array.isArray(arr) || !arr.length) throw new Error("கேள்விகள் பட்டியல் வரவில்லை.");
+
+    qs = arr;
+    var client = getSB();
+    if (client) await client.rpc("quiz_save_questions", { p_test_code: code, p_questions: qs });
+
+    g("aiMsg").className = "ok";
+    g("aiMsg").textContent = code + " க்கு " + qs.length + " புதிய AI Bilingual கேள்விகள் தயார்!";
+  } catch (e) {
+    refreshSubjectBatchQuestions();
+    g("aiMsg").className = "err";
+    g("aiMsg").textContent = e.message + " (தினசரி Bilingual Q&A தயார்.)";
+  } finally {
+    g("aiBtn1").disabled = false;
+    g("aiBtn2").disabled = false;
+  }
+}
+
+async function joinQuiz() {
+  refreshSubjectBatchQuestions();
+  g("joinMsg").textContent = "";
+  var name = g("name").value.trim();
+  var code = g("code").value.trim().toUpperCase();
+  g("code").value = code;
+  if (!name || code.length < 3) {
+    g("joinMsg").textContent = "பெயர் மற்றும் Test Batch / Code உள்ளிடவும்.";
+    return;
+  }
+
+  var client = getSB();
+  if (client) {
+    try {
+      var saved = await client.rpc("quiz_get_questions", { p_test_code: code });
+      if (!saved.error && Array.isArray(saved.data) && saved.data.length && saved.data[0].ta) {
+        qs = saved.data;
+      }
+      var res = await client.rpc("quiz_join", { p_test_code: code, p_name: name, p_max_players: 50 });
+      if (!res.error && res.data) {
+        me = res.data;
+      }
+    } catch (e) {}
+  }
+
+  g("whoTitle").textContent = name + " (" + code + ")";
+  renderQ();
+  hide("joinBox");
+  hide("adminTrigger");
+  show("examBox");
+}
+
+function renderQ() {
+  var h = "";
+  for (var i = 0; i < qs.length; i++) {
+    var item = qs[i];
+    h += '<div class="q"><b>' + (i + 1) + '. ' + item.ta + '</b>' +
+      '<span class="q-en">' + (item.en || "") + '</span>';
+    for (var j = 0; j < item.opts.length; j++) {
+      var optObj = item.opts[j];
+      var optTa = typeof optObj === "string" ? optObj : optObj.ta;
+      var optEn = typeof optObj === "string" ? "" : (optObj.en || "");
+      h += '<label class="opt"><input type="radio" name="q' + i + '" value="' + j + '"> <b>' + optTa + '</b>' +
+        (optEn ? '<span class="opt-en">' + optEn + '</span>' : '') + '</label>';
+    }
+    h += '</div>';
+  }
+  g("qArea").innerHTML = h;
+}
+
+async function submitQuiz() {
+  g("examMsg").textContent = "";
+  var arr = [];
+  var sc = 0;
+  for (var i = 0; i < qs.length; i++) {
+    var el = document.querySelector('input[name="q' + i + '"]:checked');
+    if (!el) {
+      g("examMsg").textContent = "அனைத்து கேள்விகளுக்கும் பதில் அளிக்கவும் (Please answer all questions).";
+      return;
+    }
+    var v = Number(el.value);
+    arr.push(v);
+    if (v === qs[i].a) sc++;
+  }
+
+  myAns = arr;
+  myScore = sc;
+
+  var rankVal = 1;
+  var totalVal = 1;
+
+  var client = getSB();
+  if (client && me && me.participant_id) {
+    try {
+      await client.rpc("quiz_submit", {
+        p_test_code: g("code").value.trim().toUpperCase(),
+        p_participant_id: me.participant_id,
+        p_token: me.token,
+        p_answers: arr
+      });
+      var st = await client.rpc("quiz_status", {
+        p_test_code: g("code").value.trim().toUpperCase(),
+        p_participant_id: me.participant_id
+      });
+      if (!st.error && st.data) {
+        if (typeof st.data.my_score === "number") sc = st.data.my_score;
+        if (st.data.rank) rankVal = st.data.rank;
+        if (st.data.total_players) totalVal = st.data.total_players;
+      }
+    } catch (e) {}
+  }
+
+  showResult({ my_score: sc, rank: rankVal, total_players: totalVal });
+  hide("examBox");
+  show("resBox");
+  show("adminTrigger");
+}
+
+function showResult(d) {
+  var sc = typeof d.my_score === "number" ? d.my_score : myScore;
+  var rank = d.rank || 1;
+  var tot = d.total_players || 1;
+  var b = g("banner");
+  b.className = "banner";
+
+  var pct = qs.length ? (sc / qs.length) * 100 : 0;
+  if (pct > 80) {
+    b.classList.add("champ");
+    b.textContent = "🏆 CHAMPION! (" + sc + "/" + qs.length + ")";
+  } else if (pct >= 50) {
+    b.classList.add("good");
+    b.textContent = "👏 GOOD! (" + sc + "/" + qs.length + ")";
+  } else {
+    b.classList.add("imp");
+    b.textContent = "📚 இன்னும் improve பண்ணனும் (" + sc + "/" + qs.length + ")";
+  }
+
+  g("statsText").textContent = "உங்கள் மதிப்பெண் (Score): " + sc + "/" + qs.length + " | உங்கள் Position: #" + rank + " / " + tot;
+
+  var rv = "";
+  for (var i = 0; i < qs.length; i++) {
+    var qItem = qs[i];
+    var ok = myAns[i] === qItem.a;
+    var rightOpt = qItem.opts[qItem.a];
+    var rightTa = typeof rightOpt === "string" ? rightOpt : rightOpt.ta;
+    var rightEn = typeof rightOpt === "string" ? "" : (rightOpt.en || "");
+
+    rv += '<div class="q"><b>' + (i + 1) + '. ' + qItem.ta + '</b><span class="q-en">' + (qItem.en || "") + '</span><br>' +
+      (ok ? '<span class="ok">சரி / Correct</span>' : '<span class="err">தவறு / Wrong</span>') +
+      ' — சரியான பதில்: <b>' + rightTa + (rightEn ? ' (' + rightEn + ')' : '') + '</b>' +
+      '<br><small>' + (qItem.whyTa || "") + (qItem.whyEn ? ' | ' + qItem.whyEn : '') + '</small></div>';
+  }
+  g("reviewArea").innerHTML = rv;
+}
+
+function backToHome() {
+  hide("resBox");
+  hide("examBox");
+  show("joinBox");
+  show("adminTrigger");
+}
+
+function inviteText() {
+  var c = g("code").value.trim().toUpperCase();
+  var u = location.href.split("?")[0] + "?code=" + encodeURIComponent(c);
+  return "TNPSC Live Quiz!\nBatch / Code: " + c + "\nJoin: " + u;
+}
+
+function shareWA() {
+  window.open("https://wa.me/?text=" + encodeURIComponent(inviteText()), "_blank");
+}
+
+async function shareSocial() {
+  var t = inviteText();
+  if (navigator.share) {
+    try { await navigator.share({ title: "TNPSC Quiz", text: t }); return; } catch (e) {}
+  }
+  try { await navigator.clipboard.writeText(t); g("shareMsg").textContent = "Invite Copy செய்யப்பட்டது!"; }
+  catch (e) { g("shareMsg").textContent = t; }
+}
+
+if (g("adminBtn")) g("adminBtn").addEventListener("click", showAdminLogin);
+if (g("adminOpenBtn")) g("adminOpenBtn").addEventListener("click", openAdminPanel);
+if (g("adminBackBtn1")) g("adminBackBtn1").addEventListener("click", closeAdminViews);
+if (g("adminBackBtn2")) g("adminBackBtn2").addEventListener("click", closeAdminViews);
+if (g("joinBtn")) g("joinBtn").addEventListener("click", joinQuiz);
+if (g("submitBtn")) g("submitBtn").addEventListener("click", submitQuiz);
+if (g("waBtn")) g("waBtn").addEventListener("click", shareWA);
+if (g("shareBtn")) g("shareBtn").addEventListener("click", shareSocial);
+if (g("homeBtn")) g("homeBtn").addEventListener("click", backToHome);
+if (g("code")) g("code").addEventListener("input", refreshSubjectBatchQuestions);
+if (g("adminCode")) g("adminCode").addEventListener("input", function() {
+  if (g("code")) g("code").value = (g("adminCode").value.trim() || "TNPSC01").toUpperCase();
+  refreshSubjectBatchQuestions();
+});
+if (g("subj")) g("subj").addEventListener("change", refreshSubjectBatchQuestions);
+if (g("qCount")) g("qCount").addEventListener("change", refreshSubjectBatchQuestions);
+if (g("aiProvider")) g("aiProvider").addEventListener("change", onProviderChange);
+if (g("aiBtn1")) g("aiBtn1").addEventListener("click", function() { genAI(false); });
+if (g("aiBtn2")) g("aiBtn2").addEventListener("click", function() { genAI(true); });
+
+refreshSubjectBatchQuestions();
+</script>
+</body>
+</html>
