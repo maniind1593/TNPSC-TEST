@@ -208,7 +208,6 @@
     <p>ஒவ்வொருவருக்கும் தங்கள் தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே தெரியும்.</p>
   </header>
 
-  <!-- 1. Setup / Join -->
   <div class="card" id="setup">
     <h2>தேர்வில் இணையவும்</h2>
     <p class="muted">Test Code மற்றும் உங்கள் பெயரை உள்ளிட்டு உடனடியாகத் தேர்வில் இணையலாம்.</p>
@@ -238,7 +237,6 @@
     <div id="setupMsg" class="err"></div>
   </div>
 
-  <!-- 2. Exam Screen -->
   <div class="card hidden" id="exam">
     <div class="exam-bar">
       <span class="tag" id="who"></span>
@@ -250,7 +248,6 @@
     <div id="examMsg" class="err"></div>
   </div>
 
-  <!-- 3. Waiting Screen -->
   <div class="card hidden" id="waiting">
     <div class="pulse-box">
       <div class="spinner"></div>
@@ -261,7 +258,6 @@
     </div>
   </div>
 
-  <!-- 4. Personal Results Screen -->
   <div class="card hidden" id="results">
     <h2>உங்கள் தனிப்பட்ட தேர்வு முடிவு</h2>
     <div id="feedbackBanner" class="status-banner"></div>
@@ -281,7 +277,6 @@
     <div id="resultBody" style="margin-top:16px;"></div>
   </div>
 
-  <!-- 5. Admin View -->
   <div class="card admin-card" id="adminSection">
     <h2>Admin Control &amp; Score Summary</h2>
     <p class="muted">Admin PIN உள்ளிட்டு <strong>Subject-wise AI கேள்விகள்</strong>, <strong>புதிய Test (AI Auto)</strong>, <strong>Maximum Limit (Min 2)</strong>, மற்றும் <strong>High / Low Score</strong> ஆகியவற்றை நிர்வகிக்கலாம்.</p>
@@ -332,7 +327,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-const SUBJECT_QUESTIONS = {
+window.onerror = function(msg, url, line) {
+  var el = document.getElementById("setupMsg");
+  if (el) el.textContent = "JS Error (Line " + line + "): " + msg;
+};
+
+var SUBJECT_QUESTIONS = {
   "Indian Polity": [
     {ta:"இந்திய அரசியலமைப்பின் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",en:"Fundamental Rights are in which Part of the Indian Constitution?",opts:[["பகுதி II","Part II"],["பகுதி III","Part III"],["பகுதி IV","Part IV"],["பகுதி V","Part V"]],a:1,why:"அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்து 12-35) உள்ளன."},
     {ta:"இந்திய அரசியலமைப்பின் எந்தத் திருத்தம் வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்தது?",en:"Which amendment reduced the voting age from 21 to 18?",opts:[["42வது","42nd"],["44வது","44th"],["61வது","61st"],["73வது","73rd"]],a:2,why:"61வது அரசியலமைப்புத் திருத்தச் சட்டம் (1988) வாக்கு வயதை 18-ஆகக் குறைத்தது."},
@@ -350,4 +350,4 @@ const SUBJECT_QUESTIONS = {
   "History and Culture of Tamil Nadu": [
     {ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1905","1905"]],a:1,why:"வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது."},
     {ta:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",en:"Who founded the Self-Respect Movement?",opts:[["சி. ராஜகோபாலாச்சாரி","C. Rajagopalachari"],["பெரியார் ஈ.வெ.ரா.","Periyar E. V. Ramasamy"],["காமராசர்","K. Kamaraj"],["அண்ணா","C. N. Annadurai"]],a:1,why:"பெரியார் ஈ.வெ.ரா. சுயமரியாதை இயக்கத்தைத் தொடங்கினார்."},
-    {ta:"சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",en:"Which one is among the Ettuthokai works of Sangam literature?",opts:[["சிலப்பதிகாரம்","Silappathikaram"],["புற
+    {ta:"சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",en:"Which one is among the Ettuthokai works of Sangam literature?",opts:[["சிலப்பதிகாரம்","Silappa
