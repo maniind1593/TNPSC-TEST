@@ -101,7 +101,7 @@
   }
   .code-row input { flex: 1; text-transform: uppercase; font-weight: 700; letter-spacing: 0.6px; }
 
-  input[type=text], input[type=password] {
+  input[type=text], input[type=password], input[type=number] {
     width: 100%;
     padding: 13px 14px;
     border: 1.5px solid #cbd5e1;
@@ -111,7 +111,7 @@
     background: #f8fafc;
     transition: all 0.2s;
   }
-  input[type=text]:focus, input[type=password]:focus {
+  input[type=text]:focus, input[type=password]:focus, input[type=number]:focus {
     outline: none;
     border-color: var(--primary);
     background: #fff;
@@ -274,7 +274,7 @@
   }
   .score-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 12px;
     margin-bottom: 18px;
   }
@@ -367,15 +367,15 @@
 <body>
 <div class="wrap">
   <header>
-    <span class="badge-top">TNPSC GROUP II / IIA • LIVE BATTLE</span>
-    <h1>TNPSC நண்பர்கள் போட்டித் தேர்வு</h1>
-    <p>இரண்டு பேரும் தனித்தனி மொபைலில் Login இல்லாமல் ஒரே நேரத்தில் தேர்வு எழுதலாம்.</p>
+    <span class="badge-top">TNPSC GROUP II / IIA • LIVE QUIZ</span>
+    <h1>TNPSC குழு போட்டித் தேர்வு</h1>
+    <p>குறைந்தது 2 பேர் முதல் நீங்கள் நிர்ணயிக்கும் அதிகபட்ச நபர்கள் வரை ஒரே Test Code-ல் தேர்வு எழுதலாம்.</p>
   </header>
 
   <!-- 1. Setup / Join -->
   <div class="card" id="setup">
     <h2>தேர்வில் இணையவும்</h2>
-    <p class="muted">உங்களுக்கு விருப்பமான <strong>Test Code</strong>-ஐ மாற்றி (அல்லது புதிய Code உருவாக்கி) நண்பருடன் பகிர்ந்து கொள்ளுங்கள்.</p>
+    <p class="muted"><strong>Test Code</strong> மற்றும் <strong>Maximum Participants (Min 2)</strong> ஆகியவற்றை அமைத்து நண்பர்களுடன் பகிர்ந்து கொள்ளுங்கள்.</p>
 
     <label class="field-label">Test Code (நீங்கள் மாற்றிக்கொள்ளலாம்)</label>
     <div class="code-row">
@@ -383,9 +383,12 @@
       <button type="button" class="mini-btn outline" onclick="generateNewCode()">புதிய Code</button>
     </div>
 
+    <label class="field-label">Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
+    <input id="maxPlayers" type="number" min="2" max="500" value="10" placeholder="எ.கா: 5, 10, 20">
+
     <div class="share-box">
-      <div>நண்பருக்குச் சொல்ல வேண்டிய Code: <strong id="previewCode">TNPSC01</strong></div>
-      <button type="button" class="mini-btn" onclick="copyCodeAndLink()">Code Copy</button>
+      <div>Code: <strong id="previewCode">TNPSC01</strong> • Max: <strong id="previewMax">10</strong> பேர்</div>
+      <button type="button" class="mini-btn" onclick="copyCodeAndLink()">Code &amp; Link Copy</button>
     </div>
     <div id="copyMsg" class="ok-msg"></div>
 
@@ -412,7 +415,7 @@
     <div class="pulse-box">
       <div class="spinner"></div>
       <h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது!</h2>
-      <p class="muted">உங்கள் நண்பரும் தேர்வை முடிக்கும் வரை முடிவுகள் மறைக்கப்பட்டிருக்கும். அவர் Submit செய்த நொடியில் முடிவுகள் இங்கே தானாகத் தோன்றும்.</p>
+      <p class="muted">மற்ற பங்கேற்பாளர்களும் தேர்வை முடிக்கும் வரை முடிவுகள் மறைக்கப்பட்டிருக்கும்.</p>
       <p id="waitStatus" style="font-weight:700; color:#1d4ed8;"></p>
       <button class="outline" id="refresh">இப்போதே நிலையைப் பார்க்கவும் (Refresh)</button>
     </div>
@@ -420,7 +423,7 @@
 
   <!-- 4. Results Screen -->
   <div class="card hidden" id="results">
-    <h2>இருவரின் தேர்வு முடிவுகள்</h2>
+    <h2>தேர்வு முடிவுகள்</h2>
     <div id="winnerBanner" class="winner-box"></div>
     <div id="scoreCards" class="score-cards"></div>
     <div id="resultBody"></div>
@@ -438,7 +441,7 @@
     <div id="adminBody"></div>
   </div>
 
-  <div class="footer-note">குறிப்பு: ஒரு Test Code-க்கு இரண்டு பங்கேற்பாளர்கள் மட்டுமே அனுமதிக்கப்படுவர்.</div>
+  <div class="footer-note">குறிப்பு: குறைந்தது 2 பேர் முதல் நீங்கள் அமைக்கும் Maximum எண்ணிக்கை வரை சேரலாம்.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -501,9 +504,20 @@ function escapeHtml(s) {
   }[c]));
 }
 
+function getMaxPlayersValue() {
+  const raw = Number($("maxPlayers")?.value);
+  if (!Number.isFinite(raw) || raw < 2) return 2;
+  return Math.min(500, Math.floor(raw));
+}
+
 function syncCodePreview() {
   const clean = ($("code").value || "").trim().toUpperCase();
+  const maxVal = getMaxPlayersValue();
+  if ($("maxPlayers") && String($("maxPlayers").value) !== "" && Number($("maxPlayers").value) < 2) {
+    $("maxPlayers").value = 2;
+  }
   if ($("previewCode")) $("previewCode").textContent = clean || "உங்கள் Code-ஐ உள்ளிடவும்";
+  if ($("previewMax")) $("previewMax").textContent = maxVal;
   if (clean && $("adminCode")) {
     $("adminCode").value = clean;
   }
@@ -522,16 +536,19 @@ window.generateNewCode = function () {
 
 window.copyCodeAndLink = async function () {
   const clean = ($("code").value || "").trim().toUpperCase();
+  const maxVal = getMaxPlayersValue();
   if (!clean) {
     if ($("copyMsg")) $("copyMsg").textContent = "முதலில் ஒரு Test Code உள்ளிடவும்.";
     return;
   }
-  const shareText = `TNPSC Quiz Link: ${window.location.href}\nTest Code: ${clean}`;
+  const baseUrl = window.location.href.split("?")[0];
+  const joinUrl = `${baseUrl}?code=${encodeURIComponent(clean)}&max=${maxVal}`;
+  const shareText = `TNPSC Quiz Link: ${joinUrl}\nTest Code: ${clean} (Max: ${maxVal} பேர்)`;
   try {
     await navigator.clipboard.writeText(shareText);
-    if ($("copyMsg")) $("copyMsg").textContent = `Link & Code (${clean}) Copy செய்யப்பட்டது!`;
+    if ($("copyMsg")) $("copyMsg").textContent = `Link & Code (${clean}, Max ${maxVal}) Copy செய்யப்பட்டது!`;
   } catch {
-    if ($("copyMsg")) $("copyMsg").textContent = `Test Code: ${clean}`;
+    if ($("copyMsg")) $("copyMsg").textContent = `Test Code: ${clean} (Max: ${maxVal})`;
   }
 };
 
@@ -593,7 +610,9 @@ async function status() {
     hide("waiting");
     show("results");
   } else {
-    $("waitStatus").textContent = `சமர்ப்பித்தவர்கள்: ${data?.submitted_count || 0} / 2`;
+    const subCount = data?.submitted_count || 0;
+    const totalJoined = data?.total_players || data?.joined_count || getMaxPlayersValue();
+    $("waitStatus").textContent = `சமர்ப்பித்தவர்கள்: ${subCount} / ${totalJoined}`;
   }
 }
 
@@ -604,14 +623,13 @@ function renderResults(d) {
 
   players.forEach(p => { if (p.score > maxScore) maxScore = p.score; });
 
-  if (players.length >= 2) {
-    const [p1, p2] = players;
-    if (p1.score > p2.score) {
-      winnerText = `🏆 அதிக மதிப்பெண் (Winner): ${escapeHtml(p1.name)} (${p1.score}/10)`;
-    } else if (p2.score > p1.score) {
-      winnerText = `🏆 அதிக மதிப்பெண் (Winner): ${escapeHtml(p2.name)} (${p2.score}/10)`;
+  if (players.length > 0 && maxScore >= 0) {
+    const topPlayers = players.filter(p => p.score === maxScore);
+    if (topPlayers.length === 1) {
+      winnerText = `🏆 அதிக மதிப்பெண் (Winner): ${escapeHtml(topPlayers[0].name)} (${maxScore}/10)`;
     } else {
-      winnerText = `🤝 போட்டி சமநிலை (Tie): இருவரும் ${p1.score}/10 பெற்றுள்ளீர்கள்`;
+      const names = topPlayers.map(p => escapeHtml(p.name)).join(", ");
+      winnerText = `🤝 சமநிலை (Tie): ${names} — ${maxScore}/10`;
     }
   }
   $("winnerBanner").textContent = winnerText;
@@ -633,7 +651,7 @@ function renderResults(d) {
             ${a.correct ? '<span class="pill-good">சரி</span>' : '<span class="pill-bad">தவறு</span>'}
           </div>
           <div style="margin-top:8px; font-size:14px;">
-            உங்கள் பதில்: <strong>${QUESTIONS[i].opts[a.selected]?.[0] || "பதில் இல்லை"}</strong><br>
+            பதில்: <strong>${QUESTIONS[i].opts[a.selected]?.[0] || "பதில் இல்லை"}</strong><br>
             சரியான பதில்: <strong style="color:#065f46;">${QUESTIONS[i].opts[QUESTIONS[i].a][0]}</strong>
           </div>
           <div class="why-box">${QUESTIONS[i].why}</div>
@@ -647,12 +665,19 @@ function bindEvents() {
   if ($("code")) {
     $("code").addEventListener("input", syncCodePreview);
   }
+  if ($("maxPlayers")) {
+    $("maxPlayers").addEventListener("input", syncCodePreview);
+  }
 
   const params = new URLSearchParams(window.location.search);
   const urlCode = (params.get("code") || "").trim().toUpperCase();
+  const urlMax = Number(params.get("max"));
   if (urlCode && $("code")) {
     $("code").value = urlCode;
     if ($("adminCode")) $("adminCode").value = urlCode;
+  }
+  if (urlMax >= 2 && $("maxPlayers")) {
+    $("maxPlayers").value = Math.min(500, Math.floor(urlMax));
   }
   syncCodePreview();
 
@@ -670,7 +695,9 @@ function bindEvents() {
       }
       const name = ($("name").value || "").trim();
       const code = ($("code").value || "").trim().toUpperCase();
+      const maxPlayers = getMaxPlayersValue();
       $("code").value = code;
+      if ($("maxPlayers")) $("maxPlayers").value = maxPlayers;
       if ($("adminCode")) $("adminCode").value = code;
 
       if (!name || code.length < 3) {
@@ -679,7 +706,17 @@ function bindEvents() {
       }
 
       $("join").disabled = true;
-      const { data, error } = await sb.rpc("quiz_join", { p_test_code: code, p_name: name });
+      let { data, error } = await sb.rpc("quiz_join", {
+        p_test_code: code,
+        p_name: name,
+        p_max_players: maxPlayers
+      });
+      if (error && /function.*quiz_join/i.test(error.message)) {
+        ({ data, error } = await sb.rpc("quiz_join", {
+          p_test_code: code,
+          p_name: name
+        }));
+      }
       $("join").disabled = false;
 
       if (error) {
@@ -687,7 +724,7 @@ function bindEvents() {
         return;
       }
       participant = data;
-      $("who").textContent = `👤 ${name} (${code})`;
+      $("who").textContent = `👤 ${name} (${code} • Max ${maxPlayers})`;
       renderQuestions();
       hide("setup");
       show("exam");
