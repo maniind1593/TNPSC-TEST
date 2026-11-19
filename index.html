@@ -3,351 +3,314 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TNPSC நண்பர்கள் Live Quiz</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<title>TNPSC Live Quiz</title>
 <style>
-  :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --secondary: #0d9488;
-    --bg: #f1f5f9;
-    --card: #ffffff;
-    --text: #0f172a;
-    --muted: #64748b;
-    --border: #e2e8f0;
-    --success-bg: #ecfdf5;
-    --success-text: #065f46;
-    --success-border: #6ee7b7;
-    --danger-bg: #fef2f2;
-    --danger-text: #991b1b;
-    --danger-border: #fca5a5;
-    font-family: "Plus Jakarta Sans", "Noto Sans Tamil", system-ui, -apple-system, sans-serif;
-  }
-
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: linear-gradient(180deg, #e0e7ff 0%, var(--bg) 260px);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 36px;
-  }
-
-  .wrap { max-width: 740px; margin: auto; padding: 16px; }
-
-  header {
-    background: linear-gradient(135deg, #1e1b4b 0%, #1d4ed8 100%);
-    color: #fff;
-    padding: 24px 20px;
-    border-radius: 20px;
-    margin: 6px 0 18px;
-    box-shadow: 0 12px 28px -8px rgba(29, 78, 216, 0.35);
-  }
-  .badge-top {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.16);
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  h1 { font-size: 22px; margin: 0 0 6px; font-weight: 800; line-height: 1.35; }
-  header p { margin: 0; font-size: 14px; color: #dbeafe; }
-
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 20px;
-    margin: 14px 0;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
-  }
-
-  h2 { font-size: 18px; margin: 0 0 8px; font-weight: 800; color: #1e293b; }
-  .muted { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
-
-  label.field-label {
-    display: block;
-    font-weight: 700;
-    font-size: 13.5px;
-    margin: 12px 0 6px;
-    color: #334155;
-  }
-
-  .code-label-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 12px 0 6px;
-  }
-  .code-label-row label { margin: 0; }
-
-  .slot-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .max-pill {
-    background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;
-    padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
-  }
-  .count-pill {
-    background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7;
-    padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
-  }
-
-  .code-row { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
-  .code-row input { flex: 1; min-width: 140px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.6px; }
-
-  input[type=text], input[type=password], input[type=number], select {
-    width: 100%; padding: 13px 14px; border: 1.5px solid #cbd5e1;
-    border-radius: 12px; font: inherit; font-size: 15px; background: #f8fafc;
-  }
-
-  .admin-panel-box {
-    background: #f8fafc; border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px; margin-top: 12px;
-  }
-
-  button {
-    width: 100%; border: 0; border-radius: 12px; padding: 14px 18px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff; font: inherit; font-size: 15.5px; font-weight: 700;
-    cursor: pointer; margin-top: 14px;
-  }
-  button.mini-btn {
-    width: auto; margin-top: 0; padding: 10px 14px;
-    font-size: 13px; border-radius: 11px; white-space: nowrap;
-  }
-  button:disabled { opacity: 0.55; cursor: not-allowed; }
-  button.secondary { background: linear-gradient(135deg, #0d9488, #0f766e); }
-  button.outline { background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; }
-  .wa-btn { background: linear-gradient(135deg, #16a34a, #15803d); }
-
-  .share-box {
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 10px; flex-wrap: wrap; background: #eff6ff; border: 1px dashed #93c5fd;
-    padding: 10px 12px; border-radius: 12px; margin-top: 12px; font-size: 13px; color: #1e3a8a;
-  }
-  .social-share-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-
-  .exam-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-  .tag {
-    display: inline-flex; align-items: center; gap: 5px; background: #eff6ff;
-    color: #1d4ed8; border: 1px solid #bfdbfe; padding: 5px 12px; border-radius: 999px;
-    font-size: 12.5px; font-weight: 700;
-  }
-  .progress-wrap { width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin: 10px 0 16px; }
-  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563eb, #10b981); transition: width 0.3s ease; }
-
-  .q { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
-  .q-num { display: inline-block; background: #1e293b; color: #fff; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 6px; margin-bottom: 8px; }
-  .qtitle { font-weight: 700; font-size: 15.5px; line-height: 1.55; color: #0f172a; }
-  .qtitle-en { display: block; font-weight: 500; font-size: 13.5px; color: #475569; margin-top: 3px; }
-
-  .opt {
-    display: flex; gap: 11px; align-items: flex-start; padding: 11px 12px; margin: 8px 0 0;
-    background: #fff; border: 1.5px solid #e2e8f0; border-radius: 11px; cursor: pointer;
-  }
-  .opt.selected { border-color: var(--primary); background: #eff6ff; }
-  .opt input { margin-top: 4px; accent-color: var(--primary); transform: scale(1.15); }
-  .opt-letter { font-weight: 800; color: var(--primary); min-width: 20px; }
-
-  .pulse-box { text-align: center; padding: 14px 8px; }
-  .spinner {
-    width: 42px; height: 42px; border: 4px solid #dbeafe; border-top-color: var(--primary);
-    border-radius: 50%; margin: 0 auto 14px; animation: spin 0.9s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .status-banner { border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; border: 1.5px solid var(--border); }
-  .status-champion { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 55%, #fef9c3 100%); border-color: #f59e0b; color: #78350f; }
-  .status-good { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: var(--success-border); color: var(--success-text); }
-  .status-improve { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-color: var(--danger-border); color: var(--danger-text); }
-
-  .trophy-anim { display: inline-block; font-size: 46px; animation: trophyBounce 1.2s ease-in-out infinite; margin-bottom: 6px; }
-  @keyframes trophyBounce {
-    0%, 100% { transform: translateY(0) scale(1) rotate(-3deg); }
-    50% { transform: translateY(-9px) scale(1.12) rotate(3deg); }
-  }
-
-  .personal-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
-  .stat-tile { background: #f8fafc; border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
-  .stat-big { font-size: 26px; font-weight: 800; color: var(--primary); margin-top: 4px; }
-
-  .review-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 12px; }
-  .pill-good { display: inline-block; background: var(--success-bg); color: var(--success-text); padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-  .pill-bad { display: inline-block; background: var(--danger-bg); color: var(--danger-text); padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-  .why-box { background: #f1f5f9; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: #334155; margin-top: 8px; border-left: 3px solid var(--primary); }
-
-  .admin-card { border-top: 4px solid #0d9488; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-  .high-box { background: var(--success-bg); border: 1.5px solid var(--success-border); color: var(--success-text); padding: 14px; border-radius: 12px; }
-  .low-box { background: var(--danger-bg); border: 1.5px solid var(--danger-border); color: var(--danger-text); padding: 14px; border-radius: 12px; }
-  .admin-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }
-  .admin-table th, .admin-table td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); }
-  .admin-table th { background: #f8fafc; color: #475569; font-weight: 700; }
-
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 14px; background: #f1f5f9; color: #0f172a; }
+  .box { max-width: 680px; margin: 12px auto; background: #fff; padding: 16px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  h1, h2 { margin: 0 0 10px; }
+  label { display: block; font-weight: 700; margin: 10px 0 4px; font-size: 14px; }
+  input, select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
+  button { width: 100%; padding: 12px; margin-top: 10px; border: 0; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
+  button.sec { background: #0d9488; }
+  button.wa { background: #16a34a; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .row button { width: auto; flex: 1; min-width: 130px; }
   .hidden { display: none; }
-  .err { color: #dc2626; font-weight: 600; font-size: 13.5px; margin-top: 8px; }
-  .ok-msg { color: #059669; font-weight: 600; font-size: 13px; margin-top: 6px; }
-  .footer-note { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 16px; }
-
-  @media (max-width: 540px) {
-    .grid-2, .personal-stats { grid-template-columns: 1fr; }
-    header { padding: 20px 16px; }
-    h1 { font-size: 20px; }
-  }
+  .err { color: #dc2626; font-weight: 700; margin-top: 8px; }
+  .ok { color: #059669; font-weight: 700; margin-top: 8px; }
+  .q { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+  .opt { display: block; padding: 8px; margin-top: 6px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; }
+  .banner { padding: 16px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; margin-bottom: 12px; }
+  .champ { background: #fef08a; color: #713f12; animation: pop 1s infinite alternate; }
+  .good { background: #dcfce7; color: #14532d; }
+  .imp { background: #fee2e2; color: #7f1d1d; }
+  @keyframes pop { from { transform: scale(1); } to { transform: scale(1.04); } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <span class="badge-top">TNPSC GROUP II / IIA • LIVE QUIZ</span>
-    <h1>TNPSC குழு போட்டித் தேர்வு</h1>
-    <p>ஒவ்வொருவருக்கும் தங்கள் தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே தெரியும்.</p>
-  </header>
 
-  <div class="card" id="setup">
-    <h2>தேர்வில் இணையவும்</h2>
-    <p class="muted">Test Code மற்றும் உங்கள் பெயரை உள்ளிட்டு உடனடியாகத் தேர்வில் இணையலாம்.</p>
+<div class="box" id="joinBox">
+  <h1>TNPSC Live Quiz</h1>
+  <label>Test Code</label>
+  <input id="code" type="text" value="TNPSC01">
+  <label>உங்கள் பெயர்</label>
+  <input id="name" type="text" placeholder="பெயர் உள்ளிடவும்">
+  <button type="button" onclick="joinQuiz()">Join Quiz</button>
+  <div id="joinMsg" class="err"></div>
+</div>
 
-    <div class="code-label-row">
-      <label class="field-label" for="code">Test Code</label>
-      <div class="slot-badges">
-        <span class="max-pill" id="maxBadge">Max: 10</span>
-        <span class="count-pill" id="slotBadge">0/10 (10 left)</span>
-      </div>
-    </div>
+<div class="box hidden" id="examBox">
+  <h2 id="whoTitle">தேர்வு</h2>
+  <div id="qArea"></div>
+  <button type="button" class="sec" onclick="submitQuiz()">Submit Answers</button>
+  <div id="examMsg" class="err"></div>
+</div>
 
-    <div class="code-row">
-      <input id="code" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02 அல்லது GROUP2_A" maxlength="24" autocomplete="off" oninput="onCodeInput()">
-      <button type="button" class="mini-btn outline" onclick="generateNewCode()">புதிய Code</button>
-    </div>
+<div class="box hidden" id="waitBox">
+  <h2>பதில்கள் சமர்ப்பிக்கப்பட்டன</h2>
+  <p id="waitText">மற்றவர்கள் முடிக்கும் வரை காத்திருக்கவும்...</p>
+  <button type="button" onclick="checkStatus()">Refresh Status</button>
+</div>
 
-    <div class="share-box">
-      <div>Code: <strong id="previewCode">TNPSC01</strong> • Status: <strong id="previewSlots">0/10 (10 left)</strong></div>
-      <button type="button" class="mini-btn" onclick="copyCodeAndLink()">Code &amp; Link Copy</button>
-    </div>
-    <div id="copyMsg" class="ok-msg"></div>
-
-    <label class="field-label">உங்கள் பெயர் (Your Name)</label>
-    <input id="name" type="text" placeholder="உங்கள் பெயரை உள்ளிடவும்" maxlength="40">
-    <button type="button" id="join" onclick="handleJoinClick()">தேர்வைத் தொடங்குக (Join Quiz)</button>
-    <div id="setupMsg" class="err"></div>
+<div class="box hidden" id="resBox">
+  <h2>உங்கள் தனிப்பட்ட முடிவு</h2>
+  <div id="banner" class="banner"></div>
+  <div id="statsText" style="font-weight:700;margin-bottom:12px;"></div>
+  <div class="row">
+    <button type="button" class="wa" onclick="shareWA()">WhatsApp Invite</button>
+    <button type="button" onclick="shareSocial()">Share / Copy Invite</button>
   </div>
+  <div id="shareMsg" class="ok"></div>
+  <div id="reviewArea" style="margin-top:12px;"></div>
+</div>
 
-  <div class="card hidden" id="exam">
-    <div class="exam-bar">
-      <span class="tag" id="who"></span>
-      <span class="tag" id="progText">பதிலளித்தவை: 0 / 10</span>
-    </div>
-    <div class="progress-wrap"><div class="progress-fill" id="progBar"></div></div>
-    <div id="questions"></div>
-    <button type="button" class="secondary" id="submit" onclick="handleSubmitClick()">பதில்களை Submit செய்யவும்</button>
-    <div id="examMsg" class="err"></div>
+<div class="box" id="adminBox">
+  <h2>Admin Panel</h2>
+  <label>Admin PIN</label>
+  <input id="pin" type="password" placeholder="Admin2026">
+  <label>Subject</label>
+  <select id="subj" onchange="changeSubject()">
+    <option value="Indian Polity">Indian Polity</option>
+    <option value="Indian National Movement">Indian National Movement</option>
+    <option value="History and Culture of Tamil Nadu">TN History &amp; Culture</option>
+    <option value="Geography of India">Geography</option>
+    <option value="Indian Economy">Indian Economy</option>
+    <option value="General Science">General Science</option>
+  </select>
+  <label>Gemini API Key</label>
+  <input id="gkey" type="password" placeholder="AIza...">
+  <div class="row">
+    <button type="button" onclick="genAI(false)">AI கேள்விகள்</button>
+    <button type="button" class="sec" onclick="genAI(true)">புதிய Test (AI)</button>
   </div>
-
-  <div class="card hidden" id="waiting">
-    <div class="pulse-box">
-      <div class="spinner"></div>
-      <h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது!</h2>
-      <p class="muted">பங்கேற்பாளர்கள் தேர்வை முடித்தவுடன் உங்கள் தனிப்பட்ட முடிவு &amp; Position காட்டப்படும்.</p>
-      <p id="waitStatus" style="font-weight:700; color:#1d4ed8;"></p>
-      <button type="button" class="outline" id="refresh" onclick="status()">இப்போதே நிலையைப் பார்க்கவும் (Refresh)</button>
-    </div>
-  </div>
-
-  <div class="card hidden" id="results">
-    <h2>உங்கள் தனிப்பட்ட தேர்வு முடிவு</h2>
-    <div id="feedbackBanner" class="status-banner"></div>
-    <div id="personalStats" class="personal-stats"></div>
-
-    <div class="admin-panel-box">
-      <div style="font-weight:800; color:#1e293b; font-size:15px;">நண்பர்களை அழைக்க / Share செய்யவும்</div>
-      <p class="muted" style="margin:4px 0 0;">WhatsApp அல்லது பிற Social Media-வில் இந்த Test Code &amp; Link-ஐப் பகிர்ந்து நண்பர்களை Invite செய்யுங்கள்.</p>
-      <div class="social-share-row">
-        <button type="button" class="mini-btn wa-btn" onclick="shareOnWhatsApp()">WhatsApp Invite</button>
-        <button type="button" class="mini-btn" onclick="nativeOrSocialShare()">Social Media / Share</button>
-        <button type="button" class="mini-btn outline" onclick="copyInviteMessage()">Invite Copy</button>
-      </div>
-      <div id="inviteMsg" class="ok-msg"></div>
-    </div>
-
-    <div id="resultBody" style="margin-top:16px;"></div>
-  </div>
-
-  <div class="card admin-card" id="adminSection">
-    <h2>Admin Control &amp; Score Summary</h2>
-    <p class="muted">Admin PIN உள்ளிட்டு <strong>Subject-wise AI கேள்விகள்</strong>, <strong>புதிய Test (AI Auto)</strong>, <strong>Maximum Limit (Min 2)</strong>, மற்றும் <strong>High / Low Score</strong> ஆகியவற்றை நிர்வகிக்கலாம்.</p>
-
-    <label class="field-label" for="adminPin">Admin PIN</label>
-    <input id="adminPin" type="password" placeholder="Admin PIN உள்ளிடவும் (எ.கா: Admin2026)">
-
-    <label class="field-label" for="adminCode">Test Code</label>
-    <input id="adminCode" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02" autocomplete="off">
-
-    <div class="admin-panel-box">
-      <label class="field-label" for="aiSubject" style="margin-top:0;">Admin: பாடம் / Subject (AI கேள்விகள்)</label>
-      <select id="aiSubject" onchange="onSubjectChange()">
-        <option value="Indian Polity">Indian Polity (இந்திய அரசியலமைப்பு)</option>
-        <option value="Indian National Movement">Indian National Movement (இந்திய தேசிய இயக்கம்)</option>
-        <option value="History and Culture of Tamil Nadu">TN History &amp; Culture (தமிழக வரலாறு &amp; பண்பாடு)</option>
-        <option value="Geography of India">Geography (புவியியல்)</option>
-        <option value="Indian Economy">Indian Economy (இந்தியப் பொருளாதாரம்)</option>
-        <option value="General Science">General Science (அறிவியல்)</option>
-      </select>
-
-      <label class="field-label" for="geminiKeyInput">Admin: Gemini API Key (GitHub-ல் சேமிக்கப்படாது)</label>
-      <input id="geminiKeyInput" type="password" placeholder="AIza... (Admin Gemini API Key உள்ளிடவும்)" autocomplete="off">
-
-      <div class="code-row" style="margin-top:12px;">
-        <button type="button" class="mini-btn" style="flex:1;" id="genAiBtn" onclick="loadSubjectQuestionsByAdmin()">AI கேள்விகள் உருவாக்குக</button>
-        <button type="button" class="mini-btn secondary" style="flex:1;" id="autoTestBtn" onclick="createNewTestWithAutoAI()">புதிய Test (AI Auto)</button>
-      </div>
-      <div id="aiMsg" class="ok-msg"></div>
-    </div>
-
-    <div class="admin-panel-box">
-      <label class="field-label" style="margin-top:0;">Admin: Set Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
-      <div class="code-row">
-        <input id="adminMaxPlayers" type="number" min="2" max="1000" value="50" placeholder="எ.கா: 50">
-        <button type="button" class="mini-btn" id="saveLimitBtn" onclick="handleSaveLimitClick()">Limit Save</button>
-      </div>
-      <div id="limitMsg" class="ok-msg"></div>
-    </div>
-
-    <button type="button" class="secondary" id="adminBtn" onclick="handleAdminSummaryClick()">High / Low Score பார்க்கவும்</button>
-    <div id="adminBody"></div>
-  </div>
-
-  <div class="footer-note">குறிப்பு: பங்கேற்பாளர்களுக்குத் தங்கள் தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே தெரியும்.</div>
+  <div id="aiMsg" class="ok"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-window.onerror = function(msg, url, line) {
-  var el = document.getElementById("setupMsg");
-  if (el) el.textContent = "JS Error (Line " + line + "): " + msg;
-};
-
-var SUBJECT_QUESTIONS = {
+var BANKS = {
   "Indian Polity": [
-    {ta:"இந்திய அரசியலமைப்பின் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",en:"Fundamental Rights are in which Part of the Indian Constitution?",opts:[["பகுதி II","Part II"],["பகுதி III","Part III"],["பகுதி IV","Part IV"],["பகுதி V","Part V"]],a:1,why:"அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்து 12-35) உள்ளன."},
-    {ta:"இந்திய அரசியலமைப்பின் எந்தத் திருத்தம் வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்தது?",en:"Which amendment reduced the voting age from 21 to 18?",opts:[["42வது","42nd"],["44வது","44th"],["61வது","61st"],["73வது","73rd"]],a:2,why:"61வது அரசியலமைப்புத் திருத்தச் சட்டம் (1988) வாக்கு வயதை 18-ஆகக் குறைத்தது."},
-    {ta:"இந்தியாவின் முதல் குடிமகனாகக் கருதப்படுபவர் யார்?",en:"Who is the first citizen of India?",opts:[["பிரதமர்","Prime Minister"],["குடியரசுத் தலைவர்","President"],["உச்ச நீதிமன்ற நீதிபதி","Chief Justice"],["சபாநாயகர்","Speaker"]],a:1,why:"இந்தியக் குடியரசுத் தலைவர் நாட்டின் முதல் குடிமகன் ஆவார்."},
-    {ta:"மாநிலங்களவையின் (Rajya Sabha) அலுவல் வழித் தலைவர் யார்?",en:"Who is the ex-officio Chairman of the Rajya Sabha?",opts:[["குடியரசுத் தலைவர்","President"],["துணைக் குடியரசுத் தலைவர்","Vice President"],["பிரதமர்","Prime Minister"],["ஆளுநர்","Governor"]],a:1,why:"துணைக் குடியரசுத் தலைவர் மாநிலங்களவையின் அவைத் தலைவராகச் செயல்படுவார்."},
-    {ta:"அரசியலமைப்புச் சட்ட வரைவுக்குழுவின் தலைவர் யார்?",en:"Who was the Chairman of the Drafting Committee of the Constitution?",opts:[["நேரு","Jawaharlal Nehru"],["டாக்டர் பி.ஆர். அம்பேத்கர்","Dr. B. R. Ambedkar"],["ராஜேந்திர பிரசாத்","Rajendra Prasad"],["சர்தார் பட்டேல்","Sardar Patel"]],a:1,why:"டாக்டர் பி.ஆர். அம்பேத்கர் வரைவுக்குழுவின் தலைவராக இருந்தார்."}
+    {q:"அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",opts:["பகுதி II","பகுதி III","பகுதி IV","பகுதி V"],a:1,why:"பகுதி III (சரத்து 12-35)."},
+    {q:"வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்த திருத்தம்?",opts:["42வது","44வது","61வது","73வது"],a:2,why:"61வது திருத்தம்."}
   ],
   "Indian National Movement": [
-    {ta:"இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",en:"In which year was the Indian National Congress founded?",opts:[["1885","1885"],["1905","1905"],["1919","1919"],["1942","1942"]],a:0,why:"1885-ஆம் ஆண்டு இந்திய தேசிய காங்கிரஸ் தொடங்கப்பட்டது."},
-    {ta:"உப்பு சத்தியாகிரகம் எந்த ஆண்டு தொடங்கியது?",en:"In which year did the Salt Satyagraha begin?",opts:[["1920","1920"],["1930","1930"],["1935","1935"],["1942","1942"]],a:1,why:"1930-ஆம் ஆண்டு தண்டி யாத்திரையுடன் உப்பு சத்தியாகிரகம் தொடங்கியது."},
-    {ta:"'சுயராஜ்யம் எனது பிறப்புரிமை' என்று முழங்கியவர் யார்?",en:"Who gave the slogan 'Swaraj is my birthright'?",opts:[["பாலகங்காதர திலகர்","Bal Gangadhar Tilak"],["பகத் சிங்","Bhagat Singh"],["சுபாஷ் சந்திர போஸ்","Subhas Chandra Bose"],["லாலா லஜபதி ராய்","Lala Lajpat Rai"]],a:0,why:"பாலகங்காதர திலகர் இப்புகழ்பெற்ற முழக்கத்தை முன்வைத்தார்."},
-    {ta:"வங்கப் பிரிவினை எந்த ஆண்டு அறிவிக்கப்பட்டது?",en:"In which year was the Partition of Bengal announced?",opts:[["1902","1902"],["1905","1905"],["1907","1907"],["1911","1911"]],a:1,why:"கர்சன் பிரபு 1905-ல் வங்கப் பிரிவினையை அறிவித்தார்."},
-    {ta:"இந்திய தேசிய இராணுவத்தை (INA) வலுப்படுத்தியவர் யார்?",en:"Who led and strengthened the Indian National Army?",opts:[["நேதாஜி சுபாஷ் சந்திர போஸ்","Netaji Subhas Chandra Bose"],["ராஷ் பிஹாரி போஸ்","Rash Behari Bose"],["மோதிலால் நேரு","Motilal Nehru"],["சி.ஆர். தாஸ்","C. R. Das"]],a:0,why:"நேதாஜி சுபாஷ் சந்திர போஸ் இந்திய தேசிய இராணுவத்திற்குத் தலைமை தாங்கினார்."}
+    {q:"இந்திய தேசிய காங்கிரஸ் தொடங்கிய ஆண்டு?",opts:["1885","1905","1919","1942"],a:0,why:"1885-ஆம் ஆண்டு."},
+    {q:"உப்பு சத்தியாகிரகம் தொடங்கிய ஆண்டு?",opts:["1920","1930","1935","1942"],a:1,why:"1930-ஆம் ஆண்டு."}
   ],
   "History and Culture of Tamil Nadu": [
-    {ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1905","1905"]],a:1,why:"வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது."},
-    {ta:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",en:"Who founded the Self-Respect Movement?",opts:[["சி. ராஜகோபாலாச்சாரி","C. Rajagopalachari"],["பெரியார் ஈ.வெ.ரா.","Periyar E. V. Ramasamy"],["காமராசர்","K. Kamaraj"],["அண்ணா","C. N. Annadurai"]],a:1,why:"பெரியார் ஈ.வெ.ரா. சுயமரியாதை இயக்கத்தைத் தொடங்கினார்."},
-    {ta:"சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",en:"Which one is among the Ettuthokai works of Sangam literature?",opts:[["சிலப்பதிகாரம்","Silappa
+    {q:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு?",opts:["1757","1806","1857","1905"],a:1,why:"1806-ஆம் ஆண்டு."},
+    {q:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர்?",opts:["ராஜாஜி","பெரியார்","காமராசர்","அண்ணா"],a:1,why:"பெரியார் ஈ.வெ.ரா."}
+  ],
+  "Geography of India": [
+    {q:"இந்தியாவின் மிக நீளமான நதி?",opts:["கோதாவரி","கங்கை","நர்மதை","கிருஷ்ணா"],a:1,why:"கங்கை நதி."},
+    {q:"கருப்பு மண் ஏற்ற பயிர்?",opts:["தேயிலை","பருத்தி","சணல்","காபி"],a:1,why:"பருத்தி."}
+  ],
+  "Indian Economy": [
+    {q:"RBI நாட்டுடைமையாக்கப்பட்ட ஆண்டு?",opts:["1935","1947","1949","1969"],a:2,why:"1949-ஆம் ஆண்டு."},
+    {q:"GST நடைமுறைக்கு வந்த ஆண்டு?",opts:["2016","2017","2018","2019"],a:1,why:"2017 ஜூலை 1."}
+  ],
+  "General Science": [
+    {q:"இன்சுலின் சுரக்கும் உறுப்பு?",opts:["கல்லீரல்","கணையம்","சிறுநீரகம்","இதயம்"],a:1,why:"கணையம்."},
+    {q:"வைட்டமின் D குறைபாட்டால் வருவது?",opts:["ஸ்கர்வி","ரிக்கெட்ஸ்","பெரிபெரி","அனீமியா"],a:1,why:"ரிக்கெட்ஸ்."}
+  ]
+};
+
+var qs = BANKS["Indian Polity"].slice();
+var sb = null, me = null, myAns = [], myScore = 0, timer = null;
+
+function g(id){ return document.getElementById(id); }
+function show(id){ g(id).classList.remove("hidden"); }
+function hide(id){ g(id).classList.add("hidden"); }
+
+function getSB(){
+  if (sb) return sb;
+  var cfg = window.QUIZ_CONFIG || {};
+  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || !window.supabase) return null;
+  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  return sb;
+}
+
+function changeSubject(){
+  var s = g("subj").value;
+  qs = (BANKS[s] || BANKS["Indian Polity"]).slice();
+  g("aiMsg").className = "ok";
+  g("aiMsg").textContent = s + " கேள்விகள் மாற்றப்பட்டன (" + qs.length + ").";
+}
+
+async function genAI(newCode){
+  var cfg = window.QUIZ_CONFIG || {};
+  var pin = g("pin").value.trim();
+  var expected = String(cfg.ADMIN_PIN || "Admin2026").trim();
+  if (!pin || pin !== expected){
+    g("aiMsg").className = "err";
+    g("aiMsg").textContent = "சரியான Admin PIN உள்ளிடவும்.";
+    return;
+  }
+  var key = g("gkey").value.trim();
+  if (!key){
+    g("aiMsg").className = "err";
+    g("aiMsg").textContent = "Gemini API Key உள்ளிடவும்.";
+    return;
+  }
+  if (newCode){
+    g("code").value = "TNP" + Math.floor(100 + Math.random()*900);
+  }
+  var code = g("code").value.trim().toUpperCase();
+  var s = g("subj").value;
+  var model = String(cfg.GEMINI_MODEL || "gemini-3.8-flash").replace(/^models\//, "");
+  g("aiMsg").className = "ok";
+  g("aiMsg").textContent = "AI கேள்விகள் உருவாக்குகிறது...";
+
+  var prompt = 'Create 10 TNPSC multiple-choice questions on "' + s + '" for test "' + code + '" (' + Date.now() + '). Return ONLY JSON array: [{"q":"...","opts":["A","B","C","D"],"a":0,"why":"..."}]';
+  try {
+    var r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(key), {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{responseMimeType:"application/json"} })
+    });
+    var d = await r.json();
+    if (!r.ok) throw new Error((d && d.error && d.error.message) || "API Error");
+    var txt = d.candidates[0].content.parts[0].text;
+    var arr = JSON.parse(txt);
+    if (!Array.isArray(arr) || !arr.length) throw new Error("Empty questions");
+    qs = arr;
+    var client = getSB();
+    if (client) await client.rpc("quiz_save_questions", { p_test_code: code, p_questions: qs });
+    g("aiMsg").className = "ok";
+    g("aiMsg").textContent = code + " க்கு " + qs.length + " புதிய AI கேள்விகள் தயார்!";
+  } catch(e){
+    g("aiMsg").className = "err";
+    g("aiMsg").textContent = e.message;
+  }
+}
+
+async function joinQuiz(){
+  g("joinMsg").textContent = "";
+  var name = g("name").value.trim();
+  var code = g("code").value.trim().toUpperCase();
+  g("code").value = code;
+  if (!name || code.length < 3){
+    g("joinMsg").textContent = "பெயர் மற்றும் Test Code உள்ளிடவும்.";
+    return;
+  }
+  var client = getSB();
+  if (!client){
+    g("joinMsg").textContent = "config.js சரிபார்க்கவும்.";
+    return;
+  }
+  var saved = await client.rpc("quiz_get_questions", { p_test_code: code });
+  if (!saved.error && Array.isArray(saved.data) && saved.data.length) qs = saved.data;
+
+  var res = await client.rpc("quiz_join", { p_test_code: code, p_name: name, p_max_players: 50 });
+  if (res.error){
+    g("joinMsg").textContent = res.error.message;
+    return;
+  }
+  me = res.data;
+  g("whoTitle").textContent = name + " (" + code + ")";
+  renderQ();
+  hide("joinBox");
+  show("examBox");
+}
+
+function renderQ(){
+  var h = "";
+  for (var i = 0; i < qs.length; i++){
+    h += '<div class="q"><b>' + (i+1) + '. ' + qs[i].q + '</b>';
+    for (var j = 0; j < qs[i].opts.length; j++){
+      h += '<label class="opt"><input type="radio" name="q' + i + '" value="' + j + '"> ' + qs[i].opts[j] + '</label>';
+    }
+    h += '</div>';
+  }
+  g("qArea").innerHTML = h;
+}
+
+async function submitQuiz(){
+  g("examMsg").textContent = "";
+  var arr = [], sc = 0;
+  for (var i = 0; i < qs.length; i++){
+    var el = document.querySelector('input[name="q' + i + '"]:checked');
+    if (!el){ g("examMsg").textContent = "அனைத்து கேள்விகளுக்கும் பதில் அளிக்கவும்."; return; }
+    var v = Number(el.value);
+    arr.push(v);
+    if (v === qs[i].a) sc++;
+  }
+  myAns = arr;
+  myScore = sc;
+  var client = getSB();
+  var res = await client.rpc("quiz_submit", {
+    p_test_code: g("code").value.trim().toUpperCase(),
+    p_participant_id: me.participant_id,
+    p_token: me.token,
+    p_answers: arr
+  });
+  if (res.error){ g("examMsg").textContent = res.error.message; return; }
+  hide("examBox");
+  show("waitBox");
+  await checkStatus();
+  if (!g("waitBox").classList.contains("hidden")){
+    timer = setInterval(checkStatus, 3000);
+  }
+}
+
+async function checkStatus(){
+  var client = getSB();
+  var res = await client.rpc("quiz_status", {
+    p_test_code: g("code").value.trim().toUpperCase(),
+    p_participant_id: me ? me.participant_id : null
+  });
+  if (res.error) return;
+  if (res.data && res.data.released){
+    if (timer) clearInterval(timer);
+    showResult(res.data);
+    hide("waitBox");
+    show("resBox");
+  } else {
+    g("waitText").textContent = "சமர்ப்பித்தவர்கள்: " + (res.data.submitted_count || 0) + " / " + (res.data.total_players || 2);
+  }
+}
+
+function showResult(d){
+  var sc = typeof d.my_score === "number" ? d.my_score : myScore;
+  var rank = d.rank || 1;
+  var tot = d.total_players || 1;
+  var b = g("banner");
+  b.className = "banner";
+  if (sc > 8){ b.classList.add("champ"); b.textContent = "🏆 CHAMPION! (" + sc + "/" + qs.length + ")"; }
+  else if (sc > 5){ b.classList.add("good"); b.textContent = "👏 GOOD! (" + sc + "/" + qs.length + ")"; }
+  else { b.classList.add("imp"); b.textContent = "📚 இன்னும் improve பண்ணனும் (" + sc + "/" + qs.length + ")"; }
+
+  g("statsText").textContent = "உங்கள் மதிப்பெண்: " + sc + "/" + qs.length + " | உங்கள் Position: #" + rank + " / " + tot;
+
+  var rv = "";
+  for (var i = 0; i < qs.length; i++){
+    var ok = myAns[i] === qs[i].a;
+    rv += '<div class="q"><b>' + (i+1) + '. ' + qs[i].q + '</b><br>' +
+      (ok ? '<span class="ok">சரி</span>' : '<span class="err">தவறு</span>') +
+      ' — சரியான பதில்: <b>' + qs[i].opts[qs[i].a] + '</b><br><small>' + (qs[i].why || "") + '</small></div>';
+  }
+  g("reviewArea").innerHTML = rv;
+}
+
+function inviteText(){
+  var c = g("code").value.trim().toUpperCase();
+  var u = location.href.split("?")[0] + "?code=" + encodeURIComponent(c);
+  return "TNPSC Live Quiz!\nCode: " + c + "\nJoin: " + u;
+}
+
+function shareWA(){
+  window.open("https://wa.me/?text=" + encodeURIComponent(inviteText()), "_blank");
+}
+
+async function shareSocial(){
+  var t = inviteText();
+  if (navigator.share){
+    try { await navigator.share({ title: "TNPSC Quiz", text: t }); return; } catch(e){}
+  }
+  try { await navigator.clipboard.writeText(t); g("shareMsg").textContent = "Invite Copy செய்யப்பட்டது!"; }
+  catch(e){ g("shareMsg").textContent = t; }
+}
+</script>
+</body>
+</html>
