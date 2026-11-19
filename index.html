@@ -1,38 +1,446 @@
 <!doctype html>
 <html lang="ta">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TNPSC நண்பர்கள் Quiz</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TNPSC நண்பர்கள் Live Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{font-family:system-ui,-apple-system,"Noto Sans Tamil",sans-serif;color:#172033;background:#f4f6fb}
-*{box-sizing:border-box}body{margin:0}.wrap{max-width:760px;margin:auto;padding:18px}
-header{background:#172b4d;color:white;padding:22px;border-radius:16px;margin:8px 0 18px}
-h1{font-size:23px;margin:0 0 7px}p{line-height:1.55}.muted{color:#667085;font-size:14px}
-.card{background:white;border:1px solid #e5e9f2;border-radius:14px;padding:17px;margin:12px 0;box-shadow:0 3px 12px #172b4d0a}
-label{display:block;font-weight:650;margin:10px 0 6px}input,button{font:inherit}input[type=text]{width:100%;padding:12px;border:1px solid #cbd2df;border-radius:9px}
-button{border:0;border-radius:10px;padding:12px 16px;background:#2457d6;color:white;font-weight:700;cursor:pointer;margin-top:12px;width:100%}button:disabled{opacity:.5}
-.q{padding:15px 0;border-bottom:1px solid #edf0f5}.q:last-child{border:0}.qtitle{font-weight:700;line-height:1.55}
-.opt{display:flex;gap:9px;align-items:flex-start;padding:9px;margin:7px 0;border:1px solid #e4e8ef;border-radius:9px;font-weight:400}
-.opt input{margin-top:5px}.hidden{display:none}.tag{display:inline-block;background:#eaf0ff;color:#214bb2;padding:4px 9px;border-radius:30px;font-size:12px}
-.good{color:#087443}.bad{color:#b42318}.result{font-size:24px;font-weight:800}.notice{background:#fff8e6;padding:12px;border-radius:9px;color:#694b00}
-</style></head>
-<body><div class="wrap">
-<header><h1>TNPSC Group II / IIA – நண்பர்கள் Quiz</h1><div>இரண்டு பேரும் தனித்தனி மொபைலில் தேர்வு எழுதலாம்.</div></header>
-<div class="card" id="setup">
-<p class="muted">முதலில் Supabase இணைப்பை அமைத்த பிறகு Test Code மற்றும் உங்கள் பெயரை உள்ளிடவும்.</p>
-<label>Test Code</label><input id="code" type="text" value="TNPSC01" autocomplete="off">
-<label>உங்கள் பெயர்</label><input id="name" type="text" placeholder="உங்கள் பெயர்" maxlength="40">
-<button id="join">தேர்வில் சேரவும்</button><p id="setupMsg" class="muted"></p>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #0d9488;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --success-bg: #ecfdf5;
+    --success-text: #065f46;
+    --success-border: #6ee7b7;
+    --danger-bg: #fef2f2;
+    --danger-text: #991b1b;
+    --danger-border: #fca5a5;
+    font-family: "Plus Jakarta Sans", "Noto Sans Tamil", system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, #e0e7ff 0%, var(--bg) 260px);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 36px;
+  }
+
+  .wrap { max-width: 740px; margin: auto; padding: 16px; }
+
+  header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #1d4ed8 100%);
+    color: #fff;
+    padding: 24px 20px;
+    border-radius: 20px;
+    margin: 6px 0 18px;
+    box-shadow: 0 12px 28px -8px rgba(29, 78, 216, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    right: -30px;
+    top: -30px;
+    width: 140px;
+    height: 140px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
+  }
+  .badge-top {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.16);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
+  h1 { font-size: 22px; margin: 0 0 6px; font-weight: 800; line-height: 1.35; }
+  header p { margin: 0; font-size: 14px; color: #dbeafe; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin: 14px 0;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+    animation: fadeUp 0.28s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 { font-size: 18px; margin: 0 0 8px; font-weight: 800; color: #1e293b; }
+  .muted { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+
+  label.field-label {
+    display: block;
+    font-weight: 700;
+    font-size: 13.5px;
+    margin: 12px 0 6px;
+    color: #334155;
+  }
+
+  .code-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .code-row input { flex: 1; text-transform: uppercase; font-weight: 700; letter-spacing: 0.6px; }
+
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 15px;
+    background: #f8fafc;
+    transition: all 0.2s;
+  }
+  input[type=text]:focus, input[type=password]:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  }
+
+  button {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    font: inherit;
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 14px;
+    box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  button.mini-btn {
+    width: auto;
+    margin-top: 0;
+    padding: 0 14px;
+    font-size: 13px;
+    border-radius: 11px;
+    box-shadow: none;
+    white-space: nowrap;
+  }
+  button:hover { transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+  button.secondary {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    box-shadow: 0 6px 16px -4px rgba(13, 148, 136, 0.4);
+  }
+  button.outline {
+    background: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    box-shadow: none;
+  }
+  button.outline:hover { background: #e2e8f0; }
+
+  .share-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #eff6ff;
+    border: 1px dashed #93c5fd;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #1e3a8a;
+  }
+
+  .exam-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+  }
+  .progress-wrap {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 10px 0 16px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #2563eb, #10b981);
+    transition: width 0.3s ease;
+  }
+
+  .q {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .q-num {
+    display: inline-block;
+    background: #1e293b;
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  .qtitle { font-weight: 700; font-size: 15.5px; line-height: 1.55; color: #0f172a; }
+  .qtitle-en { display: block; font-weight: 500; font-size: 13.5px; color: #475569; margin-top: 3px; }
+
+  .opt {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 11px 12px;
+    margin: 8px 0 0;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .opt:hover { border-color: #93c5fd; background: #f0f7ff; }
+  .opt.selected {
+    border-color: var(--primary);
+    background: #eff6ff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+  }
+  .opt input { margin-top: 4px; accent-color: var(--primary); transform: scale(1.15); }
+  .opt-letter { font-weight: 800; color: var(--primary); min-width: 20px; }
+
+  .pulse-box { text-align: center; padding: 14px 8px; }
+  .spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid #dbeafe;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .winner-box {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 1.5px solid var(--success-border);
+    color: var(--success-text);
+    padding: 16px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 17.5px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .score-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .score-tile {
+    background: #f8fafc;
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+  }
+  .score-tile.top { background: #eff6ff; border-color: #93c5fd; }
+  .score-big { font-size: 28px; font-weight: 800; color: var(--primary); margin-top: 4px; }
+
+  .review-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 12px;
+  }
+  .pill-good {
+    display: inline-block;
+    background: var(--success-bg);
+    color: var(--success-text);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .pill-bad {
+    display: inline-block;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .why-box {
+    background: #f1f5f9;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #334155;
+    margin-top: 8px;
+    border-left: 3px solid var(--primary);
+  }
+
+  .admin-card { border-top: 4px solid #0d9488; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .high-box {
+    background: var(--success-bg);
+    border: 1.5px solid var(--success-border);
+    color: var(--success-text);
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .low-box {
+    background: var(--danger-bg);
+    border: 1.5px solid var(--danger-border);
+    color: var(--danger-text);
+    padding: 14px;
+    border-radius: 12px;
+  }
+  .admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    font-size: 14px;
+  }
+  .admin-table th, .admin-table td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-table th { background: #f8fafc; color: #475569; font-weight: 700; }
+
+  .hidden { display: none; }
+  .err { color: #dc2626; font-weight: 600; font-size: 13.5px; margin-top: 8px; }
+  .ok-msg { color: #059669; font-weight: 600; font-size: 13px; margin-top: 6px; }
+  .footer-note { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 16px; }
+
+  @media (max-width: 540px) {
+    .grid-2, .score-cards { grid-template-columns: 1fr; }
+    header { padding: 20px 16px; }
+    h1 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="badge-top">TNPSC GROUP II / IIA • LIVE BATTLE</span>
+    <h1>TNPSC நண்பர்கள் போட்டித் தேர்வு</h1>
+    <p>இரண்டு பேரும் தனித்தனி மொபைலில் Login இல்லாமல் ஒரே நேரத்தில் தேர்வு எழுதலாம்.</p>
+  </header>
+
+  <!-- 1. Setup / Join -->
+  <div class="card" id="setup">
+    <h2>தேர்வில் இணையவும்</h2>
+    <p class="muted">உங்களுக்கு விருப்பமான <strong>Test Code</strong>-ஐ மாற்றி (அல்லது புதிய Code உருவாக்கி) நண்பருடன் பகிர்ந்து கொள்ளுங்கள்.</p>
+
+    <label class="field-label">Test Code (நீங்கள் மாற்றிக்கொள்ளலாம்)</label>
+    <div class="code-row">
+      <input id="code" type="text" value="" placeholder="எ.கா: TNPSC02 அல்லது GROUP2_A" maxlength="24" autocomplete="off">
+      <button type="button" class="mini-btn outline" onclick="generateNewCode()">புதிய Code</button>
+    </div>
+
+    <div class="share-box">
+      <div>நண்பருக்குச் சொல்ல வேண்டிய Code: <strong id="previewCode">-</strong></div>
+      <button type="button" class="mini-btn" onclick="copyCodeAndLink()">Code Copy</button>
+    </div>
+    <div id="copyMsg" class="ok-msg"></div>
+
+    <label class="field-label">உங்கள் பெயர் (Your Name)</label>
+    <input id="name" type="text" placeholder="உங்கள் பெயரை உள்ளிடவும்" maxlength="40">
+    <button id="join">தேர்வைத் தொடங்குக (Join Quiz)</button>
+    <div id="setupMsg" class="err"></div>
+  </div>
+
+  <!-- 2. Exam Screen -->
+  <div class="card hidden" id="exam">
+    <div class="exam-bar">
+      <span class="tag" id="who"></span>
+      <span class="tag" id="progText">பதிலளித்தவை: 0 / 10</span>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="progBar"></div></div>
+    <div id="questions"></div>
+    <button class="secondary" id="submit">பதில்களை Submit செய்யவும்</button>
+    <div id="examMsg" class="err"></div>
+  </div>
+
+  <!-- 3. Waiting Screen -->
+  <div class="card hidden" id="waiting">
+    <div class="pulse-box">
+      <div class="spinner"></div>
+      <h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது!</h2>
+      <p class="muted">உங்கள் நண்பரும் தேர்வை முடிக்கும் வரை முடிவுகள் மறைக்கப்பட்டிருக்கும். அவர் Submit செய்த நொடியில் முடிவுகள் இங்கே தானாகத் தோன்றும்.</p>
+      <p id="waitStatus" style="font-weight:700; color:#1d4ed8;"></p>
+      <button class="outline" id="refresh">இப்போதே நிலையைப் பார்க்கவும் (Refresh)</button>
+    </div>
+  </div>
+
+  <!-- 4. Results Screen -->
+  <div class="card hidden" id="results">
+    <h2>இருவரின் தேர்வு முடிவுகள்</h2>
+    <div id="winnerBanner" class="winner-box"></div>
+    <div id="scoreCards" class="score-cards"></div>
+    <div id="resultBody"></div>
+  </div>
+
+  <!-- 5. Admin View -->
+  <div class="card admin-card" id="adminSection">
+    <h2>Admin View — High &amp; Low Score</h2>
+    <p class="muted">தேர்வு முடிந்த பிறகு Test Code மற்றும் Admin PIN கொடுத்து யார் அதிக மதிப்பெண் (High), யார் குறைந்த மதிப்பெண் (Low) என்பதைப் பார்க்கவும்.</p>
+    <label class="field-label">Admin PIN</label>
+    <input id="adminPin" type="password" placeholder="Admin PIN உள்ளிடவும்">
+    <label class="field-label">Test Code</label>
+    <input id="adminCode" type="text" placeholder="எ.கா: TNPSC02" autocomplete="off">
+    <button class="secondary" id="adminBtn">High / Low Score பார்க்கவும்</button>
+    <div id="adminBody"></div>
+  </div>
+
+  <div class="footer-note">குறிப்பு: ஒரு Test Code-க்கு இரண்டு பங்கேற்பாளர்கள் மட்டுமே அனுமதிக்கப்படுவர்.</div>
 </div>
-<div class="card hidden" id="exam">
-<div><span class="tag" id="who"></span> <span class="tag">10 கேள்விகள்</span></div>
-<p class="muted" id="status"></p><div id="questions"></div>
-<button id="submit">பதில்களை Submit செய்யவும்</button><p class="muted" id="examMsg"></p>
-</div>
-<div class="card hidden" id="waiting"><h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது</h2><p>உங்கள் நண்பரும் தேர்வை முடிக்கும் வரை முடிவுகள் மறைக்கப்பட்டிருக்கும்.</p><p id="waitStatus" class="muted"></p><button id="refresh">முடிவு நிலையைப் பார்க்கவும்</button></div>
-<div class="card hidden" id="results"><h2>இருவரின் தேர்வு முடிவுகள்</h2><div id="resultBody"></div></div>
-<p class="muted">குறிப்பு: ஒரே Test Code-ஐ இருவரும் பயன்படுத்த வேண்டும். ஒரு Code-க்கு இரண்டு பங்கேற்பாளர்கள் மட்டுமே.</p>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
@@ -48,14 +456,119 @@ const QUESTIONS = [
 {ta:"இந்திய அரசியலமைப்பின் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",en:"Fundamental Rights are contained in which Part of the Indian Constitution?",opts:[["பகுதி II","Part II"],["பகுதி III","Part III"],["பகுதி IV","Part IV"],["பகுதி V","Part V"]],a:1,why:"அடிப்படை உரிமைகள் அரசியலமைப்பின் பகுதி III-ல் உள்ளன. / Fundamental Rights are in Part III."},
 {ta:"இந்திய அரசியலமைப்பின் எந்தத் திருத்தம் வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்தது?",en:"Which amendment reduced the voting age from 21 to 18?",opts:[["42வது","42nd"],["44வது","44th"],["61வது","61st"],["73வது","73rd"]],a:2,why:"61வது அரசியலமைப்புத் திருத்தச் சட்டம் வாக்கு வயதை 18-ஆகக் குறைத்தது. / The 61st Amendment lowered the voting age to 18."}
 ];
-const $=id=>document.getElementById(id); let client, participant=null;
-function configured(){return window.SUPABASE_URL&&window.SUPABASE_ANON_KEY&&window.SUPABASE_URL.startsWith("https://")&&!window.SUPABASE_ANON_KEY.includes("PASTE")}
-function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).classList.add("hidden")}
-function renderQuestions(){ $("questions").innerHTML=QUESTIONS.map((q,i)=>`<div class="q"><div class="qtitle">${i+1}. ${q.ta}<br><span class="muted">${q.en}</span></div>${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"><span>${"ABCD"[j]}. ${o[0]}<br><span class="muted">${o[1]}</span></span></label>`).join("")}</div>`).join("");}
-async function status(){const {data,error}=await client.rpc("quiz_status",{p_test_code:$("code").value.trim()});if(error){$("waitStatus").textContent=error.message;return}if(data&&data.released){renderResults(data);hide("waiting");show("results")}else $("waitStatus").textContent=`சமர்ப்பித்தவர்கள்: ${data?.submitted_count||0}/2. நண்பர் Submit செய்ததும் முடிவு வெளியாகும்.`}
-function renderResults(d){$("resultBody").innerHTML=(d.players||[]).map(p=>`<div class="card"><b>${escapeHtml(p.name)}</b><div class="result">${p.score}/10</div>${(p.answers||[]).map((a,i)=>`<p><b>${i+1}. ${QUESTIONS[i].ta}</b><br>${a.correct?'<span class="good">சரி / Correct</span>':'<span class="bad">தவறு / Incorrect</span>'}<br>உங்கள் பதில்: ${QUESTIONS[i].opts[a.selected]?.[0]||"பதில் இல்லை"}<br>சரியான பதில்: ${QUESTIONS[i].opts[QUESTIONS[i].a][0]}<br><span class="muted">${QUESTIONS[i].why}</span></p>`).join("")}</div>`).join("")}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-$("join").onclick=async()=>{if(!configured()){$("setupMsg").textContent="முதலில் config.js கோப்பில் Supabase URL மற்றும் anon key சேர்க்கவும்.";return}let name=$("name").value.trim(),code=$("code").value.trim();if(!name||!code){$("setupMsg").textContent="பெயர் மற்றும் Test Code இரண்டும் தேவை.";return}client=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);$("join").disabled=true;let {data,error}=await client.rpc("quiz_join",{p_test_code:code,p_name:name});$("join").disabled=false;if(error){$("setupMsg").textContent=error.message;return}participant=data;$("who").textContent=name;renderQuestions();hide("setup");show("exam");$("status").textContent="உங்கள் பதில்களைத் தேர்ந்தெடுத்து Submit செய்யவும்.";};
-$("submit").onclick=async()=>{if(!participant)return;let arr=QUESTIONS.map((q,i)=>{let v=document.querySelector(`input[name="q${i}"]:checked`);return v?Number(v.value):-1});if(arr.some(x=>x<0)){$("examMsg").textContent="10 கேள்விகளுக்கும் பதில் தேர்வு செய்யவும்.";return}$("submit").disabled=true;let {error}=await client.rpc("quiz_submit",{p_test_code:$("code").value.trim(),p_participant_id:participant.participant_id,p_token:participant.token,p_answers:arr});$("submit").disabled=false;if(error){$("examMsg").textContent=error.message;return}hide("exam");show("waiting");await status();};
-$("refresh").onclick=status;
-</script></body></html>
+
+const $ = id => document.getElementById(id);
+let client, participant = null, pollInterval = null;
+
+function syncCodePreview() {
+  const clean = ($("code").value || "").trim().toUpperCase();
+  $("previewCode").textContent = clean || "உங்கள் Code-ஐ உள்ளிடவும்";
+  if (clean) {
+    $("adminCode").value = clean;
+  }
+}
+
+function generateNewCode() {
+  const num = Math.floor(100 + Math.random() * 900);
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const suffix = letters[Math.floor(Math.random() * letters.length)];
+  const newCode = `TNP${num}${suffix}`;
+  $("code").value = newCode;
+  $("adminCode").value = newCode;
+  syncCodePreview();
+  $("copyMsg").textContent = `புதிய Test Code உருவாக்கப்பட்டது: ${newCode}`;
+}
+
+async function copyCodeAndLink() {
+  const clean = ($("code").value || "").trim().toUpperCase();
+  if (!clean) {
+    $("copyMsg").textContent = "முதலில் ஒரு Test Code உள்ளிடவும்.";
+    return;
+  }
+  const shareText = `TNPSC Quiz Link: ${window.location.href}\nTest Code: ${clean}`;
+  try {
+    await navigator.clipboard.writeText(shareText);
+    $("copyMsg").textContent = `Link & Code (${clean}) Copy செய்யப்பட்டது! நண்பருக்கு அனுப்பவும்.`;
+  } catch {
+    $("copyMsg").textContent = `Test Code: ${clean}`;
+  }
+}
+
+$("code").addEventListener("input", syncCodePreview);
+window.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const urlCode = (params.get("code") || "").trim().toUpperCase();
+  if (urlCode) {
+    $("code").value = urlCode;
+    $("adminCode").value = urlCode;
+  }
+  syncCodePreview();
+});
+
+function configured() {
+  return window.SUPABASE_URL && window.SUPABASE_ANON_KEY &&
+    window.SUPABASE_URL.startsWith("https://") &&
+    !window.SUPABASE_ANON_KEY.includes("PASTE");
+}
+
+function getSupabaseClient() {
+  if (client) return client;
+  if (!configured()) return null;
+  client = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  return client;
+}
+
+function show(id) { $(id).classList.remove("hidden"); }
+function hide(id) { $(id).classList.add("hidden"); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+function updateProgress() {
+  let answered = 0;
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+    document.querySelectorAll(`label[data-q="${i}"]`).forEach(lbl => lbl.classList.remove("selected"));
+    if (checked) {
+      answered++;
+      checked.closest("label").classList.add("selected");
+    }
+  }
+  $("progText").textContent = `பதிலளித்தவை: ${answered} / ${QUESTIONS.length}`;
+  $("progBar").style.width = `${(answered / QUESTIONS.length) * 100}%`;
+}
+
+function renderQuestions() {
+  $("questions").innerHTML = QUESTIONS.map((q, i) => `
+    <div class="q">
+      <span class="q-num">கேள்வி ${i + 1}</span>
+      <div class="qtitle">${q.ta}<span class="qtitle-en">${q.en}</span></div>
+      ${q.opts.map((o, j) => `
+        <label class="opt" data-q="${i}">
+          <input type="radio" name="q${i}" value="${j}" onchange="updateProgress()">
+          <span class="opt-letter">${"ABCD"[j]}.</span>
+          <span><strong>${o[0]}</strong><br><span class="muted">${o[1]}</span></span>
+        </label>
+      `).join("")}
+    </div>
+  `).join("");
+  updateProgress();
+}
+
+function startLivePolling() {
+  stopLivePolling();
+  pollInterval = setInterval(status, 3000);
+}
+
+function stopLivePolling() {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+}
+
+async function status() {
+  const sb = getSupabaseClient();
+  if (
