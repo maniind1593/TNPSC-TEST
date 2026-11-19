@@ -43,18 +43,6 @@
     border-radius: 20px;
     margin: 6px 0 18px;
     box-shadow: 0 12px 28px -8px rgba(29, 78, 216, 0.35);
-    position: relative;
-    overflow: hidden;
-  }
-  header::after {
-    content: "";
-    position: absolute;
-    right: -30px;
-    top: -30px;
-    width: 140px;
-    height: 140px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 50%;
   }
   .badge-top {
     display: inline-block;
@@ -63,7 +51,6 @@
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.4px;
     margin-bottom: 8px;
   }
   h1 { font-size: 22px; margin: 0 0 6px; font-weight: 800; line-height: 1.35; }
@@ -76,11 +63,6 @@
     padding: 20px;
     margin: 14px 0;
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
-    animation: fadeUp 0.28s ease;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
   }
 
   h2 { font-size: 18px; margin: 0 0 8px; font-weight: 800; color: #1e293b; }
@@ -104,330 +86,106 @@
   }
   .code-label-row label { margin: 0; }
 
-  .slot-badges {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
+  .slot-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .max-pill {
-    background: #eef2ff;
-    color: #3730a3;
-    border: 1px solid #c7d2fe;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 800;
+    background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;
+    padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
   }
   .count-pill {
-    background: #ecfdf5;
-    color: #065f46;
-    border: 1px solid #6ee7b7;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 800;
+    background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7;
+    padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 800;
   }
 
-  .code-row {
-    display: flex;
-    gap: 8px;
-    align-items: stretch;
-  }
+  .code-row { display: flex; gap: 8px; align-items: stretch; }
   .code-row input { flex: 1; text-transform: uppercase; font-weight: 700; letter-spacing: 0.6px; }
 
   input[type=text], input[type=password], input[type=number], select {
-    width: 100%;
-    padding: 13px 14px;
-    border: 1.5px solid #cbd5e1;
-    border-radius: 12px;
-    font: inherit;
-    font-size: 15px;
-    background: #f8fafc;
-    transition: all 0.2s;
-  }
-  input[type=text]:focus, input[type=password]:focus, input[type=number]:focus, select:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    width: 100%; padding: 13px 14px; border: 1.5px solid #cbd5e1;
+    border-radius: 12px; font: inherit; font-size: 15px; background: #f8fafc;
   }
 
   .admin-panel-box {
-    background: #f8fafc;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    margin-top: 12px;
+    background: #f8fafc; border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-top: 12px;
   }
 
   button {
-    width: 100%;
-    border: 0;
-    border-radius: 12px;
-    padding: 14px 18px;
+    width: 100%; border: 0; border-radius: 12px; padding: 14px 18px;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff;
-    font: inherit;
-    font-size: 15.5px;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 14px;
-    box-shadow: 0 6px 16px -4px rgba(37, 99, 235, 0.4);
-    transition: transform 0.15s, box-shadow 0.15s;
+    color: #fff; font: inherit; font-size: 15.5px; font-weight: 700;
+    cursor: pointer; margin-top: 14px;
   }
   button.mini-btn {
-    width: auto;
-    margin-top: 0;
-    padding: 10px 14px;
-    font-size: 13px;
-    border-radius: 11px;
-    box-shadow: none;
-    white-space: nowrap;
+    width: auto; margin-top: 0; padding: 10px 14px;
+    font-size: 13px; border-radius: 11px; white-space: nowrap;
   }
-  button:hover { transform: translateY(-1px); }
-  button:active { transform: translateY(0); }
-  button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
-
-  button.secondary {
-    background: linear-gradient(135deg, #0d9488, #0f766e);
-    box-shadow: 0 6px 16px -4px rgba(13, 148, 136, 0.4);
-  }
-  button.outline {
-    background: #f1f5f9;
-    color: #1e293b;
-    border: 1px solid #cbd5e1;
-    box-shadow: none;
-  }
-  button.outline:hover { background: #e2e8f0; }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  button.secondary { background: linear-gradient(135deg, #0d9488, #0f766e); }
+  button.outline { background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; }
+  .wa-btn { background: linear-gradient(135deg, #16a34a, #15803d); }
 
   .share-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    background: #eff6ff;
-    border: 1px dashed #93c5fd;
-    padding: 10px 12px;
-    border-radius: 12px;
-    margin-top: 12px;
-    font-size: 13px;
-    color: #1e3a8a;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; flex-wrap: wrap; background: #eff6ff; border: 1px dashed #93c5fd;
+    padding: 10px 12px; border-radius: 12px; margin-top: 12px; font-size: 13px; color: #1e3a8a;
   }
+  .social-share-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
-  .social-share-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-  }
-  .wa-btn {
-    background: linear-gradient(135deg, #16a34a, #15803d);
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-  }
-
-  .exam-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
+  .exam-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
   .tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: #eff6ff;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
-    padding: 5px 12px;
-    border-radius: 999px;
-    font-size: 12.5px;
-    font-weight: 700;
+    display: inline-flex; align-items: center; gap: 5px; background: #eff6ff;
+    color: #1d4ed8; border: 1px solid #bfdbfe; padding: 5px 12px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700;
   }
-  .progress-wrap {
-    width: 100%;
-    height: 8px;
-    background: #e2e8f0;
-    border-radius: 999px;
-    overflow: hidden;
-    margin: 10px 0 16px;
-  }
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #2563eb, #10b981);
-    transition: width 0.3s ease;
-  }
+  .progress-wrap { width: 100%; height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin: 10px 0 16px; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #2563eb, #10b981); transition: width 0.3s ease; }
 
-  .q {
-    background: #f8fafc;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
-  }
-  .q-num {
-    display: inline-block;
-    background: #1e293b;
-    color: #fff;
-    font-size: 11.5px;
-    font-weight: 700;
-    padding: 2px 9px;
-    border-radius: 6px;
-    margin-bottom: 8px;
-  }
+  .q { background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .q-num { display: inline-block; background: #1e293b; color: #fff; font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 6px; margin-bottom: 8px; }
   .qtitle { font-weight: 700; font-size: 15.5px; line-height: 1.55; color: #0f172a; }
   .qtitle-en { display: block; font-weight: 500; font-size: 13.5px; color: #475569; margin-top: 3px; }
 
   .opt {
-    display: flex;
-    gap: 11px;
-    align-items: flex-start;
-    padding: 11px 12px;
-    margin: 8px 0 0;
-    background: #fff;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
+    display: flex; gap: 11px; align-items: flex-start; padding: 11px 12px; margin: 8px 0 0;
+    background: #fff; border: 1.5px solid #e2e8f0; border-radius: 11px; cursor: pointer;
   }
-  .opt:hover { border-color: #93c5fd; background: #f0f7ff; }
-  .opt.selected {
-    border-color: var(--primary);
-    background: #eff6ff;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
-  }
+  .opt.selected { border-color: var(--primary); background: #eff6ff; }
   .opt input { margin-top: 4px; accent-color: var(--primary); transform: scale(1.15); }
   .opt-letter { font-weight: 800; color: var(--primary); min-width: 20px; }
 
   .pulse-box { text-align: center; padding: 14px 8px; }
   .spinner {
-    width: 42px;
-    height: 42px;
-    border: 4px solid #dbeafe;
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    margin: 0 auto 14px;
-    animation: spin 0.9s linear infinite;
+    width: 42px; height: 42px; border: 4px solid #dbeafe; border-top-color: var(--primary);
+    border-radius: 50%; margin: 0 auto 14px; animation: spin 0.9s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Personal Result & Champion Animation */
-  .status-banner {
-    border-radius: 16px;
-    padding: 20px;
-    text-align: center;
-    margin-bottom: 16px;
-    border: 1.5px solid var(--border);
-  }
-  .status-champion {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 55%, #fef9c3 100%);
-    border-color: #f59e0b;
-    color: #78350f;
-    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
-  }
-  .status-good {
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    border-color: var(--success-border);
-    color: var(--success-text);
-  }
-  .status-improve {
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-    border-color: var(--danger-border);
-    color: var(--danger-text);
-  }
+  .status-banner { border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; border: 1.5px solid var(--border); }
+  .status-champion { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 55%, #fef9c3 100%); border-color: #f59e0b; color: #78350f; }
+  .status-good { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-color: var(--success-border); color: var(--success-text); }
+  .status-improve { background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-color: var(--danger-border); color: var(--danger-text); }
 
-  .trophy-anim {
-    display: inline-block;
-    font-size: 46px;
-    animation: trophyBounce 1.2s ease-in-out infinite;
-    margin-bottom: 6px;
-  }
+  .trophy-anim { display: inline-block; font-size: 46px; animation: trophyBounce 1.2s ease-in-out infinite; margin-bottom: 6px; }
   @keyframes trophyBounce {
     0%, 100% { transform: translateY(0) scale(1) rotate(-3deg); }
     50% { transform: translateY(-9px) scale(1.12) rotate(3deg); }
   }
 
-  .personal-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-  .stat-tile {
-    background: #f8fafc;
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    text-align: center;
-  }
+  .personal-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat-tile { background: #f8fafc; border: 1.5px solid var(--border); border-radius: 14px; padding: 14px; text-align: center; }
   .stat-big { font-size: 26px; font-weight: 800; color: var(--primary); margin-top: 4px; }
 
-  .review-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 12px;
-  }
-  .pill-good {
-    display: inline-block;
-    background: var(--success-bg);
-    color: var(--success-text);
-    padding: 2px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .pill-bad {
-    display: inline-block;
-    background: var(--danger-bg);
-    color: var(--danger-text);
-    padding: 2px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .why-box {
-    background: #f1f5f9;
-    padding: 10px 12px;
-    border-radius: 10px;
-    font-size: 13px;
-    color: #334155;
-    margin-top: 8px;
-    border-left: 3px solid var(--primary);
-  }
+  .review-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 12px; }
+  .pill-good { display: inline-block; background: var(--success-bg); color: var(--success-text); padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .pill-bad { display: inline-block; background: var(--danger-bg); color: var(--danger-text); padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .why-box { background: #f1f5f9; padding: 10px 12px; border-radius: 10px; font-size: 13px; color: #334155; margin-top: 8px; border-left: 3px solid var(--primary); }
 
   .admin-card { border-top: 4px solid #0d9488; }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-  .high-box {
-    background: var(--success-bg);
-    border: 1.5px solid var(--success-border);
-    color: var(--success-text);
-    padding: 14px;
-    border-radius: 12px;
-  }
-  .low-box {
-    background: var(--danger-bg);
-    border: 1.5px solid var(--danger-border);
-    color: var(--danger-text);
-    padding: 14px;
-    border-radius: 12px;
-  }
-  .admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 14px;
-    font-size: 14px;
-  }
-  .admin-table th, .admin-table td {
-    text-align: left;
-    padding: 10px;
-    border-bottom: 1px solid var(--border);
-  }
+  .high-box { background: var(--success-bg); border: 1.5px solid var(--success-border); color: var(--success-text); padding: 14px; border-radius: 12px; }
+  .low-box { background: var(--danger-bg); border: 1.5px solid var(--danger-border); color: var(--danger-text); padding: 14px; border-radius: 12px; }
+  .admin-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; }
+  .admin-table th, .admin-table td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); }
   .admin-table th { background: #f8fafc; color: #475569; font-weight: 700; }
 
   .hidden { display: none; }
@@ -464,7 +222,7 @@
     </div>
 
     <div class="code-row">
-      <input id="code" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02 அல்லது GROUP2_A" maxlength="24" autocomplete="off">
+      <input id="code" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02 அல்லது GROUP2_A" maxlength="24" autocomplete="off" oninput="onCodeInput()">
       <button type="button" class="mini-btn outline" onclick="generateNewCode()">புதிய Code</button>
     </div>
 
@@ -476,7 +234,7 @@
 
     <label class="field-label">உங்கள் பெயர் (Your Name)</label>
     <input id="name" type="text" placeholder="உங்கள் பெயரை உள்ளிடவும்" maxlength="40">
-    <button id="join">தேர்வைத் தொடங்குக (Join Quiz)</button>
+    <button type="button" id="join" onclick="handleJoinClick()">தேர்வைத் தொடங்குக (Join Quiz)</button>
     <div id="setupMsg" class="err"></div>
   </div>
 
@@ -488,7 +246,7 @@
     </div>
     <div class="progress-wrap"><div class="progress-fill" id="progBar"></div></div>
     <div id="questions"></div>
-    <button class="secondary" id="submit">பதில்களை Submit செய்யவும்</button>
+    <button type="button" class="secondary" id="submit" onclick="handleSubmitClick()">பதில்களை Submit செய்யவும்</button>
     <div id="examMsg" class="err"></div>
   </div>
 
@@ -499,7 +257,7 @@
       <h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது!</h2>
       <p class="muted">பங்கேற்பாளர்கள் தேர்வை முடித்தவுடன் உங்கள் தனிப்பட்ட முடிவு &amp; Position காட்டப்படும்.</p>
       <p id="waitStatus" style="font-weight:700; color:#1d4ed8;"></p>
-      <button class="outline" id="refresh">இப்போதே நிலையைப் பார்க்கவும் (Refresh)</button>
+      <button type="button" class="outline" id="refresh" onclick="status()">இப்போதே நிலையைப் பார்க்கவும் (Refresh)</button>
     </div>
   </div>
 
@@ -548,7 +306,7 @@
       <label class="field-label" for="geminiKeyInput">Admin: Gemini API Key (GitHub-ல் சேமிக்கப்படாது)</label>
       <input id="geminiKeyInput" type="password" placeholder="AIza... (Admin Gemini API Key உள்ளிடவும்)" autocomplete="off">
 
-      <button type="button" id="genAiBtn">Admin: AI கேள்விகள் உருவாக்குக</button>
+      <button type="button" id="genAiBtn" onclick="loadSubjectQuestionsByAdmin()">Admin: AI கேள்விகள் உருவாக்குக</button>
       <div id="aiMsg" class="ok-msg"></div>
     </div>
 
@@ -556,12 +314,12 @@
       <label class="field-label" style="margin-top:0;">Admin: Set Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
       <div class="code-row">
         <input id="adminMaxPlayers" type="number" min="2" max="1000" value="50" placeholder="எ.கா: 50">
-        <button type="button" class="mini-btn" id="saveLimitBtn">Limit Save</button>
+        <button type="button" class="mini-btn" id="saveLimitBtn" onclick="handleSaveLimitClick()">Limit Save</button>
       </div>
       <div id="limitMsg" class="ok-msg"></div>
     </div>
 
-    <button class="secondary" id="adminBtn">High / Low Score பார்க்கவும்</button>
+    <button type="button" class="secondary" id="adminBtn" onclick="handleAdminSummaryClick()">High / Low Score பார்க்கவும்</button>
     <div id="adminBody"></div>
   </div>
 
@@ -572,11 +330,482 @@
 <script src="config.js"></script>
 <script>
 const DEFAULT_QUESTIONS = [
-{ta:"மனித உடலில் இன்சுலின் சுரக்கும் உறுப்பு எது?",en:"Which organ secretes insulin?",opts:[["கல்லீரல்","Liver"],["கணையம்","Pancreas"],["சிறுநீரகம்","Kidney"],["இதயம்","Heart"]],a:1,why:"கணையத்தின் பீட்டா செல்கள் இன்சுலின் சுரக்கின்றன. / Beta cells of the pancreas secrete insulin."},
-{ta:"வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு ஏற்படும் நோய் எது?",en:"Which disease in children is caused by vitamin D deficiency?",opts:[["ஸ்கர்வி","Scurvy"],["ரிக்கெட்ஸ்","Rickets"],["பெரிபெரி","Beriberi"],["இரத்தசோகை","Anaemia"]],a:1,why:"வைட்டமின் D குறைபாடு எலும்பு கனிமமயமாக்கலைப் பாதித்து ரிக்கெட்ஸ் ஏற்படுத்தும். / Vitamin D deficiency impairs bone mineralisation and causes rickets."},
-{ta:"இந்தியாவின் மிக நீளமான நதி எது?",en:"Which is the longest river in India?",opts:[["கோதாவரி","Godavari"],["கங்கை","Ganga"],["நர்மதை","Narmada"],["கிருஷ்ணா","Krishna"]],a:1,why:"இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமானது. / The Ganga is the longest river flowing within India."},
-{ta:"கருப்பு மண் எந்தப் பயிருக்கு மிகவும் ஏற்றது?",en:"Black soil is especially suitable for which crop?",opts:[["தேயிலை","Tea"],["பருத்தி","Cotton"],["சணல்","Jute"],["காபி","Coffee"]],a:1,why:"கருப்பு மண் ஈரத்தைத் தக்கவைக்கும் தன்மை கொண்டதால் பருத்திக்கு ஏற்றது. / Black soil retains moisture and is well suited to cotton."},
-{ta:"இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",en:"In which year was the Indian National Congress founded?",opts:[["1885","1885"],["1905","1905"],["1919","1919"],["1942","1942"]],a:0,why:"இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு பம்பாயில் தொடங்கப்பட்டது. / The INC was founded in Bombay in 1885."},
-{ta:"உப்பு சத்தியாகிரகம் எந்த ஆண்டு தொடங்கியது?",en:"In which year did the Salt Satyagraha begin?",opts:[["1920","1920"],["1930","1930"],["1935","1935"],["1942","1942"]],a:1,why:"காந்தியடிகள் 1930-ல் தண்டி நடைப்பயணத்துடன் உப்பு சத்தியாகிரகத்தைத் தொடங்கினார். / Gandhi began the Salt Satyagraha with the Dandi March in 1930."},
-{ta:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",en:"Who founded the Self-Respect Movement?",opts:[["சி. ராஜகோபாலாச்சாரி","C. Rajagopalachari"],["பெரியார் ஈ.வெ.ரா.","Periyar E. V. Ramasamy"],["காமராசர்","K. Kamaraj"],["அண்ணா","C. N. Annadurai"]],a:1,why:"பெரியார் ஈ.வெ.ரா. 1925-ல் சுயமரியாதை இயக்கத்தைத் தொடங்கினார். / Periyar launched the Self-Respect Movement in 1925."},
-{ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1
+  {ta:"மனித உடலில் இன்சுலின் சுரக்கும் உறுப்பு எது?",en:"Which organ secretes insulin?",opts:[["கல்லீரல்","Liver"],["கணையம்","Pancreas"],["சிறுநீரகம்","Kidney"],["இதயம்","Heart"]],a:1,why:"கணையத்தின் பீட்டா செல்கள் இன்சுலின் சுரக்கின்றன. / Beta cells of the pancreas secrete insulin."},
+  {ta:"வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு ஏற்படும் நோய் எது?",en:"Which disease in children is caused by vitamin D deficiency?",opts:[["ஸ்கர்வி","Scurvy"],["ரிக்கெட்ஸ்","Rickets"],["பெரிபெரி","Beriberi"],["இரத்தசோகை","Anaemia"]],a:1,why:"வைட்டமின் D குறைபாடு எலும்பு கனிமமயமாக்கலைப் பாதித்து ரிக்கெட்ஸ் ஏற்படுத்தும். / Vitamin D deficiency impairs bone mineralisation and causes rickets."},
+  {ta:"இந்தியாவின் மிக நீளமான நதி எது?",en:"Which is the longest river in India?",opts:[["கோதாவரி","Godavari"],["கங்கை","Ganga"],["நர்மதை","Narmada"],["கிருஷ்ணா","Krishna"]],a:1,why:"இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமானது. / The Ganga is the longest river flowing within India."},
+  {ta:"கருப்பு மண் எந்தப் பயிருக்கு மிகவும் ஏற்றது?",en:"Black soil is especially suitable for which crop?",opts:[["தேயிலை","Tea"],["பருத்தி","Cotton"],["சணல்","Jute"],["காபி","Coffee"]],a:1,why:"கருப்பு மண் ஈரத்தைத் தக்கவைக்கும் தன்மை கொண்டதால் பருத்திக்கு ஏற்றது. / Black soil retains moisture and is well suited to cotton."},
+  {ta:"இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",en:"In which year was the Indian National Congress founded?",opts:[["1885","1885"],["1905","1905"],["1919","1919"],["1942","1942"]],a:0,why:"இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு பம்பாயில் தொடங்கப்பட்டது. / The INC was founded in Bombay in 1885."},
+  {ta:"உப்பு சத்தியாகிரகம் எந்த ஆண்டு தொடங்கியது?",en:"In which year did the Salt Satyagraha begin?",opts:[["1920","1920"],["1930","1930"],["1935","1935"],["1942","1942"]],a:1,why:"காந்தியடிகள் 1930-ல் தண்டி நடைப்பயணத்துடன் உப்பு சத்தியாகிரகத்தைத் தொடங்கினார். / Gandhi began the Salt Satyagraha with the Dandi March in 1930."},
+  {ta:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",en:"Who founded the Self-Respect Movement?",opts:[["சி. ராஜகோபாலாச்சாரி","C. Rajagopalachari"],["பெரியார் ஈ.வெ.ரா.","Periyar E. V. Ramasamy"],["காமராசர்","K. Kamaraj"],["அண்ணா","C. N. Annadurai"]],a:1,why:"பெரியார் ஈ.வெ.ரா. 1925-ல் சுயமரியாதை இயக்கத்தைத் தொடங்கினார். / Periyar launched the Self-Respect Movement in 1925."},
+  {ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1905","1905"]],a:1,why:"வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது. / The Vellore Mutiny took place in 1806."},
+  {ta:"இந்திய அரசியலமைப்பின் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",en:"Fundamental Rights are contained in which Part of the Indian Constitution?",opts:[["பகுதி II","Part II"],["பகுதி III","Part III"],["பகுதி IV","Part IV"],["பகுதி V","Part V"]],a:1,why:"அடிப்படை உரிமைகள் அரசியலமைப்பின் பகுதி III-ல் உள்ளன. / Fundamental Rights are in Part III."},
+  {ta:"இந்திய அரசியலமைப்பின் எந்தத் திருத்தம் வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்தது?",en:"Which amendment reduced the voting age from 21 to 18?",opts:[["42வது","42nd"],["44வது","44th"],["61வது","61st"],["73வது","73rd"]],a:2,why:"61வது அரசியலமைப்புத் திருத்தச் சட்டம் வாக்கு வயதை 18-ஆகக் குறைத்தது. / The 61st Amendment lowered the voting age to 18."}
+];
+
+let activeQuestions = DEFAULT_QUESTIONS.slice();
+const $ = id => document.getElementById(id);
+let client = null, participant = null, pollInterval = null;
+let currentMaxPlayers = 10, currentJoinedCount = 0;
+let mySubmittedAnswers = [], myLocalScore = 0, currentPlayerName = "";
+
+function getQuizConfig() {
+  return window.QUIZ_CONFIG || {};
+}
+
+function isAdminPinValid() {
+  const enteredPin = ($("adminPin") ? $("adminPin").value : "").trim();
+  const expectedPin = String(getQuizConfig().ADMIN_PIN || "Admin2026").trim();
+  return Boolean(enteredPin) && enteredPin === expectedPin;
+}
+
+function getSupabaseCredentials() {
+  const cfg = getQuizConfig();
+  const url = String(cfg.SUPABASE_URL || window.SUPABASE_URL || "").trim();
+  const key = String(cfg.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "").trim();
+  return { url, key };
+}
+
+function configured() {
+  const c = getSupabaseCredentials();
+  return Boolean(c.url && c.key && c.url.indexOf("https://") === 0 && c.url.indexOf("YOUR_PROJECT_REF") === -1);
+}
+
+function getSupabaseClient() {
+  if (client) return client;
+  if (!configured() || !window.supabase || typeof window.supabase.createClient !== "function") return null;
+  const c = getSupabaseCredentials();
+  client = window.supabase.createClient(c.url, c.key);
+  return client;
+}
+
+function show(id) { if ($(id)) $(id).classList.remove("hidden"); }
+function hide(id) { if ($(id)) $(id).classList.add("hidden"); }
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+function getEffectiveGeminiKey() {
+  const uiKey = ($("geminiKeyInput") ? $("geminiKeyInput").value : "").trim();
+  if (uiKey) {
+    try { sessionStorage.setItem("tnpsc_admin_gemini_key", uiKey); } catch (e) {}
+    return uiKey;
+  }
+  try {
+    const saved = (sessionStorage.getItem("tnpsc_admin_gemini_key") || "").trim();
+    if (saved) return saved;
+  } catch (e) {}
+  return "";
+}
+
+function renderSlotBadges() {
+  const clean = ($("code") ? $("code").value : "").trim().toUpperCase();
+  const left = Math.max(0, currentMaxPlayers - currentJoinedCount);
+  if ($("maxBadge")) $("maxBadge").textContent = "Max: " + currentMaxPlayers;
+  if ($("slotBadge")) $("slotBadge").textContent = currentJoinedCount + "/" + currentMaxPlayers + " (" + left + " left)";
+  if ($("previewCode")) $("previewCode").textContent = clean || "-";
+  if ($("previewSlots")) $("previewSlots").textContent = currentJoinedCount + "/" + currentMaxPlayers + " (" + left + " left)";
+}
+
+async function refreshTestSlotInfo() {
+  const clean = ($("code") ? $("code").value : "").trim().toUpperCase();
+  if ($("adminCode") && clean) $("adminCode").value = clean;
+  renderSlotBadges();
+  const sb = getSupabaseClient();
+  if (!sb || !clean) return;
+  const res = await sb.rpc("quiz_test_info", { p_test_code: clean });
+  if (!res.error && res.data) {
+    currentMaxPlayers = Number(res.data.max_players) || 10;
+    currentJoinedCount = Number(res.data.joined_count) || 0;
+    if ($("adminMaxPlayers")) $("adminMaxPlayers").value = currentMaxPlayers;
+    renderSlotBadges();
+  }
+}
+
+function onCodeInput() {
+  renderSlotBadges();
+  refreshTestSlotInfo();
+}
+
+async function loadSubjectQuestionsByAdmin() {
+  const aiMsg = $("aiMsg");
+  const btn = $("genAiBtn");
+  const subject = ($("aiSubject") ? $("aiSubject").value : "") || "Indian Polity";
+  const model = String(getQuizConfig().GEMINI_MODEL || "gemini-2.5-flash").trim();
+
+  if (!isAdminPinValid()) {
+    if (aiMsg) {
+      aiMsg.className = "err";
+      aiMsg.textContent = "சரியான Admin PIN உள்ளிட்ட பிறகே AI கேள்விகளை உருவாக்க முடியும்.";
+    }
+    return;
+  }
+
+  const apiKey = getEffectiveGeminiKey();
+  if (!apiKey) {
+    if (aiMsg) {
+      aiMsg.className = "err";
+      aiMsg.textContent = "Admin Gemini API Key உள்ளிட்டு மீண்டும் 'AI கேள்விகள் உருவாக்குக' அழுத்தவும்.";
+    }
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  if (aiMsg) {
+    aiMsg.className = "ok-msg";
+    aiMsg.textContent = '"' + subject + '" பாடத்திற்கான கேள்விகளை AI உருவாக்குகிறது...';
+  }
+
+  const prompt = 'Create 10 TNPSC Group II / IIA multiple-choice questions strictly on the subject: "' + subject + '". ' +
+    'Return ONLY a valid JSON array with no markdown. Each item must have keys: ' +
+    '"ta" (string), "en" (string), "opts" (array of 4 [ta, en] pairs), "a" (integer 0-3), "why" (string).';
+
+  try {
+    const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(apiKey);
+    const resp = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0.7 }
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error((data && data.error && data.error.message) || "Gemini API பிழை ஏற்பட்டது.");
+    }
+    const rawText = (data && data.candidates && data.candidates[0] &&
+      data.candidates[0].content && data.candidates[0].content.parts &&
+      data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || "[]";
+    const parsed = JSON.parse(rawText);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      throw new Error("கேள்விகள் பட்டியல் வரவில்லை.");
+    }
+    activeQuestions = parsed;
+    if (aiMsg) {
+      aiMsg.className = "ok-msg";
+      aiMsg.textContent = '"' + subject + '" பாடத்திலிருந்து ' + activeQuestions.length + " புதிய AI கேள்விகள் தயார்!";
+    }
+  } catch (err) {
+    if (aiMsg) {
+      aiMsg.className = "err";
+      aiMsg.textContent = err.message + " (இயல்பான கேள்விகள் தொடரும்; Join செய்யலாம்.)";
+    }
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function handleJoinClick() {
+  const msgEl = $("setupMsg");
+  const joinBtn = $("join");
+  if (msgEl) msgEl.textContent = "";
+
+  try {
+    if (!configured()) {
+      if (msgEl) msgEl.textContent = "config.js கோப்பில் Supabase URL மற்றும் anon key சரியாக உள்ளதா எனச் சரிபார்க்கவும்.";
+      return;
+    }
+    const sb = getSupabaseClient();
+    if (!sb) {
+      if (msgEl) msgEl.textContent = "Supabase client-ஐத் தொடங்க முடியவில்லை. பக்கத்தை refresh செய்யவும்.";
+      return;
+    }
+    const name = ($("name") ? $("name").value : "").trim();
+    const code = ($("code") ? $("code").value : "").trim().toUpperCase();
+    if ($("code")) $("code").value = code;
+    if ($("adminCode")) $("adminCode").value = code;
+
+    if (!name || code.length < 3) {
+      if (msgEl) msgEl.textContent = "பெயர் மற்றும் குறைந்தது 3 எழுத்துகள் கொண்ட Test Code தேவை.";
+      return;
+    }
+
+    if (joinBtn) {
+      joinBtn.disabled = true;
+      joinBtn.textContent = "இணைகிறது...";
+    }
+
+    const res = await sb.rpc("quiz_join", {
+      p_test_code: code,
+      p_name: name,
+      p_max_players: currentMaxPlayers
+    });
+
+    if (joinBtn) {
+      joinBtn.disabled = false;
+      joinBtn.textContent = "தேர்வைத் தொடங்குக (Join Quiz)";
+    }
+
+    if (res.error) {
+      if (msgEl) msgEl.textContent = res.error.message;
+      refreshTestSlotInfo();
+      return;
+    }
+
+    participant = res.data;
+    currentPlayerName = name;
+    if (res.data && res.data.max_players) currentMaxPlayers = Number(res.data.max_players);
+    if (res.data && res.data.joined_count) currentJoinedCount = Number(res.data.joined_count);
+    renderSlotBadges();
+
+    if ($("who")) $("who").textContent = name + " (" + code + " • " + currentJoinedCount + "/" + currentMaxPlayers + ")";
+    renderQuestions();
+    hide("setup");
+    show("exam");
+  } catch (e) {
+    if (joinBtn) {
+      joinBtn.disabled = false;
+      joinBtn.textContent = "தேர்வைத் தொடங்குக (Join Quiz)";
+    }
+    if (msgEl) msgEl.textContent = e.message || "Join செய்யும்போது பிழை ஏற்பட்டது.";
+  }
+}
+
+window.generateNewCode = function() {
+  const num = Math.floor(100 + Math.random() * 900);
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const suffix = letters[Math.floor(Math.random() * letters.length)];
+  const newCode = "TNP" + num + suffix;
+  if ($("code")) $("code").value = newCode;
+  if ($("adminCode")) $("adminCode").value = newCode;
+  currentJoinedCount = 0;
+  renderSlotBadges();
+  refreshTestSlotInfo();
+  if ($("copyMsg")) $("copyMsg").textContent = "புதிய Test Code உருவாக்கப்பட்டது: " + newCode;
+};
+
+window.copyCodeAndLink = async function() {
+  const clean = ($("code") ? $("code").value : "").trim().toUpperCase();
+  if (!clean) return;
+  const baseUrl = window.location.href.split("?")[0];
+  const joinUrl = baseUrl + "?code=" + encodeURIComponent(clean);
+  const shareText = "TNPSC Quiz Link: " + joinUrl + "\nTest Code: " + clean;
+  try {
+    await navigator.clipboard.writeText(shareText);
+    if ($("copyMsg")) $("copyMsg").textContent = "Link & Code (" + clean + ") Copy செய்யப்பட்டது!";
+  } catch (e) {
+    if ($("copyMsg")) $("copyMsg").textContent = "Test Code: " + clean;
+  }
+};
+
+function getInviteMessage() {
+  const clean = ($("code") ? $("code").value : "TNPSC01").trim().toUpperCase();
+  const baseUrl = window.location.href.split("?")[0];
+  const joinUrl = baseUrl + "?code=" + encodeURIComponent(clean);
+  return "TNPSC Live Quiz Challenge!\nTest Code: " + clean + "\nJoin here: " + joinUrl;
+}
+
+window.shareOnWhatsApp = function() {
+  window.open("https://wa.me/?text=" + encodeURIComponent(getInviteMessage()), "_blank", "noopener,noreferrer");
+};
+
+window.nativeOrSocialShare = async function() {
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: "TNPSC Live Quiz Invite", text: getInviteMessage(), url: window.location.href.split("?")[0] });
+      if ($("inviteMsg")) $("inviteMsg").textContent = "Invite Share செய்யப்பட்டது!";
+      return;
+    } catch (e) {}
+  }
+  await window.copyInviteMessage();
+};
+
+window.copyInviteMessage = async function() {
+  const text = getInviteMessage();
+  try {
+    await navigator.clipboard.writeText(text);
+    if ($("inviteMsg")) $("inviteMsg").textContent = "Invite செய்தி Copy செய்யப்பட்டது!";
+  } catch (e) {
+    if ($("inviteMsg")) $("inviteMsg").textContent = text;
+  }
+};
+
+window.updateProgress = function() {
+  const total = activeQuestions.length;
+  let answered = 0;
+  for (let i = 0; i < total; i++) {
+    const checked = document.querySelector('input[name="q' + i + '"]:checked');
+    document.querySelectorAll('label[data-q="' + i + '"]').forEach(function(lbl) { lbl.classList.remove("selected"); });
+    if (checked) {
+      answered++;
+      checked.closest("label").classList.add("selected");
+    }
+  }
+  if ($("progText")) $("progText").textContent = "பதிலளித்தவை: " + answered + " / " + total;
+  if ($("progBar")) $("progBar").style.width = (total ? (answered / total) * 100 : 0) + "%";
+};
+
+function renderQuestions() {
+  $("questions").innerHTML = activeQuestions.map(function(q, i) {
+    return '<div class="q"><span class="q-num">கேள்வி ' + (i + 1) + '</span>' +
+      '<div class="qtitle">' + escapeHtml(q.ta) + '<span class="qtitle-en">' + escapeHtml(q.en) + '</span></div>' +
+      (q.opts || []).map(function(o, j) {
+        return '<label class="opt" data-q="' + i + '">' +
+          '<input type="radio" name="q' + i + '" value="' + j + '" onchange="updateProgress()">' +
+          '<span class="opt-letter">' + "ABCD"[j] + '.</span>' +
+          '<span><strong>' + escapeHtml(o[0]) + '</strong><br><span class="muted">' + escapeHtml(o[1]) + '</span></span>' +
+          '</label>';
+      }).join("") + '</div>';
+  }).join("");
+  window.updateProgress();
+}
+
+function startLivePolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(status, 3000);
+}
+
+async function status() {
+  const sb = getSupabaseClient();
+  if (!sb) return;
+  const code = ($("code") ? $("code").value : "").trim().toUpperCase();
+  const res = await sb.rpc("quiz_status", {
+    p_test_code: code,
+    p_participant_id: participant ? participant.participant_id : null
+  });
+  if (res.error) {
+    if ($("waitStatus")) $("waitStatus").textContent = res.error.message;
+    return;
+  }
+  if (res.data && res.data.released) {
+    if (pollInterval) clearInterval(pollInterval);
+    renderPersonalResult(res.data);
+    hide("waiting");
+    show("results");
+  } else {
+    const subCount = (res.data && res.data.submitted_count) || 0;
+    const totalJoined = (res.data && (res.data.total_players || res.data.joined_count)) || currentJoinedCount || 2;
+    if ($("waitStatus")) $("waitStatus").textContent = "சமர்ப்பித்தவர்கள்: " + subCount + " / " + totalJoined;
+  }
+}
+
+function renderPersonalResult(d) {
+  const totalQ = activeQuestions.length || 10;
+  const score = typeof (d && d.my_score) === "number" ? d.my_score : myLocalScore;
+  const totalParticipants = Number((d && d.total_players) || currentJoinedCount || 1);
+  const rank = Number((d && d.rank) || 1);
+
+  const banner = $("feedbackBanner");
+  banner.className = "status-banner";
+  if (score > 8) {
+    banner.classList.add("status-champion");
+    banner.innerHTML = '<div class="trophy-anim">🏆</div><div style="font-size:21px;font-weight:800;">CHAMPION! சூப்பர் சாதனை!</div><div style="margin-top:4px;font-size:14px;">உங்கள் மதிப்பெண் ' + score + '/' + totalQ + '</div>';
+  } else if (score > 5) {
+    banner.classList.add("status-good");
+    banner.innerHTML = '<div style="font-size:20px;font-weight:800;">👏 GOOD! நல்ல முயற்சி!</div><div style="margin-top:4px;font-size:14px;">உங்கள் மதிப்பெண் ' + score + '/' + totalQ + '</div>';
+  } else {
+    banner.classList.add("status-improve");
+    banner.innerHTML = '<div style="font-size:20px;font-weight:800;">📚 இன்னும் improve பண்ணனும்</div><div style="margin-top:4px;font-size:14px;">உங்கள் மதிப்பெண் ' + score + '/' + totalQ + '</div>';
+  }
+
+  $("personalStats").innerHTML =
+    '<div class="stat-tile"><div style="font-weight:700;color:#475569;font-size:13px;">உங்கள் மதிப்பெண்</div><div class="stat-big">' + score + '<span style="font-size:15px;color:#64748b;">/' + totalQ + '</span></div></div>' +
+    '<div class="stat-tile"><div style="font-weight:700;color:#475569;font-size:13px;">உங்கள் Position / Rank</div><div class="stat-big">#' + rank + '<span style="font-size:15px;color:#64748b;"> / ' + totalParticipants + ' பேர்</span></div></div>';
+
+  $("resultBody").innerHTML = '<div class="card" style="background:#f8fafc;"><h3 style="margin:0 0 12px;">' + escapeHtml(currentPlayerName || "உங்கள்") + ' — தனிப்பட்ட விடைத்தாள் (' + score + '/' + totalQ + ')</h3>' +
+    activeQuestions.map(function(qItem, i) {
+      const chosenIdx = mySubmittedAnswers[i];
+      const isCorrect = chosenIdx === qItem.a;
+      const chosenText = chosenIdx >= 0 && qItem.opts && qItem.opts[chosenIdx] ? qItem.opts[chosenIdx][0] : "பதில் இல்லை";
+      const rightText = qItem.opts && qItem.opts[qItem.a] ? qItem.opts[qItem.a][0] : "";
+      return '<div class="review-card"><div style="display:flex;justify-content:space-between;gap:8px;"><strong>' + (i + 1) + '. ' + escapeHtml(qItem.ta) + '</strong>' +
+        (isCorrect ? '<span class="pill-good">சரி</span>' : '<span class="pill-bad">தவறு</span>') + '</div>' +
+        '<div style="margin-top:8px;font-size:14px;">உங்கள் பதில்: <strong>' + escapeHtml(chosenText) + '</strong><br>சரியான பதில்: <strong style="color:#065f46;">' + escapeHtml(rightText) + '</strong></div>' +
+        '<div class="why-box">' + escapeHtml(qItem.why || "") + '</div></div>';
+    }).join("") + '</div>';
+}
+
+async function handleSubmitClick() {
+  const msgEl = $("examMsg");
+  if (msgEl) msgEl.textContent = "";
+  if (!participant) return;
+  const arr = activeQuestions.map(function(q, i) {
+    const v = document.querySelector('input[name="q' + i + '"]:checked');
+    return v ? Number(v.value) : -1;
+  });
+  if (arr.some(function(x) { return x < 0; })) {
+    if (msgEl) msgEl.textContent = "தயவுசெய்து " + activeQuestions.length + " கேள்விகளுக்கும் பதில் தேர்வு செய்யவும்.";
+    return;
+  }
+  const sb = getSupabaseClient();
+  if (!sb) return;
+  mySubmittedAnswers = arr;
+  myLocalScore = activeQuestions.reduce(function(acc, q, idx) { return acc + (arr[idx] === q.a ? 1 : 0); }, 0);
+  const res = await sb.rpc("quiz_submit", {
+    p_test_code: ($("code") ? $("code").value : "").trim().toUpperCase(),
+    p_participant_id: participant.participant_id,
+    p_token: participant.token,
+    p_answers: arr
+  });
+  if (res.error) {
+    if (msgEl) msgEl.textContent = res.error.message;
+    return;
+  }
+  hide("exam");
+  show("waiting");
+  await status();
+  if ($("waiting") && !$("waiting").classList.contains("hidden")) startLivePolling();
+}
+
+async function handleSaveLimitClick() {
+  const msgEl = $("limitMsg");
+  if (!msgEl || !configured()) return;
+  const sb = getSupabaseClient();
+  const pin = ($("adminPin") ? $("adminPin").value : "").trim();
+  const code = ($("adminCode") ? $("adminCode").value : "").trim().toUpperCase();
+  const rawMax = Number($("adminMaxPlayers") ? $("adminMaxPlayers").value : 50);
+  const res = await sb.rpc("quiz_set_limit", { p_admin_key: pin, p_test_code: code, p_max_players: Math.floor(rawMax) });
+  if (res.error) {
+    msgEl.className = "err";
+    msgEl.textContent = res.error.message;
+    return;
+  }
+  currentMaxPlayers = Number(res.data && res.data.max_players) || Math.floor(rawMax);
+  currentJoinedCount = Number(res.data && res.data.joined_count) || 0;
+  renderSlotBadges();
+  msgEl.className = "ok-msg";
+  msgEl.textContent = "Saved! " + code + " -> Max: " + currentMaxPlayers;
+}
+
+async function handleAdminSummaryClick() {
+  const bodyEl = $("adminBody");
+  if (!bodyEl || !configured()) return;
+  const sb = getSupabaseClient();
+  const pin = ($("adminPin") ? $("adminPin").value : "").trim();
+  const code = ($("adminCode") ? $("adminCode").value : "").trim().toUpperCase();
+  const res = await sb.rpc("quiz_admin_summary", { p_admin_key: pin, p_test_code: code });
+  if (res.error) {
+    bodyEl.innerHTML = '<div class="err">' + escapeHtml(res.error.message) + '</div>';
+    return;
+  }
+  const totalQ = activeQuestions.length || 10;
+  const high = res.data && res.data.highest ? "<strong>" + escapeHtml(res.data.highest.player_name) + "</strong> (" + res.data.highest.score + "/" + totalQ + ")" : "இன்னும் முடிவு இல்லை";
+  const low = res.data && res.data.lowest ? "<strong>" + escapeHtml(res.data.lowest.player_name) + "</strong> (" + res.data.lowest.score + "/" + totalQ + ")" : "இன்னும் முடிவு இல்லை";
+  const rows = ((res.data && res.data.players) || []).map(function(p) {
+    return "<tr><td><strong>" + escapeHtml(p.player_name) + "</strong></td><td><strong>" + (p.score ?? "-") + "</strong> / " + totalQ + "</td><td>" + escapeHtml(p.status || "") + "</td></tr>";
+  }).join("");
+  bodyEl.innerHTML = '<div class="grid-2"><div class="high-box"><div>HIGH SCORE</div><div style="font-size:17px;margin-top:4px;">🏆 ' + high + '</div></div>' +
+    '<div class="low-box"><div>LOW SCORE</div><div style="font-size:17px;margin-top:4px;">📉 ' + low + '</div></div></div>' +
+    '<table class="admin-table"><thead><tr><th>பெயர்</th><th>மதிப்பெண்</th><th>நிலை</th></tr></thead><tbody>' + (rows || '<tr><td colspan="3">பங்கேற்பாளர்கள் இல்லை</td></tr>') + '</tbody></table>';
+}
+
+(function initPage() {
+  try {
+    const savedKey = sessionStorage.getItem("tnpsc_admin_gemini_key");
+    if (savedKey && $("geminiKeyInput")) $("geminiKeyInput").value = savedKey;
+  } catch (e) {}
+  const params = new URLSearchParams(window.location.search);
+  const urlCode = (params.get("code") || "").trim().toUpperCase();
+  if (urlCode && $("code")) {
+    $("code").value = urlCode;
+    if ($("adminCode")) $("adminCode").value = urlCode;
+  }
+  renderSlotBadges();
+  refreshTestSlotInfo();
+})();
+</script>
+</body>
+</html>
