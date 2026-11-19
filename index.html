@@ -153,7 +153,7 @@
     box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
   }
 
-  .ai-panel {
+  .admin-panel-box {
     background: #f8fafc;
     border: 1px solid var(--border);
     border-radius: 14px;
@@ -179,7 +179,7 @@
   button.mini-btn {
     width: auto;
     margin-top: 0;
-    padding: 0 14px;
+    padding: 10px 14px;
     font-size: 13px;
     border-radius: 11px;
     box-shadow: none;
@@ -214,6 +214,17 @@
     margin-top: 12px;
     font-size: 13px;
     color: #1e3a8a;
+  }
+
+  .social-share-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .wa-btn {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
   }
 
   .exam-bar {
@@ -304,32 +315,56 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .winner-box {
-    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    border: 1.5px solid var(--success-border);
-    color: var(--success-text);
-    padding: 16px;
-    border-radius: 14px;
-    font-weight: 800;
-    font-size: 17.5px;
+  /* Personal Result & Champion Animation */
+  .status-banner {
+    border-radius: 16px;
+    padding: 20px;
     text-align: center;
     margin-bottom: 16px;
+    border: 1.5px solid var(--border);
   }
-  .score-cards {
+  .status-champion {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 55%, #fef9c3 100%);
+    border-color: #f59e0b;
+    color: #78350f;
+    box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+  }
+  .status-good {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: var(--success-border);
+    color: var(--success-text);
+  }
+  .status-improve {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
+  }
+
+  .trophy-anim {
+    display: inline-block;
+    font-size: 46px;
+    animation: trophyBounce 1.2s ease-in-out infinite;
+    margin-bottom: 6px;
+  }
+  @keyframes trophyBounce {
+    0%, 100% { transform: translateY(0) scale(1) rotate(-3deg); }
+    50% { transform: translateY(-9px) scale(1.12) rotate(3deg); }
+  }
+
+  .personal-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
     margin-bottom: 18px;
   }
-  .score-tile {
+  .stat-tile {
     background: #f8fafc;
     border: 1.5px solid var(--border);
     border-radius: 14px;
     padding: 14px;
     text-align: center;
   }
-  .score-tile.top { background: #eff6ff; border-color: #93c5fd; }
-  .score-big { font-size: 28px; font-weight: 800; color: var(--primary); margin-top: 4px; }
+  .stat-big { font-size: 26px; font-weight: 800; color: var(--primary); margin-top: 4px; }
 
   .review-card {
     background: #fff;
@@ -367,13 +402,6 @@
   }
 
   .admin-card { border-top: 4px solid #0d9488; }
-  .admin-limit-box {
-    background: #f8fafc;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    margin-top: 12px;
-  }
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .high-box {
     background: var(--success-bg);
@@ -408,7 +436,7 @@
   .footer-note { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 16px; }
 
   @media (max-width: 540px) {
-    .grid-2, .score-cards { grid-template-columns: 1fr; }
+    .grid-2, .personal-stats { grid-template-columns: 1fr; }
     header { padding: 20px 16px; }
     h1 { font-size: 20px; }
   }
@@ -419,13 +447,13 @@
   <header>
     <span class="badge-top">TNPSC GROUP II / IIA • LIVE QUIZ</span>
     <h1>TNPSC குழு போட்டித் தேர்வு</h1>
-    <p>Admin நிர்ணயிக்கும் Maximum எண்ணிக்கைக்கு ஏற்ப பங்கேற்பாளர்கள் Test Code மூலம் சேரலாம்.</p>
+    <p>ஒவ்வொருவருக்கும் தங்கள் தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே தெரியும்.</p>
   </header>
 
   <!-- 1. Setup / Join -->
   <div class="card" id="setup">
     <h2>தேர்வில் இணையவும்</h2>
-    <p class="muted">பாடம் (Subject) தேர்வு செய்து Gemini API Key மூலம் புதிய AI கேள்விகள் எடுக்கலாம் அல்லது இயல்பான 10 கேள்விகளுடன் Test Code மூலம் இணையலாம்.</p>
+    <p class="muted">Test Code மற்றும் உங்கள் பெயரை உள்ளிட்டு உடனடியாகத் தேர்வில் இணையலாம்.</p>
 
     <div class="code-label-row">
       <label class="field-label" for="code">Test Code</label>
@@ -438,25 +466,6 @@
     <div class="code-row">
       <input id="code" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02 அல்லது GROUP2_A" maxlength="24" autocomplete="off">
       <button type="button" class="mini-btn outline" onclick="generateNewCode()">புதிய Code</button>
-    </div>
-
-    <div class="ai-panel">
-      <label class="field-label" for="aiSubject" style="margin-top:0;">பாடம் / Subject (AI மூலம் கேள்விகள்)</label>
-      <div class="code-row">
-        <select id="aiSubject" style="flex:1;">
-          <option value="Indian Polity">Indian Polity (இந்திய அரசியலமைப்பு)</option>
-          <option value="Indian National Movement">Indian National Movement (இந்திய தேசிய இயக்கம்)</option>
-          <option value="History and Culture of Tamil Nadu">TN History &amp; Culture (தமிழக வரலாறு &amp; பண்பாடு)</option>
-          <option value="Geography of India">Geography (புவியியல்)</option>
-          <option value="Indian Economy">Indian Economy (இந்தியப் பொருளாதாரம்)</option>
-          <option value="General Science">General Science (அறிவியல்)</option>
-        </select>
-        <button type="button" class="mini-btn secondary" id="genAiBtn">AI கேள்விகள்</button>
-      </div>
-
-      <label class="field-label" for="geminiKeyInput">Gemini API Key (AI கேள்விகளுக்கு மட்டும் — GitHub-ல் சேமிக்கப்படாது)</label>
-      <input id="geminiKeyInput" type="password" placeholder="AIza... (புதிய AI கேள்விகள் வேண்டுமெனில் உள்ளிடவும்)" autocomplete="off">
-      <div id="aiMsg" class="ok-msg"></div>
     </div>
 
     <div class="share-box">
@@ -488,33 +497,63 @@
     <div class="pulse-box">
       <div class="spinner"></div>
       <h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது!</h2>
-      <p class="muted">மற்ற பங்கேற்பாளர்களும் தேர்வை முடிக்கும் வரை முடிவுகள் மறைக்கப்பட்டிருக்கும்.</p>
+      <p class="muted">பங்கேற்பாளர்கள் தேர்வை முடித்தவுடன் உங்கள் தனிப்பட்ட முடிவு &amp; Position காட்டப்படும்.</p>
       <p id="waitStatus" style="font-weight:700; color:#1d4ed8;"></p>
       <button class="outline" id="refresh">இப்போதே நிலையைப் பார்க்கவும் (Refresh)</button>
     </div>
   </div>
 
-  <!-- 4. Results Screen -->
+  <!-- 4. Personal Results Screen -->
   <div class="card hidden" id="results">
-    <h2>தேர்வு முடிவுகள்</h2>
-    <div id="winnerBanner" class="winner-box"></div>
-    <div id="scoreCards" class="score-cards"></div>
-    <div id="resultBody"></div>
+    <h2>உங்கள் தனிப்பட்ட தேர்வு முடிவு</h2>
+    <div id="feedbackBanner" class="status-banner"></div>
+    <div id="personalStats" class="personal-stats"></div>
+
+    <div class="admin-panel-box">
+      <div style="font-weight:800; color:#1e293b; font-size:15px;">நண்பர்களை அழைக்க / Share செய்யவும்</div>
+      <p class="muted" style="margin:4px 0 0;">WhatsApp அல்லது பிற Social Media-வில் இந்த Test Code &amp; Link-ஐப் பகிர்ந்து நண்பர்களை Invite செய்யுங்கள்.</p>
+      <div class="social-share-row">
+        <button type="button" class="mini-btn wa-btn" onclick="shareOnWhatsApp()">WhatsApp Invite</button>
+        <button type="button" class="mini-btn" onclick="nativeOrSocialShare()">Social Media / Share</button>
+        <button type="button" class="mini-btn outline" onclick="copyInviteMessage()">Invite Copy</button>
+      </div>
+      <div id="inviteMsg" class="ok-msg"></div>
+    </div>
+
+    <div id="resultBody" style="margin-top:16px;"></div>
   </div>
 
   <!-- 5. Admin View -->
   <div class="card admin-card" id="adminSection">
     <h2>Admin Control &amp; Score Summary</h2>
-    <p class="muted">Admin PIN மற்றும் Test Code கொடுத்து <strong>Maximum Participants (Min 2)</strong> அமைக்கலாம் மற்றும் High / Low Score பார்க்கலாம்.</p>
+    <p class="muted">Admin PIN உள்ளிட்டு <strong>Subject-wise AI கேள்விகள்</strong>, <strong>Maximum Limit (Min 2)</strong>, மற்றும் <strong>High / Low Score</strong> ஆகியவற்றை நிர்வகிக்கலாம்.</p>
 
-    <label class="field-label">Admin PIN</label>
-    <input id="adminPin" type="password" placeholder="Admin PIN உள்ளிடவும்">
+    <label class="field-label" for="adminPin">Admin PIN</label>
+    <input id="adminPin" type="password" placeholder="Admin PIN உள்ளிடவும் (எ.கா: Admin2026)">
 
-    <label class="field-label">Test Code</label>
+    <label class="field-label" for="adminCode">Test Code</label>
     <input id="adminCode" type="text" value="TNPSC01" placeholder="எ.கா: TNPSC02" autocomplete="off">
 
-    <div class="admin-limit-box">
-      <label class="field-label" style="margin-top:0;">Set Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
+    <div class="admin-panel-box">
+      <label class="field-label" for="aiSubject" style="margin-top:0;">Admin: பாடம் / Subject (AI கேள்விகள்)</label>
+      <select id="aiSubject">
+        <option value="Indian Polity">Indian Polity (இந்திய அரசியலமைப்பு)</option>
+        <option value="Indian National Movement">Indian National Movement (இந்திய தேசிய இயக்கம்)</option>
+        <option value="History and Culture of Tamil Nadu">TN History &amp; Culture (தமிழக வரலாறு &amp; பண்பாடு)</option>
+        <option value="Geography of India">Geography (புவியியல்)</option>
+        <option value="Indian Economy">Indian Economy (இந்தியப் பொருளாதாரம்)</option>
+        <option value="General Science">General Science (அறிவியல்)</option>
+      </select>
+
+      <label class="field-label" for="geminiKeyInput">Admin: Gemini API Key (GitHub-ல் சேமிக்கப்படாது)</label>
+      <input id="geminiKeyInput" type="password" placeholder="AIza... (Admin Gemini API Key உள்ளிடவும்)" autocomplete="off">
+
+      <button type="button" id="genAiBtn">Admin: AI கேள்விகள் உருவாக்குக</button>
+      <div id="aiMsg" class="ok-msg"></div>
+    </div>
+
+    <div class="admin-panel-box">
+      <label class="field-label" style="margin-top:0;">Admin: Set Maximum Participants (குறைந்தது 2 முதல் எவ்வளவு வேண்டுமானாலும்)</label>
       <div class="code-row">
         <input id="adminMaxPlayers" type="number" min="2" max="1000" value="50" placeholder="எ.கா: 50">
         <button type="button" class="mini-btn" id="saveLimitBtn">Limit Save</button>
@@ -526,7 +565,7 @@
     <div id="adminBody"></div>
   </div>
 
-  <div class="footer-note">குறிப்பு: Maximum பங்கேற்பாளர் எண்ணிக்கையை Admin மட்டுமே நிர்ணயிக்க முடியும்.</div>
+  <div class="footer-note">குறிப்பு: பங்கேற்பாளர்களுக்குத் தங்கள் தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே தெரியும்.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -540,578 +579,4 @@ const DEFAULT_QUESTIONS = [
 {ta:"இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",en:"In which year was the Indian National Congress founded?",opts:[["1885","1885"],["1905","1905"],["1919","1919"],["1942","1942"]],a:0,why:"இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு பம்பாயில் தொடங்கப்பட்டது. / The INC was founded in Bombay in 1885."},
 {ta:"உப்பு சத்தியாகிரகம் எந்த ஆண்டு தொடங்கியது?",en:"In which year did the Salt Satyagraha begin?",opts:[["1920","1920"],["1930","1930"],["1935","1935"],["1942","1942"]],a:1,why:"காந்தியடிகள் 1930-ல் தண்டி நடைப்பயணத்துடன் உப்பு சத்தியாகிரகத்தைத் தொடங்கினார். / Gandhi began the Salt Satyagraha with the Dandi March in 1930."},
 {ta:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",en:"Who founded the Self-Respect Movement?",opts:[["சி. ராஜகோபாலாச்சாரி","C. Rajagopalachari"],["பெரியார் ஈ.வெ.ரா.","Periyar E. V. Ramasamy"],["காமராசர்","K. Kamaraj"],["அண்ணா","C. N. Annadurai"]],a:1,why:"பெரியார் ஈ.வெ.ரா. 1925-ல் சுயமரியாதை இயக்கத்தைத் தொடங்கினார். / Periyar launched the Self-Respect Movement in 1925."},
-{ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1905","1905"]],a:1,why:"வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது. / The Vellore Mutiny took place in 1806."},
-{ta:"இந்திய அரசியலமைப்பின் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",en:"Fundamental Rights are contained in which Part of the Indian Constitution?",opts:[["பகுதி II","Part II"],["பகுதி III","Part III"],["பகுதி IV","Part IV"],["பகுதி V","Part V"]],a:1,why:"அடிப்படை உரிமைகள் அரசியலமைப்பின் பகுதி III-ல் உள்ளன. / Fundamental Rights are in Part III."},
-{ta:"இந்திய அரசியலமைப்பின் எந்தத் திருத்தம் வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்தது?",en:"Which amendment reduced the voting age from 21 to 18?",opts:[["42வது","42nd"],["44வது","44th"],["61வது","61st"],["73வது","73rd"]],a:2,why:"61வது அரசியலமைப்புத் திருத்தச் சட்டம் வாக்கு வயதை 18-ஆகக் குறைத்தது. / The 61st Amendment lowered the voting age to 18."}
-];
-
-let activeQuestions = [...DEFAULT_QUESTIONS];
-
-const $ = id => document.getElementById(id);
-let client, participant = null, pollInterval = null, slotInterval = null;
-let currentMaxPlayers = 10;
-let currentJoinedCount = 0;
-
-function getQuizConfig() {
-  return window.QUIZ_CONFIG || {};
-}
-
-function getSupabaseCredentials() {
-  const cfg = getQuizConfig();
-  const url = cfg.SUPABASE_URL || window.SUPABASE_URL || "";
-  const key = cfg.SUPABASE_ANON_KEY || window.SUPABASE_ANON_KEY || "";
-  return { url: String(url).trim(), key: String(key).trim() };
-}
-
-function configured() {
-  const { url, key } = getSupabaseCredentials();
-  return Boolean(
-    url &&
-    key &&
-    url.startsWith("https://") &&
-    !url.includes("YOUR_PROJECT_REF") &&
-    !key.includes("PASTE") &&
-    !key.includes("YOUR_SUPABASE_ANON_PUBLIC_KEY")
-  );
-}
-
-function getSupabaseClient() {
-  if (client) return client;
-  if (!configured() || !window.supabase || typeof window.supabase.createClient !== "function") {
-    return null;
-  }
-  const { url, key } = getSupabaseCredentials();
-  client = window.supabase.createClient(url, key);
-  return client;
-}
-
-function show(id) { $(id).classList.remove("hidden"); }
-function hide(id) { $(id).classList.add("hidden"); }
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-  }[c]));
-}
-
-function getEffectiveGeminiKey() {
-  const uiKey = ($("geminiKeyInput")?.value || "").trim();
-  if (uiKey) {
-    try { sessionStorage.setItem("tnpsc_gemini_key", uiKey); } catch {}
-    return uiKey;
-  }
-  try {
-    const saved = (sessionStorage.getItem("tnpsc_gemini_key") || "").trim();
-    if (saved) return saved;
-  } catch {}
-  const cfgKey = String(getQuizConfig().GEMINI_API_KEY || "").trim();
-  if (cfgKey && cfgKey !== "YOUR_GEMINI_API_KEY") return cfgKey;
-  return "";
-}
-
-function renderSlotBadges() {
-  const clean = ($("code").value || "").trim().toUpperCase();
-  const left = Math.max(0, currentMaxPlayers - currentJoinedCount);
-  if ($("maxBadge")) $("maxBadge").textContent = `Max: ${currentMaxPlayers}`;
-  if ($("slotBadge")) $("slotBadge").textContent = `${currentJoinedCount}/${currentMaxPlayers} (${left} left)`;
-  if ($("previewCode")) $("previewCode").textContent = clean || "-";
-  if ($("previewSlots")) $("previewSlots").textContent = `${currentJoinedCount}/${currentMaxPlayers} (${left} left)`;
-}
-
-async function refreshTestSlotInfo() {
-  const clean = ($("code").value || "").trim().toUpperCase();
-  if ($("adminCode") && clean) {
-    $("adminCode").value = clean;
-  }
-  renderSlotBadges();
-
-  const sb = getSupabaseClient();
-  if (!sb || !clean) return;
-
-  const { data, error } = await sb.rpc("quiz_test_info", { p_test_code: clean });
-  if (!error && data) {
-    currentMaxPlayers = Number(data.max_players) || 10;
-    currentJoinedCount = Number(data.joined_count) || 0;
-    if ($("adminMaxPlayers")) {
-      $("adminMaxPlayers").value = currentMaxPlayers;
-    }
-    renderSlotBadges();
-  }
-}
-
-async function loadSubjectQuestionsFromUI() {
-  const aiMsg = $("aiMsg");
-  const btn = $("genAiBtn");
-  const subject = $("aiSubject")?.value || "Indian Polity";
-  const cfg = getQuizConfig();
-  const apiKey = getEffectiveGeminiKey();
-  const model = String(cfg.GEMINI_MODEL || "gemini-2.5-flash").trim();
-
-  if (!apiKey) {
-    if (aiMsg) {
-      aiMsg.className = "err";
-      aiMsg.textContent = "மேலே உள்ள கட்டத்தில் Gemini API Key உள்ளிட்டு மீண்டும் 'AI கேள்விகள்' அழுத்தவும். (தற்போது இயல்பான 10 கேள்விகள் உள்ளன.)";
-    }
-    activeQuestions = [...DEFAULT_QUESTIONS];
-    return;
-  }
-
-  if (btn) btn.disabled = true;
-  if (aiMsg) {
-    aiMsg.className = "ok-msg";
-    aiMsg.textContent = `"${subject}" பாடத்திற்கான கேள்விகளை AI உருவாக்குகிறது...`;
-  }
-
-  const prompt = `Create 10 TNPSC Group II / IIA multiple-choice questions strictly on the subject: "${subject}".
-Return ONLY a valid JSON array with no markdown or extra text.
-Each item must match this exact structure:
-{
-  "ta": "தமிழ் கேள்வி",
-  "en": "English question",
-  "opts": [
-    ["விருப்பம் A தமிழ்", "Option A English"],
-    ["விருப்பம் B தமிழ்", "Option B English"],
-    ["விருப்பம் C தமிழ்", "Option C English"],
-    ["விருப்பம் D தமிழ்", "Option D English"]
-  ],
-  "a": 0,
-  "why": "தமிழ் விளக்கம் / English explanation."
-}
-Rules:
-- "a" must be an integer from 0 to 3 indicating the correct option index.
-- Keep questions accurate to TNPSC syllabus.`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.7,
-          },
-        }),
-      }
-    );
-
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data?.error?.message || "Gemini API அழைப்பில் பிழை ஏற்பட்டது.");
-    }
-
-    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-    const parsed = JSON.parse(rawText);
-
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      throw new Error("சரியான கேள்விகள் பட்டியல் வரவில்லை.");
-    }
-
-    activeQuestions = parsed;
-    if (aiMsg) {
-      aiMsg.className = "ok-msg";
-      aiMsg.textContent = `${subject} பாடத்திலிருந்து ${activeQuestions.length} புதிய AI கேள்விகள் தயார்!`;
-    }
-  } catch (err) {
-    activeQuestions = [...DEFAULT_QUESTIONS];
-    if (aiMsg) {
-      aiMsg.className = "err";
-      aiMsg.textContent = `${err.message} இயல்பான 10 கேள்விகள் பயன்படுத்தப்படும்.`;
-    }
-  } finally {
-    if (btn) btn.disabled = false;
-  }
-}
-
-window.generateNewCode = function () {
-  const num = Math.floor(100 + Math.random() * 900);
-  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
-  const suffix = letters[Math.floor(Math.random() * letters.length)];
-  const newCode = `TNP${num}${suffix}`;
-  $("code").value = newCode;
-  if ($("adminCode")) $("adminCode").value = newCode;
-  currentJoinedCount = 0;
-  renderSlotBadges();
-  refreshTestSlotInfo();
-  if ($("copyMsg")) $("copyMsg").textContent = `புதிய Test Code உருவாக்கப்பட்டது: ${newCode}`;
-};
-
-window.copyCodeAndLink = async function () {
-  const clean = ($("code").value || "").trim().toUpperCase();
-  if (!clean) {
-    if ($("copyMsg")) $("copyMsg").textContent = "முதலில் ஒரு Test Code உள்ளிடவும்.";
-    return;
-  }
-  const baseUrl = window.location.href.split("?")[0];
-  const joinUrl = `${baseUrl}?code=${encodeURIComponent(clean)}`;
-  const shareText = `TNPSC Quiz Link: ${joinUrl}\nTest Code: ${clean} (Max: ${currentMaxPlayers}, Joined: ${currentJoinedCount}/${currentMaxPlayers})`;
-  try {
-    await navigator.clipboard.writeText(shareText);
-    if ($("copyMsg")) $("copyMsg").textContent = `Link & Code (${clean}) Copy செய்யப்பட்டது!`;
-  } catch {
-    if ($("copyMsg")) $("copyMsg").textContent = `Test Code: ${clean}`;
-  }
-};
-
-window.updateProgress = function () {
-  const total = activeQuestions.length;
-  let answered = 0;
-  for (let i = 0; i < total; i++) {
-    const checked = document.querySelector(`input[name="q${i}"]:checked`);
-    document.querySelectorAll(`label[data-q="${i}"]`).forEach(lbl => lbl.classList.remove("selected"));
-    if (checked) {
-      answered++;
-      checked.closest("label").classList.add("selected");
-    }
-  }
-  if ($("progText")) $("progText").textContent = `பதிலளித்தவை: ${answered} / ${total}`;
-  if ($("progBar")) $("progBar").style.width = `${total ? (answered / total) * 100 : 0}%`;
-};
-
-function renderQuestions() {
-  $("questions").innerHTML = activeQuestions.map((q, i) => `
-    <div class="q">
-      <span class="q-num">கேள்வி ${i + 1}</span>
-      <div class="qtitle">${escapeHtml(q.ta)}<span class="qtitle-en">${escapeHtml(q.en)}</span></div>
-      ${(q.opts || []).map((o, j) => `
-        <label class="opt" data-q="${i}">
-          <input type="radio" name="q${i}" value="${j}" onchange="updateProgress()">
-          <span class="opt-letter">${"ABCD"[j]}.</span>
-          <span><strong>${escapeHtml(o[0])}</strong><br><span class="muted">${escapeHtml(o[1])}</span></span>
-        </label>
-      `).join("")}
-    </div>
-  `).join("");
-  window.updateProgress();
-}
-
-function startLivePolling() {
-  stopLivePolling();
-  pollInterval = setInterval(status, 3000);
-}
-
-function stopLivePolling() {
-  if (pollInterval) {
-    clearInterval(pollInterval);
-    pollInterval = null;
-  }
-}
-
-async function status() {
-  const sb = getSupabaseClient();
-  if (!sb) return;
-  const code = ($("code").value || "").trim().toUpperCase();
-  const { data, error } = await sb.rpc("quiz_status", { p_test_code: code });
-  if (error) {
-    $("waitStatus").textContent = error.message;
-    return;
-  }
-  if (data && data.released) {
-    stopLivePolling();
-    renderResults(data);
-    hide("waiting");
-    show("results");
-  } else {
-    const subCount = data?.submitted_count || 0;
-    const totalJoined = data?.total_players || data?.joined_count || currentJoinedCount || 2;
-    $("waitStatus").textContent = `சமர்ப்பித்தவர்கள்: ${subCount} / ${totalJoined}`;
-  }
-}
-
-function renderResults(d) {
-  const totalQ = activeQuestions.length || 10;
-  const players = d.players || [];
-  let winnerText = "தேர்வு முடிவுகள் வெளியிடப்பட்டன";
-  let maxScore = -1;
-
-  players.forEach(p => { if (p.score > maxScore) maxScore = p.score; });
-
-  if (players.length > 0 && maxScore >= 0) {
-    const topPlayers = players.filter(p => p.score === maxScore);
-    if (topPlayers.length === 1) {
-      winnerText = `🏆 அதிக மதிப்பெண் (Winner): ${escapeHtml(topPlayers[0].name)} (${maxScore}/${totalQ})`;
-    } else {
-      const names = topPlayers.map(p => escapeHtml(p.name)).join(", ");
-      winnerText = `🤝 சமநிலை (Tie): ${names} — ${maxScore}/${totalQ}`;
-    }
-  }
-  $("winnerBanner").textContent = winnerText;
-
-  $("scoreCards").innerHTML = players.map(p => `
-    <div class="score-tile ${p.score === maxScore ? 'top' : ''}">
-      <div style="font-weight:700; color:#334155;">${escapeHtml(p.name)}</div>
-      <div class="score-big">${p.score}<span style="font-size:15px; color:#64748b;">/${totalQ}</span></div>
-    </div>
-  `).join("");
-
-  $("resultBody").innerHTML = players.map(p => `
-    <div class="card" style="background:#f8fafc;">
-      <h3 style="margin:0 0 12px; color:#1e293b;">${escapeHtml(p.name)} — விடைத்தாள் (${p.score}/${totalQ})</h3>
-      ${(p.answers || []).map((a, i) => {
-        const qItem = activeQuestions[i] || DEFAULT_QUESTIONS[i] || { ta: "", opts: [], a: 0, why: "" };
-        const chosenText = qItem.opts?.[a.selected]?.[0] || "பதில் இல்லை";
-        const rightText = qItem.opts?.[qItem.a]?.[0] || "";
-        return `
-          <div class="review-card">
-            <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
-              <strong>${i + 1}. ${escapeHtml(qItem.ta)}</strong>
-              ${a.correct ? '<span class="pill-good">சரி</span>' : '<span class="pill-bad">தவறு</span>'}
-            </div>
-            <div style="margin-top:8px; font-size:14px;">
-              பதில்: <strong>${escapeHtml(chosenText)}</strong><br>
-              சரியான பதில்: <strong style="color:#065f46;">${escapeHtml(rightText)}</strong>
-            </div>
-            <div class="why-box">${escapeHtml(qItem.why || "")}</div>
-          </div>
-        `;
-      }).join("")}
-    </div>
-  `).join("");
-}
-
-function bindEvents() {
-  try {
-    const savedKey = sessionStorage.getItem("tnpsc_gemini_key");
-    if (savedKey && $("geminiKeyInput")) {
-      $("geminiKeyInput").value = savedKey;
-    }
-  } catch {}
-
-  if ($("code")) {
-    $("code").addEventListener("input", () => {
-      renderSlotBadges();
-      refreshTestSlotInfo();
-    });
-  }
-
-  if ($("genAiBtn")) {
-    $("genAiBtn").onclick = loadSubjectQuestionsFromUI;
-  }
-
-  const params = new URLSearchParams(window.location.search);
-  const urlCode = (params.get("code") || "").trim().toUpperCase();
-  if (urlCode && $("code")) {
-    $("code").value = urlCode;
-    if ($("adminCode")) $("adminCode").value = urlCode;
-  }
-
-  renderSlotBadges();
-  refreshTestSlotInfo();
-  if (slotInterval) clearInterval(slotInterval);
-  slotInterval = setInterval(() => {
-    if (!$("setup")?.classList.contains("hidden")) {
-      refreshTestSlotInfo();
-    }
-  }, 4000);
-
-  if ($("saveLimitBtn")) {
-    $("saveLimitBtn").onclick = async () => {
-      $("limitMsg").textContent = "";
-      $("limitMsg").className = "ok-msg";
-      if (!configured()) {
-        $("limitMsg").className = "err";
-        $("limitMsg").textContent = "config.js கோப்பில் Supabase URL மற்றும் anon key சரியாக உள்ளதா எனச் சரிபார்க்கவும்.";
-        return;
-      }
-      const sb = getSupabaseClient();
-      const pin = ($("adminPin").value || "").trim();
-      const code = ($("adminCode").value || "").trim().toUpperCase();
-      const rawMax = Number($("adminMaxPlayers").value);
-
-      if (!code || code.length < 3) {
-        $("limitMsg").className = "err";
-        $("limitMsg").textContent = "சரியான Test Code உள்ளிடவும்.";
-        return;
-      }
-      if (!Number.isFinite(rawMax) || rawMax < 2) {
-        $("limitMsg").className = "err";
-        $("limitMsg").textContent = "Maximum participants குறைந்தது 2 ஆக இருக்க வேண்டும்.";
-        return;
-      }
-
-      $("saveLimitBtn").disabled = true;
-      const { data, error } = await sb.rpc("quiz_set_limit", {
-        p_admin_key: pin,
-        p_test_code: code,
-        p_max_players: Math.floor(rawMax)
-      });
-      $("saveLimitBtn").disabled = false;
-
-      if (error) {
-        $("limitMsg").className = "err";
-        $("limitMsg").textContent = error.message;
-        return;
-      }
-
-      currentMaxPlayers = Number(data?.max_players) || Math.floor(rawMax);
-      currentJoinedCount = Number(data?.joined_count) || 0;
-      const left = Math.max(0, currentMaxPlayers - currentJoinedCount);
-
-      if ($("code").value.trim().toUpperCase() === code) {
-        renderSlotBadges();
-      }
-      $("limitMsg").textContent = `Saved! ${code} -> Max: ${currentMaxPlayers} (${currentJoinedCount}/${currentMaxPlayers} joined, ${left} left)`;
-    };
-  }
-
-  if ($("join")) {
-    $("join").onclick = async () => {
-      $("setupMsg").textContent = "";
-      if (!configured()) {
-        $("setupMsg").textContent = "config.js கோப்பில் Supabase URL மற்றும் anon key சரியாக உள்ளதா எனச் சரிபார்க்கவும்.";
-        return;
-      }
-      const sb = getSupabaseClient();
-      if (!sb) {
-        $("setupMsg").textContent = "Supabase client-ஐத் தொடங்க முடியவில்லை.";
-        return;
-      }
-      const name = ($("name").value || "").trim();
-      const code = ($("code").value || "").trim().toUpperCase();
-      $("code").value = code;
-      if ($("adminCode")) $("adminCode").value = code;
-
-      if (!name || code.length < 3) {
-        $("setupMsg").textContent = "பெயர் மற்றும் குறைந்தது 3 எழுத்துகள் கொண்ட Test Code தேவை.";
-        return;
-      }
-
-      $("join").disabled = true;
-      const { data, error } = await sb.rpc("quiz_join", {
-        p_test_code: code,
-        p_name: name,
-        p_max_players: currentMaxPlayers
-      });
-      $("join").disabled = false;
-
-      if (error) {
-        $("setupMsg").textContent = error.message;
-        refreshTestSlotInfo();
-        return;
-      }
-
-      participant = data;
-      if (data?.max_players) currentMaxPlayers = Number(data.max_players);
-      if (data?.joined_count) currentJoinedCount = Number(data.joined_count);
-      renderSlotBadges();
-
-      $("who").textContent = `👤 ${name} (${code} • ${currentJoinedCount}/${currentMaxPlayers})`;
-      renderQuestions();
-      hide("setup");
-      show("exam");
-    };
-  }
-
-  if ($("submit")) {
-    $("submit").onclick = async () => {
-      $("examMsg").textContent = "";
-      if (!participant) return;
-      const arr = activeQuestions.map((q, i) => {
-        const v = document.querySelector(`input[name="q${i}"]:checked`);
-        return v ? Number(v.value) : -1;
-      });
-      if (arr.some(x => x < 0)) {
-        $("examMsg").textContent = `தயவுசெய்து ${activeQuestions.length} கேள்விகளுக்கும் பதில் தேர்வு செய்யவும்.`;
-        return;
-      }
-      const sb = getSupabaseClient();
-      if (!sb) {
-        $("examMsg").textContent = "Supabase இணைப்பு இல்லை.";
-        return;
-      }
-      $("submit").disabled = true;
-      const { error } = await sb.rpc("quiz_submit", {
-        p_test_code: ($("code").value || "").trim().toUpperCase(),
-        p_participant_id: participant.participant_id,
-        p_token: participant.token,
-        p_answers: arr
-      });
-      $("submit").disabled = false;
-      if (error) {
-        $("examMsg").textContent = error.message;
-        return;
-      }
-      hide("exam");
-      show("waiting");
-      await status();
-      if (!$("waiting").classList.contains("hidden")) {
-        startLivePolling();
-      }
-    };
-  }
-
-  if ($("refresh")) {
-    $("refresh").onclick = status;
-  }
-
-  if ($("adminBtn")) {
-    $("adminBtn").onclick = async () => {
-      if (!configured()) {
-        $("adminBody").innerHTML = `<div class="err">config.js கோப்பில் Supabase URL மற்றும் anon key சரியாக உள்ளதா எனச் சரிபார்க்கவும்.</div>`;
-        return;
-      }
-      const sb = getSupabaseClient();
-      if (!sb) {
-        $("adminBody").innerHTML = `<div class="err">Supabase client-ஐத் தொடங்க முடியவில்லை.</div>`;
-        return;
-      }
-      const pin = ($("adminPin").value || "").trim();
-      const code = ($("adminCode").value || "").trim().toUpperCase();
-      $("adminCode").value = code;
-      $("adminBody").innerHTML = `<p class="muted">தரவு ஏற்றப்படுகிறது...</p>`;
-
-      const { data, error } = await sb.rpc("quiz_admin_summary", {
-        p_admin_key: pin,
-        p_test_code: code
-      });
-
-      if (error) {
-        $("adminBody").innerHTML = `<div class="err">${escapeHtml(error.message)}</div>`;
-        return;
-      }
-
-      const totalQ = activeQuestions.length || 10;
-      const high = data?.highest
-        ? `<strong>${escapeHtml(data.highest.player_name)}</strong> (${data.highest.score}/${totalQ})`
-        : "இன்னும் முடிவு இல்லை";
-      const low = data?.lowest
-        ? `<strong>${escapeHtml(data.lowest.player_name)}</strong> (${data.lowest.score}/${totalQ})`
-        : "இன்னும் முடிவு இல்லை";
-
-      const rows = (data?.players || []).map(p => `
-        <tr>
-          <td><strong>${escapeHtml(p.player_name)}</strong></td>
-          <td><strong>${p.score ?? "-"}</strong> / ${totalQ}</td>
-          <td>${escapeHtml(p.status || "")}</td>
-        </tr>
-      `).join("");
-
-      $("adminBody").innerHTML = `
-        <div class="grid-2">
-          <div class="high-box">
-            <div style="font-size:12px; font-weight:800; opacity:0.85;">HIGH SCORE (அதிகம்)</div>
-            <div style="font-size:17px; margin-top:4px;">🏆 ${high}</div>
-          </div>
-          <div class="low-box">
-            <div style="font-size:12px; font-weight:800; opacity:0.85;">LOW SCORE (குறைவு)</div>
-            <div style="font-size:17px; margin-top:4px;">📉 ${low}</div>
-          </div>
-        </div>
-        <table class="admin-table">
-          <thead><tr><th>பெயர்</th><th>மதிப்பெண்</th><th>நிலை</th></tr></thead>
-          <tbody>${rows || '<tr><td colspan="3">பங்கேற்பாளர்கள் இல்லை</td></tr>'}</tbody>
-        </table>
-      `;
-    };
-  }
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bindEvents);
-} else {
-  bindEvents();
-}
-</script>
-</body>
-</html>
+{ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1
