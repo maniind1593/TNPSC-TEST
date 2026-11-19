@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TNPSC நண்பர்கள் Quiz</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans Tamil",sans-serif;color:#172033;background:#f4f6fb}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:760px;margin:auto;padding:18px}
+header{background:#172b4d;color:white;padding:22px;border-radius:16px;margin:8px 0 18px}
+h1{font-size:23px;margin:0 0 7px}p{line-height:1.55}.muted{color:#667085;font-size:14px}
+.card{background:white;border:1px solid #e5e9f2;border-radius:14px;padding:17px;margin:12px 0;box-shadow:0 3px 12px #172b4d0a}
+label{display:block;font-weight:650;margin:10px 0 6px}input,button{font:inherit}input[type=text]{width:100%;padding:12px;border:1px solid #cbd2df;border-radius:9px}
+button{border:0;border-radius:10px;padding:12px 16px;background:#2457d6;color:white;font-weight:700;cursor:pointer;margin-top:12px;width:100%}button:disabled{opacity:.5}
+.q{padding:15px 0;border-bottom:1px solid #edf0f5}.q:last-child{border:0}.qtitle{font-weight:700;line-height:1.55}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:9px;margin:7px 0;border:1px solid #e4e8ef;border-radius:9px;font-weight:400}
+.opt input{margin-top:5px}.hidden{display:none}.tag{display:inline-block;background:#eaf0ff;color:#214bb2;padding:4px 9px;border-radius:30px;font-size:12px}
+.good{color:#087443}.bad{color:#b42318}.result{font-size:24px;font-weight:800}.notice{background:#fff8e6;padding:12px;border-radius:9px;color:#694b00}
+</style></head>
+<body><div class="wrap">
+<header><h1>TNPSC Group II / IIA – நண்பர்கள் Quiz</h1><div>இரண்டு பேரும் தனித்தனி மொபைலில் தேர்வு எழுதலாம்.</div></header>
+<div class="card" id="setup">
+<p class="muted">முதலில் Supabase இணைப்பை அமைத்த பிறகு Test Code மற்றும் உங்கள் பெயரை உள்ளிடவும்.</p>
+<label>Test Code</label><input id="code" type="text" value="TNPSC01" autocomplete="off">
+<label>உங்கள் பெயர்</label><input id="name" type="text" placeholder="உங்கள் பெயர்" maxlength="40">
+<button id="join">தேர்வில் சேரவும்</button><p id="setupMsg" class="muted"></p>
+</div>
+<div class="card hidden" id="exam">
+<div><span class="tag" id="who"></span> <span class="tag">10 கேள்விகள்</span></div>
+<p class="muted" id="status"></p><div id="questions"></div>
+<button id="submit">பதில்களை Submit செய்யவும்</button><p class="muted" id="examMsg"></p>
+</div>
+<div class="card hidden" id="waiting"><h2>உங்கள் தேர்வு சமர்ப்பிக்கப்பட்டது</h2><p>உங்கள் நண்பரும் தேர்வை முடிக்கும் வரை முடிவுகள் மறைக்கப்பட்டிருக்கும்.</p><p id="waitStatus" class="muted"></p><button id="refresh">முடிவு நிலையைப் பார்க்கவும்</button></div>
+<div class="card hidden" id="results"><h2>இருவரின் தேர்வு முடிவுகள்</h2><div id="resultBody"></div></div>
+<p class="muted">குறிப்பு: ஒரே Test Code-ஐ இருவரும் பயன்படுத்த வேண்டும். ஒரு Code-க்கு இரண்டு பங்கேற்பாளர்கள் மட்டுமே.</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const QUESTIONS = [
+{ta:"மனித உடலில் இன்சுலின் சுரக்கும் உறுப்பு எது?",en:"Which organ secretes insulin?",opts:[["கல்லீரல்","Liver"],["கணையம்","Pancreas"],["சிறுநீரகம்","Kidney"],["இதயம்","Heart"]],a:1,why:"கணையத்தின் பீட்டா செல்கள் இன்சுலின் சுரக்கின்றன. / Beta cells of the pancreas secrete insulin."},
+{ta:"வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு ஏற்படும் நோய் எது?",en:"Which disease in children is caused by vitamin D deficiency?",opts:[["ஸ்கர்வி","Scurvy"],["ரிக்கெட்ஸ்","Rickets"],["பெரிபெரி","Beriberi"],["இரத்தசோகை","Anaemia"]],a:1,why:"வைட்டமின் D குறைபாடு எலும்பு கனிமமயமாக்கலைப் பாதித்து ரிக்கெட்ஸ் ஏற்படுத்தும். / Vitamin D deficiency impairs bone mineralisation and causes rickets."},
+{ta:"இந்தியாவின் மிக நீளமான நதி எது?",en:"Which is the longest river in India?",opts:[["கோதாவரி","Godavari"],["கங்கை","Ganga"],["நர்மதை","Narmada"],["கிருஷ்ணா","Krishna"]],a:1,why:"இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமானது. / The Ganga is the longest river flowing within India."},
+{ta:"கருப்பு மண் எந்தப் பயிருக்கு மிகவும் ஏற்றது?",en:"Black soil is especially suitable for which crop?",opts:[["தேயிலை","Tea"],["பருத்தி","Cotton"],["சணல்","Jute"],["காபி","Coffee"]],a:1,why:"கருப்பு மண் ஈரத்தைத் தக்கவைக்கும் தன்மை கொண்டதால் பருத்திக்கு ஏற்றது. / Black soil retains moisture and is well suited to cotton."},
+{ta:"இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",en:"In which year was the Indian National Congress founded?",opts:[["1885","1885"],["1905","1905"],["1919","1919"],["1942","1942"]],a:0,why:"இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு பம்பாயில் தொடங்கப்பட்டது. / The INC was founded in Bombay in 1885."},
+{ta:"உப்பு சத்தியாகிரகம் எந்த ஆண்டு தொடங்கியது?",en:"In which year did the Salt Satyagraha begin?",opts:[["1920","1920"],["1930","1930"],["1935","1935"],["1942","1942"]],a:1,why:"காந்தியடிகள் 1930-ல் தண்டி நடைப்பயணத்துடன் உப்பு சத்தியாகிரகத்தைத் தொடங்கினார். / Gandhi began the Salt Satyagraha with the Dandi March in 1930."},
+{ta:"சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",en:"Who founded the Self-Respect Movement?",opts:[["சி. ராஜகோபாலாச்சாரி","C. Rajagopalachari"],["பெரியார் ஈ.வெ.ரா.","Periyar E. V. Ramasamy"],["காமராசர்","K. Kamaraj"],["அண்ணா","C. N. Annadurai"]],a:1,why:"பெரியார் ஈ.வெ.ரா. 1925-ல் சுயமரியாதை இயக்கத்தைத் தொடங்கினார். / Periyar launched the Self-Respect Movement in 1925."},
+{ta:"வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",en:"In which year did the Vellore Mutiny take place?",opts:[["1757","1757"],["1806","1806"],["1857","1857"],["1905","1905"]],a:1,why:"வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது. / The Vellore Mutiny took place in 1806."},
+{ta:"இந்திய அரசியலமைப்பின் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",en:"Fundamental Rights are contained in which Part of the Indian Constitution?",opts:[["பகுதி II","Part II"],["பகுதி III","Part III"],["பகுதி IV","Part IV"],["பகுதி V","Part V"]],a:1,why:"அடிப்படை உரிமைகள் அரசியலமைப்பின் பகுதி III-ல் உள்ளன. / Fundamental Rights are in Part III."},
+{ta:"இந்திய அரசியலமைப்பின் எந்தத் திருத்தம் வாக்கு வயதை 21-லிருந்து 18-ஆகக் குறைத்தது?",en:"Which amendment reduced the voting age from 21 to 18?",opts:[["42வது","42nd"],["44வது","44th"],["61வது","61st"],["73வது","73rd"]],a:2,why:"61வது அரசியலமைப்புத் திருத்தச் சட்டம் வாக்கு வயதை 18-ஆகக் குறைத்தது. / The 61st Amendment lowered the voting age to 18."}
+];
+const $=id=>document.getElementById(id); let client, participant=null;
+function configured(){return window.SUPABASE_URL&&window.SUPABASE_ANON_KEY&&window.SUPABASE_URL.startsWith("https://")&&!window.SUPABASE_ANON_KEY.includes("PASTE")}
+function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).classList.add("hidden")}
+function renderQuestions(){ $("questions").innerHTML=QUESTIONS.map((q,i)=>`<div class="q"><div class="qtitle">${i+1}. ${q.ta}<br><span class="muted">${q.en}</span></div>${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"><span>${"ABCD"[j]}. ${o[0]}<br><span class="muted">${o[1]}</span></span></label>`).join("")}</div>`).join("");}
+async function status(){const {data,error}=await client.rpc("quiz_status",{p_test_code:$("code").value.trim()});if(error){$("waitStatus").textContent=error.message;return}if(data&&data.released){renderResults(data);hide("waiting");show("results")}else $("waitStatus").textContent=`சமர்ப்பித்தவர்கள்: ${data?.submitted_count||0}/2. நண்பர் Submit செய்ததும் முடிவு வெளியாகும்.`}
+function renderResults(d){$("resultBody").innerHTML=(d.players||[]).map(p=>`<div class="card"><b>${escapeHtml(p.name)}</b><div class="result">${p.score}/10</div>${(p.answers||[]).map((a,i)=>`<p><b>${i+1}. ${QUESTIONS[i].ta}</b><br>${a.correct?'<span class="good">சரி / Correct</span>':'<span class="bad">தவறு / Incorrect</span>'}<br>உங்கள் பதில்: ${QUESTIONS[i].opts[a.selected]?.[0]||"பதில் இல்லை"}<br>சரியான பதில்: ${QUESTIONS[i].opts[QUESTIONS[i].a][0]}<br><span class="muted">${QUESTIONS[i].why}</span></p>`).join("")}</div>`).join("")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+$("join").onclick=async()=>{if(!configured()){$("setupMsg").textContent="முதலில் config.js கோப்பில் Supabase URL மற்றும் anon key சேர்க்கவும்.";return}let name=$("name").value.trim(),code=$("code").value.trim();if(!name||!code){$("setupMsg").textContent="பெயர் மற்றும் Test Code இரண்டும் தேவை.";return}client=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);$("join").disabled=true;let {data,error}=await client.rpc("quiz_join",{p_test_code:code,p_name:name});$("join").disabled=false;if(error){$("setupMsg").textContent=error.message;return}participant=data;$("who").textContent=name;renderQuestions();hide("setup");show("exam");$("status").textContent="உங்கள் பதில்களைத் தேர்ந்தெடுத்து Submit செய்யவும்.";};
+$("submit").onclick=async()=>{if(!participant)return;let arr=QUESTIONS.map((q,i)=>{let v=document.querySelector(`input[name="q${i}"]:checked`);return v?Number(v.value):-1});if(arr.some(x=>x<0)){$("examMsg").textContent="10 கேள்விகளுக்கும் பதில் தேர்வு செய்யவும்.";return}$("submit").disabled=true;let {error}=await client.rpc("quiz_submit",{p_test_code:$("code").value.trim(),p_participant_id:participant.participant_id,p_token:participant.token,p_answers:arr});$("submit").disabled=false;if(error){$("examMsg").textContent=error.message;return}hide("exam");show("waiting");await status();};
+$("refresh").onclick=status;
+</script></body></html>
