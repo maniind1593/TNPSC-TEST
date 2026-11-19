@@ -6,104 +6,131 @@
 <title>TNPSC Live Quiz</title>
 <style>
   body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 14px; background: #f1f5f9; color: #0f172a; }
-  .box { max-width: 680px; margin: 12px auto; background: #fff; padding: 16px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+  .box { max-width: 700px; margin: 12px auto; background: #fff; padding: 18px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
   h1, h2 { margin: 0 0 10px; }
   label { display: block; font-weight: 700; margin: 10px 0 4px; font-size: 14px; }
   input, select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; box-sizing: border-box; background: #f8fafc; }
   button { width: 100%; padding: 12px; margin-top: 10px; border: 0; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
   button.sec { background: #0d9488; }
   button.wa { background: #16a34a; }
+  button.ghost { background: #e2e8f0; color: #0f172a; }
   button:disabled { opacity: 0.6; cursor: not-allowed; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .row button { width: auto; flex: 1; min-width: 130px; }
   .hidden { display: none; }
   .err { color: #dc2626; font-weight: 700; margin-top: 8px; }
   .ok { color: #059669; font-weight: 700; margin-top: 8px; }
-  .q { background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-  .opt { display: block; padding: 8px; margin-top: 6px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; }
-  .banner { padding: 16px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 18px; margin-bottom: 12px; }
+  .muted { color: #64748b; font-size: 13px; }
+  .q { background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+  .q-en { display: block; color: #475569; font-size: 13.5px; font-weight: 600; margin-top: 4px; }
+  .opt { display: block; padding: 9px 11px; margin-top: 7px; background: #fff; border: 1px solid #cbd5e1; border-radius: 9px; cursor: pointer; }
+  .opt-en { display: block; color: #475569; font-size: 13px; margin-left: 22px; }
+  .banner { padding: 18px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 19px; margin-bottom: 12px; }
   .champ { background: #fef08a; color: #713f12; animation: pop 1s infinite alternate; }
   .good { background: #dcfce7; color: #14532d; }
   .imp { background: #fee2e2; color: #7f1d1d; }
   @keyframes pop { from { transform: scale(1); } to { transform: scale(1.04); } }
+  .admin-trigger-wrap { max-width: 700px; margin: 18px auto 0; text-align: center; }
+  .admin-trigger-wrap button { width: auto; padding: 8px 16px; font-size: 13px; }
 </style>
 </head>
 <body>
 
+<!-- USER JOIN SCREEN -->
 <div class="box" id="joinBox">
   <h1>TNPSC Live Quiz</h1>
+  <p class="muted">தமிழ் மற்றும் ஆங்கிலம் (Bilingual) கேள்விகள் • தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே</p>
   <label>Test Batch / Code</label>
   <input id="code" type="text" value="TNPSC01" oninput="refreshSubjectBatchQuestions()">
-  <label>உங்கள் பெயர்</label>
-  <input id="name" type="text" placeholder="பெயர் உள்ளிடவும்">
-  <button type="button" onclick="joinQuiz()">Join Quiz</button>
+  <label>உங்கள் பெயர் (Your Name)</label>
+  <input id="name" type="text" placeholder="பெயர் உள்ளிடவும் / Enter your name">
+  <button type="button" onclick="joinQuiz()">Join Quiz (தேர்வைத் தொடங்குக)</button>
   <div id="joinMsg" class="err"></div>
 </div>
 
+<!-- USER EXAM SCREEN -->
 <div class="box hidden" id="examBox">
   <h2 id="whoTitle">தேர்வு</h2>
   <div id="qArea"></div>
-  <button type="button" class="sec" onclick="submitQuiz()">Submit Answers</button>
+  <button type="button" class="sec" id="submitBtn" onclick="submitQuiz()">Submit Answers (பதில்களைச் சமர்ப்பிக்கவும்)</button>
   <div id="examMsg" class="err"></div>
 </div>
 
-<div class="box hidden" id="waitBox">
-  <h2>பதில்கள் சமர்ப்பிக்கப்பட்டன</h2>
-  <p id="waitText">மற்றவர்கள் முடிக்கும் வரை காத்திருக்கவும்...</p>
-  <button type="button" onclick="checkStatus()">Refresh Status</button>
-</div>
-
+<!-- USER RESULT SCREEN -->
 <div class="box hidden" id="resBox">
-  <h2>உங்கள் தனிப்பட்ட முடிவு</h2>
+  <h2>உங்கள் தனிப்பட்ட தேர்வு முடிவு (Personal Result)</h2>
   <div id="banner" class="banner"></div>
   <div id="statsText" style="font-weight:700;margin-bottom:12px;"></div>
   <div class="row">
     <button type="button" class="wa" onclick="shareWA()">WhatsApp Invite</button>
     <button type="button" onclick="shareSocial()">Share / Copy Invite</button>
+    <button type="button" class="ghost" onclick="backToHome()">புதிய தேர்வு (Home)</button>
   </div>
   <div id="shareMsg" class="ok"></div>
-  <div id="reviewArea" style="margin-top:12px;"></div>
+  <div id="reviewArea" style="margin-top:14px;"></div>
 </div>
 
-<div class="box" id="adminBox">
-  <h2>Admin Panel (Daily Subject &amp; AI)</h2>
+<!-- SEPARATE ADMIN LOGIN SCREEN -->
+<div class="box hidden" id="adminLoginBox">
+  <h2>Admin Portal Login</h2>
+  <p class="muted">Admin PIN உள்ளிட்டு தனியான Admin Control திரையைத் திறக்கவும்.</p>
   <label>Admin PIN</label>
-  <input id="pin" type="password" placeholder="Admin2026">
+  <input id="pin" type="password" placeholder="Admin PIN உள்ளிடவும்">
+  <div class="row">
+    <button type="button" onclick="openAdminPanel()">Admin திறக்கவும்</button>
+    <button type="button" class="ghost" onclick="closeAdminViews()">User திரைக்குச் செல்ல</button>
+  </div>
+  <div id="adminLoginMsg" class="err"></div>
+</div>
+
+<!-- SEPARATE ADMIN CONTROL SCREEN -->
+<div class="box hidden" id="adminBox">
+  <h2>Admin Control Panel (Daily Subject &amp; AI)</h2>
+  <p class="muted">Subject மற்றும் Test Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A தானாகத் தயாராகும்.</p>
+
+  <label>Test Batch / Code</label>
+  <input id="adminCode" type="text" value="TNPSC01" oninput="syncCodeFromAdmin()">
 
   <label>Subject (பாடம்)</label>
   <select id="subj" onchange="changeSubject()">
-    <option value="Indian Polity">Indian Polity</option>
-    <option value="Indian National Movement">Indian National Movement</option>
-    <option value="History and Culture of Tamil Nadu">TN History &amp; Culture</option>
-    <option value="Geography of India">Geography</option>
-    <option value="Indian Economy">Indian Economy</option>
-    <option value="General Science">General Science</option>
+    <option value="Indian Polity">Indian Polity (இந்திய அரசியலமைப்பு)</option>
+    <option value="Indian National Movement">Indian National Movement (இந்திய தேசிய இயக்கம்)</option>
+    <option value="History and Culture of Tamil Nadu">History and Culture of Tamil Nadu (தமிழக வரலாறு &amp; பண்பாடு)</option>
+    <option value="Geography of India">Geography of India (இந்தியப் புவியியல்)</option>
+    <option value="Indian Economy">Indian Economy (இந்தியப் பொருளாதாரம்)</option>
+    <option value="General Science">General Science (பொது அறிவியல்)</option>
   </select>
 
   <label>ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை</label>
   <select id="qCount" onchange="refreshSubjectBatchQuestions()">
-    <option value="10" selected>10 கேள்விகள்</option>
-    <option value="20">20 கேள்விகள்</option>
-    <option value="25">25 கேள்விகள்</option>
+    <option value="10" selected>10 Questions (10 கேள்விகள்)</option>
+    <option value="20">20 Questions (20 கேள்விகள்)</option>
+    <option value="25">25 Questions (25 கேள்விகள்)</option>
   </select>
 
   <label>AI Provider (ChatGPT / Gemini)</label>
   <select id="aiProvider" onchange="onProviderChange()">
-    <option value="openai">ChatGPT (OpenAI API)</option>
     <option value="gemini">Gemini (Google API)</option>
+    <option value="openai">ChatGPT (OpenAI API)</option>
   </select>
 
-  <label id="keyLabel">ChatGPT / OpenAI API Key (sk-...)</label>
-  <input id="gkey" type="password" placeholder="sk-... அல்லது AIza... API Key உள்ளிடவும்">
+  <label id="keyLabel">Gemini API Key (AIza...)</label>
+  <input id="gkey" type="password" placeholder="AIza... அல்லது sk-... API Key உள்ளிடவும்">
 
   <label>AI Model</label>
-  <input id="aiModel" type="text" value="gpt-4o-mini" placeholder="எ.கா: gpt-4o-mini அல்லது gemini-3.8-flash">
+  <input id="aiModel" type="text" value="gemini-3.8-flash" placeholder="எ.கா: gemini-3.8-flash அல்லது gpt-4o-mini">
 
   <div class="row">
     <button type="button" id="aiBtn1" onclick="genAI(false)">AI கேள்விகள்</button>
     <button type="button" class="sec" id="aiBtn2" onclick="genAI(true)">புதிய Batch / Test</button>
   </div>
   <div id="aiMsg" class="ok"></div>
+
+  <button type="button" class="ghost" onclick="closeAdminViews()">User Quiz திரைக்குத் திரும்புக</button>
+</div>
+
+<div class="admin-trigger-wrap" id="adminTrigger">
+  <button type="button" class="ghost" onclick="showAdminLogin()">Admin</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -134,491 +161,330 @@ function nextRand(stateObj) {
 var SUBJECT_TEMPLATES = {
   "Indian Polity": [
     {
-      prompt: function(n) { return "இந்திய அரசியலமைப்பில் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன? [" + n + "]"; },
-      correct: "பகுதி III (சரத்து 12 - 35)",
-      wrong: ["பகுதி II", "பகுதி IV", "பகுதி V"],
-      why: "அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்துகள் 12-35) உள்ளன."
+      ta: "இந்திய அரசியலமைப்பில் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",
+      en: "Fundamental Rights are enshrined in which Part of the Indian Constitution?",
+      correctTa: "பகுதி III (சரத்து 12 - 35)",
+      correctEn: "Part III (Articles 12 - 35)",
+      wrong: [
+        { ta: "பகுதி II (குடியுரிமை)", en: "Part II (Citizenship)" },
+        { ta: "பகுதி IV (அரசு நெறிமுறை)", en: "Part IV (DPSP)" },
+        { ta: "பகுதி V (மத்திய அரசு)", en: "Part V (The Union)" }
+      ],
+      whyTa: "அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்து 12-35) உள்ளன.",
+      whyEn: "Fundamental Rights are covered under Part III (Articles 12-35)."
     },
     {
-      prompt: function(n) { return "வாக்குரிமை வயதை 21-லிருந்து 18-ஆகக் குறைத்த திருத்தம் எது? [" + n + "]"; },
-      correct: "61வது திருத்தம் (1988)",
-      wrong: ["42வது திருத்தம்", "44வது திருத்தம்", "73வது திருத்தம்"],
-      why: "61வது திருத்தச் சட்டம் (1988) வாக்கு வயதை 18-ஆகக் குறைத்தது."
+      ta: "வாக்குரிமை வயதை 21-லிருந்து 18-ஆகக் குறைத்த அரசியலமைப்புத் திருத்தம் எது?",
+      en: "Which Constitutional Amendment reduced the voting age from 21 to 18?",
+      correctTa: "61வது திருத்தம் (1988)",
+      correctEn: "61st Amendment (1988)",
+      wrong: [
+        { ta: "42வது திருத்தம்", en: "42nd Amendment" },
+        { ta: "44வது திருத்தம்", en: "44th Amendment" },
+        { ta: "73வது திருத்தம்", en: "73rd Amendment" }
+      ],
+      whyTa: "61வது அரசியலமைப்புத் திருத்தம் (1988) வாக்கு வயதை 18-ஆகக் குறைத்தது.",
+      whyEn: "The 61st Amendment Act (1988) lowered the voting age to 18."
     },
     {
-      prompt: function(n) { return "ஊரக உள்ளாட்சி அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம்? [" + n + "]"; },
-      correct: "73வது திருத்தம்",
-      wrong: ["42வது திருத்தம்", "52வது திருத்தம்", "86வது திருத்தம்"],
-      why: "73வது திருத்தம் பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அந்தஸ்து வழங்கியது."
+      ta: "ஊரக உள்ளாட்சி அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம் எது?",
+      en: "Which Amendment granted constitutional status to Panchayati Raj institutions?",
+      correctTa: "73வது திருத்தம்",
+      correctEn: "73rd Amendment",
+      wrong: [
+        { ta: "42வது திருத்தம்", en: "42nd Amendment" },
+        { ta: "52வது திருத்தம்", en: "52nd Amendment" },
+        { ta: "86வது திருத்தம்", en: "86th Amendment" }
+      ],
+      whyTa: "73வது திருத்தச் சட்டம் பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அங்கீகாரம் வழங்கியது.",
+      whyEn: "The 73rd Amendment gave constitutional status to Panchayati Raj."
     },
     {
-      prompt: function(n) { return "மாநிலங்களவையின் அலுவல் வழித் தலைவர் யார்? [" + n + "]"; },
-      correct: "துணைக் குடியரசுத் தலைவர்",
-      wrong: ["குடியரசுத் தலைவர்", "பிரதமர்", "சபாநாயகர்"],
-      why: "துணைக் குடியரசுத் தலைவர் மாநிலங்களவையின் அவைத் தலைவராகச் செயல்படுவார்."
+      ta: "மாநிலங்களவையின் அலுவல் வழித் தலைவராகச் செயல்படுபவர் யார்?",
+      en: "Who is the ex-officio Chairman of the Rajya Sabha?",
+      correctTa: "துணைக் குடியரசுத் தலைவர்",
+      correctEn: "Vice President of India",
+      wrong: [
+        { ta: "குடியரசுத் தலைவர்", en: "President of India" },
+        { ta: "பிரதமர்", en: "Prime Minister" },
+        { ta: "மக்களவை சபாநாயகர்", en: "Lok Sabha Speaker" }
+      ],
+      whyTa: "துணைக் குடியரசுத் தலைவர் மாநிலங்களவையின் அலுவல் வழித் தலைவர் ஆவார்.",
+      whyEn: "The Vice President serves as the ex-officio Chairman of Rajya Sabha."
     }
   ],
   "Indian National Movement": [
     {
-      prompt: function(n) { return "இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது? [" + n + "]"; },
-      correct: "1885",
-      wrong: ["1905", "1919", "1942"],
-      why: "1885-ஆம் ஆண்டு இந்திய தேசிய காங்கிரஸ் தொடங்கப்பட்டது."
+      ta: "இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",
+      en: "In which year was the Indian National Congress founded?",
+      correctTa: "1885",
+      correctEn: "1885",
+      wrong: [
+        { ta: "1905", en: "1905" },
+        { ta: "1919", en: "1919" },
+        { ta: "1942", en: "1942" }
+      ],
+      whyTa: "இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு தொடங்கப்பட்டது.",
+      whyEn: "Indian National Congress was founded in 1885."
     },
     {
-      prompt: function(n) { return "உப்பு சத்தியாகிரகம் எந்த ஆண்டு தொடங்கியது? [" + n + "]"; },
-      correct: "1930",
-      wrong: ["1920", "1927", "1942"],
-      why: "1930-ஆம் ஆண்டு உப்பு சத்தியாகிரகம் தொடங்கியது."
+      ta: "உப்பு சத்தியாகிரகம் (தண்டி யாத்திரை) எந்த ஆண்டு தொடங்கியது?",
+      en: "In which year did the Salt Satyagraha (Dandi March) begin?",
+      correctTa: "1930",
+      correctEn: "1930",
+      wrong: [
+        { ta: "1920", en: "1920" },
+        { ta: "1927", en: "1927" },
+        { ta: "1942", en: "1942" }
+      ],
+      whyTa: "உப்பு சத்தியாகிரகம் 1930-ஆம் ஆண்டு தொடங்கியது.",
+      whyEn: "Salt Satyagraha began in 1930."
     },
     {
-      prompt: function(n) { return "'சுயராஜ்யம் எனது பிறப்புரிமை' என்று முழங்கியவர் யார்? [" + n + "]"; },
-      correct: "பாலகங்காதர திலகர்",
-      wrong: ["பகத் சிங்", "சுபாஷ் சந்திர போஸ்", "லாலா லஜபதி ராய்"],
-      why: "பாலகங்காதர திலகர் சுயராஜ்யம் எனது பிறப்புரிமை என்றார்."
+      ta: "'சுயராஜ்யம் எனது பிறப்புரிமை' என்று முழங்கியவர் யார்?",
+      en: "Who declared 'Swaraj is my birthright'?",
+      correctTa: "பாலகங்காதர திலகர்",
+      correctEn: "Bal Gangadhar Tilak",
+      wrong: [
+        { ta: "பகத் சிங்", en: "Bhagat Singh" },
+        { ta: "சுபாஷ் சந்திர போஸ்", en: "Subhas Chandra Bose" },
+        { ta: "லாலா லஜபதி ராய்", en: "Lala Lajpat Rai" }
+      ],
+      whyTa: "பாலகங்காதர திலகர் இம்முழக்கத்தை முன்வைத்தார்.",
+      whyEn: "Bal Gangadhar Tilak gave this famous slogan."
     },
     {
-      prompt: function(n) { return "இந்திய தேசிய இராணுவத்தை வலுப்படுத்தியவர் யார்? [" + n + "]"; },
-      correct: "நேதாஜி சுபாஷ் சந்திர போஸ்",
-      wrong: ["ராஷ் பிஹாரி போஸ்", "மோதிலால் நேரு", "சி.ஆர். தாஸ்"],
-      why: "நேதாஜி சுபாஷ் சந்திர போஸ் இந்திய தேசிய இராணுவத்திற்குத் தலைமை தாங்கினார்."
+      ta: "இந்திய தேசிய இராணுவத்தை வலுப்படுத்தி வழிநடத்தியவர் யார்?",
+      en: "Who led and strengthened the Indian National Army (INA)?",
+      correctTa: "நேதாஜி சுபாஷ் சந்திர போஸ்",
+      correctEn: "Netaji Subhas Chandra Bose",
+      wrong: [
+        { ta: "ராஷ் பிஹாரி போஸ்", en: "Rash Behari Bose" },
+        { ta: "மோதிலால் நேரு", en: "Motilal Nehru" },
+        { ta: "சி.ஆர். தாஸ்", en: "C. R. Das" }
+      ],
+      whyTa: "நேதாஜி சுபாஷ் சந்திர போஸ் இந்திய தேசிய இராணுவத்திற்குத் தலைமை தாங்கினார்.",
+      whyEn: "Netaji Subhas Chandra Bose led the Indian National Army."
     }
   ],
   "History and Culture of Tamil Nadu": [
     {
-      prompt: function(n) { return "வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது? [" + n + "]"; },
-      correct: "1806",
-      wrong: ["1757", "1857", "1905"],
-      why: "வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது."
+      ta: "வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",
+      en: "In which year did the Vellore Mutiny take place?",
+      correctTa: "1806",
+      correctEn: "1806",
+      wrong: [
+        { ta: "1757", en: "1757" },
+        { ta: "1857", en: "1857" },
+        { ta: "1905", en: "1905" }
+      ],
+      whyTa: "வேலூர் சிப்பாய் கிளர்ச்சி 1806-ஆம் ஆண்டு நடைபெற்றது.",
+      whyEn: "The Vellore Mutiny took place in 1806."
     },
     {
-      prompt: function(n) { return "சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்? [" + n + "]"; },
-      correct: "பெரியார் ஈ.வெ.ரா.",
-      wrong: ["ராஜாஜி", "காமராசர்", "அண்ணா"],
-      why: "பெரியார் ஈ.வெ.ரா. சுயமரியாதை இயக்கத்தைத் தொடங்கினார்."
+      ta: "சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",
+      en: "Who founded the Self-Respect Movement?",
+      correctTa: "பெரியார் ஈ.வெ.ரா.",
+      correctEn: "Periyar E. V. Ramasamy",
+      wrong: [
+        { ta: "ராஜாஜி", en: "C. Rajagopalachari" },
+        { ta: "காமராசர்", en: "K. Kamaraj" },
+        { ta: "அண்ணா", en: "C. N. Annadurai" }
+      ],
+      whyTa: "பெரியார் ஈ.வெ.ரா. சுயமரியாதை இயக்கத்தைத் தொடங்கினார்.",
+      whyEn: "Periyar E. V. Ramasamy founded the Self-Respect Movement."
     },
     {
-      prompt: function(n) { return "சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது? [" + n + "]"; },
-      correct: "புறநானூறு",
-      wrong: ["சிலப்பதிகாரம்", "மணிமேகலை", "பெரியபுராணம்"],
-      why: "புறநானூறு எட்டுத்தொகை நூல்களில் ஒன்றாகும்."
+      ta: "சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",
+      en: "Which one is among the Ettuthokai works of Sangam literature?",
+      correctTa: "புறநானூறு",
+      correctEn: "Purananuru",
+      wrong: [
+        { ta: "சிலப்பதிகாரம்", en: "Silappathikaram" },
+        { ta: "மணிமேகலை", en: "Manimekalai" },
+        { ta: "பெரியபுராணம்", en: "Periyapuranam" }
+      ],
+      whyTa: "புறநானூறு எட்டுத்தொகை நூல்களில் ஒன்றாகும்.",
+      whyEn: "Purananuru is one of the Ettuthokai anthologies."
     },
     {
-      prompt: function(n) { return "நீதிக்கட்சி தொடங்கப்பட்ட ஆண்டு எது? [" + n + "]"; },
-      correct: "1916",
-      wrong: ["1920", "1925", "1937"],
-      why: "நீதிக்கட்சி 1916-ஆம் ஆண்டு தொடங்கப்பட்டது."
+      ta: "நீதிக்கட்சி (Justice Party) தொடங்கப்பட்ட ஆண்டு எது?",
+      en: "In which year was the Justice Party founded?",
+      correctTa: "1916",
+      correctEn: "1916",
+      wrong: [
+        { ta: "1920", en: "1920" },
+        { ta: "1925", en: "1925" },
+        { ta: "1937", en: "1937" }
+      ],
+      whyTa: "நீதிக்கட்சி 1916-ஆம் ஆண்டு தொடங்கப்பட்டது.",
+      whyEn: "The Justice Party was founded in 1916."
     }
   ],
   "Geography of India": [
     {
-      prompt: function(n) { return "இந்தியாவின் மிக நீளமான நதி எது? [" + n + "]"; },
-      correct: "கங்கை",
-      wrong: ["கோதாவரி", "நர்மதை", "கிருஷ்ணா"],
-      why: "இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமானது."
+      ta: "இந்தியாவின் மிக நீளமான நதி எது?",
+      en: "Which is the longest river in India?",
+      correctTa: "கங்கை",
+      correctEn: "Ganga",
+      wrong: [
+        { ta: "கோதாவரி", en: "Godavari" },
+        { ta: "நர்மதை", en: "Narmada" },
+        { ta: "கிருஷ்ணா", en: "Krishna" }
+      ],
+      whyTa: "இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமானது.",
+      whyEn: "The Ganga is the longest river within India."
     },
     {
-      prompt: function(n) { return "கருப்பு மண் எந்தப் பயிருக்கு ஏற்றது? [" + n + "]"; },
-      correct: "பருத்தி",
-      wrong: ["தேயிலை", "சணல்", "காபி"],
-      why: "கருப்பு மண் பருத்தி சாகுபடிக்கு ஏற்றது."
+      ta: "கருப்பு மண் எந்தப் பயிருக்கு ஏற்றது?",
+      en: "Black soil is especially suitable for which crop?",
+      correctTa: "பருத்தி",
+      correctEn: "Cotton",
+      wrong: [
+        { ta: "தேயிலை", en: "Tea" },
+        { ta: "சணல்", en: "Jute" },
+        { ta: "காபி", en: "Coffee" }
+      ],
+      whyTa: "கருப்பு மண் பருத்தி சாகுபடிக்கு ஏற்றது.",
+      whyEn: "Black soil is ideal for cotton cultivation."
     },
     {
-      prompt: function(n) { return "தென்னிந்தியாவின் மிக உயரமான சிகரம் எது? [" + n + "]"; },
-      correct: "ஆனைமுடி",
-      wrong: ["தொட்டபெட்டா", "மகேந்திரகிரி", "அகத்தியமலை"],
-      why: "ஆனைமுடி சிகரம் தென்னிந்தியாவின் மிக உயரமான சிகரமாகும்."
+      ta: "தென்னிந்தியாவின் மிக உயரமான சிகரம் எது?",
+      en: "Which is the highest peak in South India?",
+      correctTa: "ஆனைமுடி",
+      correctEn: "Anaimudi",
+      wrong: [
+        { ta: "தொட்டபெட்டா", en: "Doddabetta" },
+        { ta: "மகேந்திரகிரி", en: "Mahendragiri" },
+        { ta: "அகத்தியமலை", en: "Agasthyamalai" }
+      ],
+      whyTa: "ஆனைமுடி சிகரம் தென்னிந்தியாவின் மிக உயரமான சிகரமாகும்.",
+      whyEn: "Anaimudi is the highest peak in South India."
     },
     {
-      prompt: function(n) { return "இந்தியாவில் அதிக மழை தரும் பருவக்காற்று எது? [" + n + "]"; },
-      correct: "தென்மேற்குப் பருவக்காற்று",
-      wrong: ["வடகிழக்குப் பருவக்காற்று", "மேற்கத்திய இடையூறு", "கோடைக் காற்று"],
-      why: "தென்மேற்குப் பருவக்காற்று முக்கிய மழைப்பொழிவைத் தருகிறது."
+      ta: "இந்தியாவில் அதிக மழை தரும் பருவக்காற்று எது?",
+      en: "Which monsoon brings most of India's rainfall?",
+      correctTa: "தென்மேற்குப் பருவக்காற்று",
+      correctEn: "Southwest Monsoon",
+      wrong: [
+        { ta: "வடகிழக்குப் பருவக்காற்று", en: "Northeast Monsoon" },
+        { ta: "மேற்கத்திய இடையூறு", en: "Western Disturbance" },
+        { ta: "கோடைக் காற்று", en: "Summer Breeze" }
+      ],
+      whyTa: "தென்மேற்குப் பருவக்காற்று முக்கிய மழைப்பொழிவைத் தருகிறது.",
+      whyEn: "The Southwest Monsoon brings the majority of India's rainfall."
     }
   ],
   "Indian Economy": [
     {
-      prompt: function(n) { return "இந்திய ரிசர்வ் வங்கி (RBI) நாட்டுடைமையாக்கப்பட்ட ஆண்டு? [" + n + "]"; },
-      correct: "1949",
-      wrong: ["1935", "1947", "1969"],
-      why: "1949 ஜனவரி 1 அன்று RBI நாட்டுடைமையாக்கப்பட்டது."
+      ta: "இந்திய ரிசர்வ் வங்கி (RBI) நாட்டுடைமையாக்கப்பட்ட ஆண்டு?",
+      en: "In which year was the Reserve Bank of India nationalised?",
+      correctTa: "1949",
+      correctEn: "1949",
+      wrong: [
+        { ta: "1935", en: "1935" },
+        { ta: "1947", en: "1947" },
+        { ta: "1969", en: "1969" }
+      ],
+      whyTa: "1949 ஜனவரி 1 அன்று RBI நாட்டுடைமையாக்கப்பட்டது.",
+      whyEn: "RBI was nationalised on January 1, 1949."
     },
     {
-      prompt: function(n) { return "GST இந்தியாவில் நடைமுறைக்கு வந்த ஆண்டு? [" + n + "]"; },
-      correct: "2017",
-      wrong: ["2016", "2018", "2019"],
-      why: "GST 2017 ஜூலை 1 அன்று நடைமுறைக்கு வந்தது."
+      ta: "GST இந்தியாவில் நடைமுறைக்கு வந்த ஆண்டு?",
+      en: "When was GST implemented in India?",
+      correctTa: "2017",
+      correctEn: "2017",
+      wrong: [
+        { ta: "2016", en: "2016" },
+        { ta: "2018", en: "2018" },
+        { ta: "2019", en: "2019" }
+      ],
+      whyTa: "GST 2017 ஜூலை 1 அன்று நடைமுறைக்கு வந்தது.",
+      whyEn: "GST came into effect on July 1, 2017."
     },
     {
-      prompt: function(n) { return "திட்டக் குழுவுக்குப் பதிலாக வந்த அமைப்பு எது? [" + n + "]"; },
-      correct: "நிதி ஆயோக்",
-      wrong: ["நிதி ஆணையம்", "செபி", "நபார்டு"],
-      why: "2015-ல் திட்டக் குழுவுக்குப் பதிலாக நிதி ஆயோக் உருவாக்கப்பட்டது."
+      ta: "திட்டக் குழுவுக்குப் பதிலாக வந்த அமைப்பு எது?",
+      en: "Which body replaced the Planning Commission of India?",
+      correctTa: "நிதி ஆயோக்",
+      correctEn: "NITI Aayog",
+      wrong: [
+        { ta: "நிதி ஆணையம்", en: "Finance Commission" },
+        { ta: "செபி", en: "SEBI" },
+        { ta: "நபார்டு", en: "NABARD" }
+      ],
+      whyTa: "2015-ல் திட்டக் குழுவுக்குப் பதிலாக நிதி ஆயோக் உருவாக்கப்பட்டது.",
+      whyEn: "NITI Aayog replaced the Planning Commission in 2015."
     },
     {
-      prompt: function(n) { return "ரூபாய் நோட்டுகளை வெளியிடும் அதிகாரம் யாருக்கு உள்ளது? [" + n + "]"; },
-      correct: "ரிசர்வ் வங்கி (RBI)",
-      wrong: ["நிதி அமைச்சகம்", "SBI", "நாடாளுமன்றம்"],
-      why: "ரூபாய் நோட்டுகளை வெளியிடும் அதிகாரம் RBI-க்கு உள்ளது."
+      ta: "ரூபாய் நோட்டுகளை வெளியிடும் அதிகாரம் யாருக்கு உள்ளது?",
+      en: "Who has the authority to issue currency notes in India?",
+      correctTa: "ரிசர்வ் வங்கி (RBI)",
+      correctEn: "Reserve Bank of India (RBI)",
+      wrong: [
+        { ta: "நிதி அமைச்சகம்", en: "Finance Ministry" },
+        { ta: "ஸ்டேட் பேங்க்", en: "State Bank of India" },
+        { ta: "நாடாளுமன்றம்", en: "Parliament" }
+      ],
+      whyTa: "ரூபாய் நோட்டுகளை வெளியிடும் அதிகாரம் RBI-க்கு உள்ளது.",
+      whyEn: "The Reserve Bank of India has authority to issue currency notes."
     }
   ],
   "General Science": [
     {
-      prompt: function(n) { return "மனித உடலில் இன்சுலின் சுரக்கும் உறுப்பு எது? [" + n + "]"; },
-      correct: "கணையம்",
-      wrong: ["கல்லீரல்", "சிறுநீரகம்", "இதயம்"],
-      why: "கணையத்தின் பீட்டா செல்கள் இன்சுலின் சுரக்கின்றன."
+      ta: "மனித உடலில் இன்சுலின் சுரக்கும் உறுப்பு எது?",
+      en: "Which organ in the human body secretes insulin?",
+      correctTa: "கணையம்",
+      correctEn: "Pancreas",
+      wrong: [
+        { ta: "கல்லீரல்", en: "Liver" },
+        { ta: "சிறுநீரகம்", en: "Kidney" },
+        { ta: "இதயம்", en: "Heart" }
+      ],
+      whyTa: "கணையத்தின் பீட்டா செல்கள் இன்சுலின் சுரக்கின்றன.",
+      whyEn: "Beta cells of the pancreas secrete insulin."
     },
     {
-      prompt: function(n) { return "வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு வரும் நோய்? [" + n + "]"; },
-      correct: "ரிக்கெட்ஸ்",
-      wrong: ["ஸ்கர்வி", "பெரிபெரி", "ரத்தசோகை"],
-      why: "வைட்டமின் D குறைபாடு ரிக்கெட்ஸ் நோயை ஏற்படுத்தும்."
+      ta: "வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு வரும் நோய்?",
+      en: "Which deficiency disease in children is caused by lack of Vitamin D?",
+      correctTa: "ரிக்கெட்ஸ்",
+      correctEn: "Rickets",
+      wrong: [
+        { ta: "ஸ்கர்வி", en: "Scurvy" },
+        { ta: "பெரிபெரி", en: "Beriberi" },
+        { ta: "ரத்தசோகை", en: "Anaemia" }
+      ],
+      whyTa: "வைட்டமின் D குறைபாடு குழந்தைகளுக்கு ரிக்கெட்ஸ் நோயை ஏற்படுத்தும்.",
+      whyEn: "Vitamin D deficiency causes rickets in children."
     },
     {
-      prompt: function(n) { return "மிகச் சிறந்த மின் கடத்தி உலோகம் எது? [" + n + "]"; },
-      correct: "வெள்ளி",
-      wrong: ["கந்தகம்", "பாஸ்பரஸ்", "கார்பன்"],
-      why: "வெள்ளி மிகச் சிறந்த மின் கடத்தியாகும்."
+      ta: "மின்சாரத்தை நன்கு கடத்தும் உலோகம் எது?",
+      en: "Which metal is the best conductor of electricity?",
+      correctTa: "வெள்ளி",
+      correctEn: "Silver",
+      wrong: [
+        { ta: "கந்தகம்", en: "Sulphur" },
+        { ta: "பாஸ்பரஸ்", en: "Phosphorus" },
+        { ta: "கார்பன்", en: "Carbon" }
+      ],
+      whyTa: "வெள்ளி மிகச் சிறந்த மின் கடத்தியாகும்.",
+      whyEn: "Silver is the best conductor of electricity."
     },
     {
-      prompt: function(n) { return "ஒளியின் திசைவேகம் எதில் அதிகம்? [" + n + "]"; },
-      correct: "வெற்றிடம்",
-      wrong: ["நீர்", "கண்ணாடி", "எண்ணெய்"],
-      why: "வெற்றிடத்தில் ஒளியின் வேகம் அதிகம்."
+      ta: "ஒளியின் திசைவேகம் எதில் அதிகம்?",
+      en: "In which medium is the speed of light maximum?",
+      correctTa: "வெற்றிடம்",
+      correctEn: "Vacuum",
+      wrong: [
+        { ta: "நீர்", en: "Water" },
+        { ta: "கண்ணாடி", en: "Glass" },
+        { ta: "எண்ணெய்", en: "Oil" }
+      ],
+      whyTa: "வெற்றிடத்தில் ஒளியின் வேகம் அதிகம்.",
+      whyEn: "Light travels fastest in a vacuum."
     }
   ]
 };
 
 function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   var qLimit = Number(totalQuestions) || 10;
-  var cleanSubj = SUBJECT_TEMPLATES[subject] ? subject : "Indian Polity";
-  var cleanBatch = String(batchCode || "TNPSC01").trim().toUpperCase();
-  var dayKey = getTodayDateKey();
-  var state = { seed: createSeedNumber(dayKey + "|" + cleanSubj + "|" + cleanBatch) };
-  var templates = SUBJECT_TEMPLATES[cleanSubj];
-  var generated = [];
-
-  for (var idx = 0; idx < qLimit; idx++) {
-    var pickIdx = nextRand(state) % templates.length;
-    var tpl = templates[pickIdx];
-    var cycleNum = Math.floor(idx / templates.length) + 1;
-
-    var options = [tpl.correct].concat(tpl.wrong.slice());
-    for (var i = options.length - 1; i > 0; i--) {
-      var j = nextRand(state) % (i + 1);
-      var temp = options[i];
-      options[i] = options[j];
-      options[j] = temp;
-    }
-
-    var answerIndex = options.indexOf(tpl.correct);
-    generated.push({
-      q: tpl.prompt(cycleNum + "-" + (idx + 1)),
-      opts: options,
-      a: answerIndex >= 0 ? answerIndex : 0,
-      why: tpl.why + " (" + dayKey + " • " + cleanBatch + ")"
-    });
-  }
-
-  return generated;
-}
-
-var qs = buildDailyQuestionsForSubject("Indian Polity", "TNPSC01", 10);
-var sb = null, me = null, myAns = [], myScore = 0, timer = null;
-
-function g(id){ return document.getElementById(id); }
-function show(id){ g(id).classList.remove("hidden"); }
-function hide(id){ g(id).classList.add("hidden"); }
-
-function getSB(){
-  if (sb) return sb;
-  var cfg = window.QUIZ_CONFIG || {};
-  if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || !window.supabase) return null;
-  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-  return sb;
-}
-
-function refreshSubjectBatchQuestions(){
-  var subj = g("subj") ? g("subj").value : "Indian Polity";
-  var batch = g("code") ? g("code").value.trim().toUpperCase() : "TNPSC01";
-  var countVal = g("qCount") ? Number(g("qCount").value) || 10 : 10;
-  qs = buildDailyQuestionsForSubject(subj, batch, countVal);
-  if (g("aiMsg")){
-    g("aiMsg").className = "ok";
-    g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Q&A தயார்)";
-  }
-}
-
-function changeSubject(){
-  refreshSubjectBatchQuestions();
-}
-
-function onProviderChange(){
-  var prov = g("aiProvider").value;
-  var cfgModel = (window.QUIZ_CONFIG && window.QUIZ_CONFIG.GEMINI_MODEL) || "gemini-3.8-flash";
-  if (prov === "openai"){
-    g("keyLabel").textContent = "ChatGPT / OpenAI API Key (sk-...)";
-    g("gkey").placeholder = "sk-... (OpenAI API Key உள்ளிடவும்)";
-    if (!g("aiModel").value.trim() || g("aiModel").value.indexOf("gemini") === 0){
-      g("aiModel").value = "gpt-4o-mini";
-    }
-  } else {
-    g("keyLabel").textContent = "Gemini API Key (AIza...)";
-    g("gkey").placeholder = "AIza... (Gemini API Key உள்ளிடவும்)";
-    g("aiModel").value = cfgModel;
-  }
-}
-
-function extractJsonArray(rawText){
-  var clean = String(rawText || "").replace(/```json|```/gi, "").trim();
-  var start = clean.indexOf("[");
-  var end = clean.lastIndexOf("]");
-  if (start !== -1 && end !== -1 && end > start){
-    clean = clean.slice(start, end + 1);
-  }
-  return JSON.parse(clean);
-}
-
-async function fetchWithRetry(url, options, retries){
-  for (var attempt = 0; attempt <= retries; attempt++){
-    var r = await fetch(url, options);
-    var d = await r.json();
-    if (r.ok) return d;
-    var msg = (d && d.error && d.error.message) || "API Error";
-    var busy = msg.toLowerCase().indexOf("high demand") !== -1 ||
-      msg.toLowerCase().indexOf("overloaded") !== -1 ||
-      msg.toLowerCase().indexOf("rate limit") !== -1 ||
-      r.status === 503 || r.status === 429;
-    if (!busy || attempt === retries) throw new Error(msg);
-    g("aiMsg").className = "ok";
-    g("aiMsg").textContent = "AI server busy-ஆக உள்ளது, மீண்டும் முயற்சிக்கிறது (" + (attempt + 1) + ")...";
-    await new Promise(function(res){ setTimeout(res, 1500 * (attempt + 1)); });
-  }
-}
-
-async function callOpenAI(apiKey, model, prompt){
-  var d = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer " + apiKey
-    },
-    body: JSON.stringify({
-      model: model || "gpt-4o-mini",
-      temperature: 0.8,
-      messages: [
-        { role: "system", content: "You are a TNPSC quiz generator. Return ONLY a valid JSON array." },
-        { role: "user", content: prompt }
-      ]
-    })
-  }, 2);
-  return d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || "[]";
-}
-
-async function callGemini(apiKey, model, prompt){
-  var cleanModel = String(model || "gemini-3.8-flash").replace(/^models\//, "");
-  var endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" +
-    encodeURIComponent(cleanModel) + ":generateContent?key=" + encodeURIComponent(apiKey);
-  var d = await fetchWithRetry(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json", temperature: 0.8 }
-    })
-  }, 2);
-  return d && d.candidates && d.candidates[0] && d.candidates[0].content &&
-    d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
-    d.candidates[0].content.parts[0].text || "[]";
-}
-
-async function genAI(newCode){
-  var cfg = window.QUIZ_CONFIG || {};
-  var pin = g("pin").value.trim();
-  var expected = String(cfg.ADMIN_PIN || "Admin2026").trim();
-  if (!pin || pin !== expected){
-    g("aiMsg").className = "err";
-    g("aiMsg").textContent = "சரியான Admin PIN உள்ளிடவும்.";
-    return;
-  }
-  if (newCode){
-    g("code").value = "TNP" + Math.floor(100 + Math.random()*900);
-    refreshSubjectBatchQuestions();
-  }
-  var key = g("gkey").value.trim();
-  if (!key){
-    g("aiMsg").className = "err";
-    g("aiMsg").textContent = "AI API Key உள்ளிடவும் (அல்லது தினசரி Subject/Batch Q&A தயாராக உள்ளது).";
-    return;
-  }
-  var code = g("code").value.trim().toUpperCase();
-  var s = g("subj").value;
-  var prov = g("aiProvider").value;
-  var model = g("aiModel").value.trim();
-  var qLimit = g("qCount") ? Number(g("qCount").value) || 10 : 10;
-
-  g("aiBtn1").disabled = true;
-  g("aiBtn2").disabled = true;
-  g("aiMsg").className = "ok";
-  g("aiMsg").textContent = (prov === "openai" ? "ChatGPT" : "Gemini") + " மூலம் புதிய கேள்விகள் உருவாக்குகிறது...";
-
-  var prompt = 'Create ' + qLimit + ' fresh TNPSC multiple-choice questions on "' + s + '" for batch "' + code + '" on ' + getTodayDateKey() + '. ' +
-    'Return ONLY a JSON array in this exact format: [{"q":"...","opts":["A","B","C","D"],"a":0,"why":"..."}]';
-
-  try {
-    var raw = prov === "openai"
-      ? await callOpenAI(key, model || "gpt-4o-mini", prompt)
-      : await callGemini(key, model || cfg.GEMINI_MODEL || "gemini-3.8-flash", prompt);
-
-    var arr = extractJsonArray(raw);
-    if (!Array.isArray(arr) || !arr.length) throw new Error("கேள்விகள் பட்டியல் வரவில்லை.");
-
-    qs = arr;
-    var client = getSB();
-    if (client) await client.rpc("quiz_save_questions", { p_test_code: code, p_questions: qs });
-
-    g("aiMsg").className = "ok";
-    g("aiMsg").textContent = code + " க்கு " + qs.length + " புதிய AI கேள்விகள் தயார்!";
-  } catch(e){
-    refreshSubjectBatchQuestions();
-    g("aiMsg").className = "err";
-    g("aiMsg").textContent = e.message + " (தினசரி Subject/Batch கேள்விகள் load செய்யப்பட்டுள்ளன.)";
-  } finally {
-    g("aiBtn1").disabled = false;
-    g("aiBtn2").disabled = false;
-  }
-}
-
-async function joinQuiz(){
-  refreshSubjectBatchQuestions();
-  g("joinMsg").textContent = "";
-  var name = g("name").value.trim();
-  var code = g("code").value.trim().toUpperCase();
-  g("code").value = code;
-  if (!name || code.length < 3){
-    g("joinMsg").textContent = "பெயர் மற்றும் Test Batch / Code உள்ளிடவும்.";
-    return;
-  }
-  var client = getSB();
-  if (!client){
-    g("joinMsg").textContent = "config.js சரிபார்க்கவும்.";
-    return;
-  }
-  var saved = await client.rpc("quiz_get_questions", { p_test_code: code });
-  if (!saved.error && Array.isArray(saved.data) && saved.data.length) qs = saved.data;
-
-  var res = await client.rpc("quiz_join", { p_test_code: code, p_name: name, p_max_players: 50 });
-  if (res.error){
-    g("joinMsg").textContent = res.error.message;
-    return;
-  }
-  me = res.data;
-  g("whoTitle").textContent = name + " (" + code + ")";
-  renderQ();
-  hide("joinBox");
-  show("examBox");
-}
-
-function renderQ(){
-  var h = "";
-  for (var i = 0; i < qs.length; i++){
-    h += '<div class="q"><b>' + (i+1) + '. ' + qs[i].q + '</b>';
-    for (var j = 0; j < qs[i].opts.length; j++){
-      h += '<label class="opt"><input type="radio" name="q' + i + '" value="' + j + '"> ' + qs[i].opts[j] + '</label>';
-    }
-    h += '</div>';
-  }
-  g("qArea").innerHTML = h;
-}
-
-async function submitQuiz(){
-  g("examMsg").textContent = "";
-  var arr = [], sc = 0;
-  for (var i = 0; i < qs.length; i++){
-    var el = document.querySelector('input[name="q' + i + '"]:checked');
-    if (!el){ g("examMsg").textContent = "அனைத்து கேள்விகளுக்கும் பதில் அளிக்கவும்."; return; }
-    var v = Number(el.value);
-    arr.push(v);
-    if (v === qs[i].a) sc++;
-  }
-  myAns = arr;
-  myScore = sc;
-  var client = getSB();
-  var res = await client.rpc("quiz_submit", {
-    p_test_code: g("code").value.trim().toUpperCase(),
-    p_participant_id: me.participant_id,
-    p_token: me.token,
-    p_answers: arr
-  });
-  if (res.error){ g("examMsg").textContent = res.error.message; return; }
-  hide("examBox");
-  show("waitBox");
-  await checkStatus();
-  if (!g("waitBox").classList.contains("hidden")){
-    timer = setInterval(checkStatus, 3000);
-  }
-}
-
-async function checkStatus(){
-  var client = getSB();
-  var res = await client.rpc("quiz_status", {
-    p_test_code: g("code").value.trim().toUpperCase(),
-    p_participant_id: me ? me.participant_id : null
-  });
-  if (res.error) return;
-  if (res.data && res.data.released){
-    if (timer) clearInterval(timer);
-    showResult(res.data);
-    hide("waitBox");
-    show("resBox");
-  } else {
-    g("waitText").textContent = "சமர்ப்பித்தவர்கள்: " + (res.data.submitted_count || 0) + " / " + (res.data.total_players || 2);
-  }
-}
-
-function showResult(d){
-  var sc = typeof d.my_score === "number" ? d.my_score : myScore;
-  var rank = d.rank || 1;
-  var tot = d.total_players || 1;
-  var b = g("banner");
-  b.className = "banner";
-  if (sc > 8){ b.classList.add("champ"); b.textContent = "🏆 CHAMPION! (" + sc + "/" + qs.length + ")"; }
-  else if (sc > 5){ b.classList.add("good"); b.textContent = "👏 GOOD! (" + sc + "/" + qs.length + ")"; }
-  else { b.classList.add("imp"); b.textContent = "📚 இன்னும் improve பண்ணனும் (" + sc + "/" + qs.length + ")"; }
-
-  g("statsText").textContent = "உங்கள் மதிப்பெண்: " + sc + "/" + qs.length + " | உங்கள் Position: #" + rank + " / " + tot;
-
-  var rv = "";
-  for (var i = 0; i < qs.length; i++){
-    var ok = myAns[i] === qs[i].a;
-    rv += '<div class="q"><b>' + (i+1) + '. ' + qs[i].q + '</b><br>' +
-      (ok ? '<span class="ok">சரி</span>' : '<span class="err">தவறு</span>') +
-      ' — சரியான பதில்: <b>' + qs[i].opts[qs[i].a] + '</b><br><small>' + (qs[i].why || "") + '</small></div>';
-  }
-  g("reviewArea").innerHTML = rv;
-}
-
-function inviteText(){
-  var c = g("code").value.trim().toUpperCase();
-  var u = location.href.split("?")[0] + "?code=" + encodeURIComponent(c);
-  return "TNPSC Live Quiz!\nBatch / Code: " + c + "\nJoin: " + u;
-}
-
-function shareWA(){
-  window.open("https://wa.me/?text=" + encodeURIComponent(inviteText()), "_blank");
-}
-
-async function shareSocial(){
-  var t = inviteText();
-  if (navigator.share){
-    try { await navigator.share({ title: "TNPSC Quiz", text: t }); return; } catch(e){}
-  }
-  try { await navigator.clipboard.writeText(t); g("shareMsg").textContent = "Invite Copy செய்யப்பட்டது!"; }
-  catch(e){ g("shareMsg").textContent = t; }
-}
-
-refreshSubjectBatchQuestions();
-</script>
-</body>
-</html>
+  var cleanSub
