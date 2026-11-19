@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TNPSC Live Quiz</title>
 <style>
-  body { font-family: system-ui, sans-serif; margin: 0; padding: 14px; background: #f1f5f9; color: #0f172a; }
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 14px; background: #f1f5f9; color: #0f172a; }
   .box { max-width: 680px; margin: 12px auto; background: #fff; padding: 16px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
   h1, h2 { margin: 0 0 10px; }
   label { display: block; font-weight: 700; margin: 10px 0 4px; font-size: 14px; }
-  input, select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; box-sizing: border-box; }
+  input, select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; box-sizing: border-box; background: #f8fafc; }
   button { width: 100%; padding: 12px; margin-top: 10px; border: 0; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
   button.sec { background: #0d9488; }
   button.wa { background: #16a34a; }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
   .row button { width: auto; flex: 1; min-width: 130px; }
   .hidden { display: none; }
@@ -65,10 +66,11 @@
 </div>
 
 <div class="box" id="adminBox">
-  <h2>Admin Panel</h2>
+  <h2>Admin Panel (AI &amp; Subject)</h2>
   <label>Admin PIN</label>
   <input id="pin" type="password" placeholder="Admin2026">
-  <label>Subject</label>
+
+  <label>Subject (பாடம்)</label>
   <select id="subj" onchange="changeSubject()">
     <option value="Indian Polity">Indian Polity</option>
     <option value="Indian National Movement">Indian National Movement</option>
@@ -77,11 +79,22 @@
     <option value="Indian Economy">Indian Economy</option>
     <option value="General Science">General Science</option>
   </select>
-  <label>Gemini API Key</label>
-  <input id="gkey" type="password" placeholder="AIza...">
+
+  <label>AI Provider (ChatGPT / Gemini)</label>
+  <select id="aiProvider" onchange="onProviderChange()">
+    <option value="openai">ChatGPT (OpenAI API)</option>
+    <option value="gemini">Gemini (Google API)</option>
+  </select>
+
+  <label id="keyLabel">ChatGPT / OpenAI API Key (sk-...)</label>
+  <input id="gkey" type="password" placeholder="sk-... அல்லது AIza... API Key உள்ளிடவும்">
+
+  <label>AI Model</label>
+  <input id="aiModel" type="text" value="gpt-4o-mini" placeholder="எ.கா: gpt-4o-mini அல்லது gemini-3.8-flash">
+
   <div class="row">
-    <button type="button" onclick="genAI(false)">AI கேள்விகள்</button>
-    <button type="button" class="sec" onclick="genAI(true)">புதிய Test (AI)</button>
+    <button type="button" id="aiBtn1" onclick="genAI(false)">AI கேள்விகள்</button>
+    <button type="button" class="sec" id="aiBtn2" onclick="genAI(true)">புதிய Test (AI)</button>
   </div>
   <div id="aiMsg" class="ok"></div>
 </div>
@@ -131,11 +144,90 @@ function getSB(){
   return sb;
 }
 
+function onProviderChange(){
+  var prov = g("aiProvider").value;
+  var cfgModel = (window.QUIZ_CONFIG && window.QUIZ_CONFIG.GEMINI_MODEL) || "gemini-3.8-flash";
+  if (prov === "openai"){
+    g("keyLabel").textContent = "ChatGPT / OpenAI API Key (sk-...)";
+    g("gkey").placeholder = "sk-... (OpenAI API Key உள்ளிடவும்)";
+    if (!g("aiModel").value.trim() || g("aiModel").value.indexOf("gemini") === 0){
+      g("aiModel").value = "gpt-4o-mini";
+    }
+  } else {
+    g("keyLabel").textContent = "Gemini API Key (AIza...)";
+    g("gkey").placeholder = "AIza... (Gemini API Key உள்ளிடவும்)";
+    g("aiModel").value = cfgModel;
+  }
+}
+
 function changeSubject(){
   var s = g("subj").value;
   qs = (BANKS[s] || BANKS["Indian Polity"]).slice();
   g("aiMsg").className = "ok";
   g("aiMsg").textContent = s + " கேள்விகள் மாற்றப்பட்டன (" + qs.length + ").";
+}
+
+function extractJsonArray(rawText){
+  var clean = String(rawText || "").replace(/```json|```/gi, "").trim();
+  var start = clean.indexOf("[");
+  var end = clean.lastIndexOf("]");
+  if (start !== -1 && end !== -1 && end > start){
+    clean = clean.slice(start, end + 1);
+  }
+  return JSON.parse(clean);
+}
+
+async function fetchWithRetry(url, options, retries){
+  for (var attempt = 0; attempt <= retries; attempt++){
+    var r = await fetch(url, options);
+    var d = await r.json();
+    if (r.ok) return d;
+    var msg = (d && d.error && d.error.message) || "API Error";
+    var busy = msg.toLowerCase().indexOf("high demand") !== -1 ||
+      msg.toLowerCase().indexOf("overloaded") !== -1 ||
+      msg.toLowerCase().indexOf("rate limit") !== -1 ||
+      r.status === 503 || r.status === 429;
+    if (!busy || attempt === retries) throw new Error(msg);
+    g("aiMsg").className = "ok";
+    g("aiMsg").textContent = "AI server busy-ஆக உள்ளது, மீண்டும் முயற்சிக்கிறது (" + (attempt + 1) + ")...";
+    await new Promise(function(res){ setTimeout(res, 1500 * (attempt + 1)); });
+  }
+}
+
+async function callOpenAI(apiKey, model, prompt){
+  var d = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + apiKey
+    },
+    body: JSON.stringify({
+      model: model || "gpt-4o-mini",
+      temperature: 0.8,
+      messages: [
+        { role: "system", content: "You are a TNPSC quiz generator. Return ONLY a valid JSON array." },
+        { role: "user", content: prompt }
+      ]
+    })
+  }, 2);
+  return d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || "[]";
+}
+
+async function callGemini(apiKey, model, prompt){
+  var cleanModel = String(model || "gemini-3.8-flash").replace(/^models\//, "");
+  var endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" +
+    encodeURIComponent(cleanModel) + ":generateContent?key=" + encodeURIComponent(apiKey);
+  var d = await fetchWithRetry(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json", temperature: 0.8 }
+    })
+  }, 2);
+  return d && d.candidates && d.candidates[0] && d.candidates[0].content &&
+    d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
+    d.candidates[0].content.parts[0].text || "[]";
 }
 
 async function genAI(newCode){
@@ -150,7 +242,7 @@ async function genAI(newCode){
   var key = g("gkey").value.trim();
   if (!key){
     g("aiMsg").className = "err";
-    g("aiMsg").textContent = "Gemini API Key உள்ளிடவும்.";
+    g("aiMsg").textContent = "AI API Key உள்ளிடவும்.";
     return;
   }
   if (newCode){
@@ -158,30 +250,37 @@ async function genAI(newCode){
   }
   var code = g("code").value.trim().toUpperCase();
   var s = g("subj").value;
-  var model = String(cfg.GEMINI_MODEL || "gemini-3.8-flash").replace(/^models\//, "");
-  g("aiMsg").className = "ok";
-  g("aiMsg").textContent = "AI கேள்விகள் உருவாக்குகிறது...";
+  var prov = g("aiProvider").value;
+  var model = g("aiModel").value.trim();
 
-  var prompt = 'Create 10 TNPSC multiple-choice questions on "' + s + '" for test "' + code + '" (' + Date.now() + '). Return ONLY JSON array: [{"q":"...","opts":["A","B","C","D"],"a":0,"why":"..."}]';
+  g("aiBtn1").disabled = true;
+  g("aiBtn2").disabled = true;
+  g("aiMsg").className = "ok";
+  g("aiMsg").textContent = (prov === "openai" ? "ChatGPT" : "Gemini") + " மூலம் புதிய கேள்விகள் உருவாக்குகிறது...";
+
+  var prompt = 'Create 10 fresh TNPSC multiple-choice questions on "' + s + '" for test "' + code + '" (' + Date.now() + '). ' +
+    'Return ONLY a JSON array in this exact format: [{"q":"...","opts":["A","B","C","D"],"a":0,"why":"..."}]';
+
   try {
-    var r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent?key=" + encodeURIComponent(key), {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ contents:[{parts:[{text:prompt}]}], generationConfig:{responseMimeType:"application/json"} })
-    });
-    var d = await r.json();
-    if (!r.ok) throw new Error((d && d.error && d.error.message) || "API Error");
-    var txt = d.candidates[0].content.parts[0].text;
-    var arr = JSON.parse(txt);
-    if (!Array.isArray(arr) || !arr.length) throw new Error("Empty questions");
+    var raw = prov === "openai"
+      ? await callOpenAI(key, model || "gpt-4o-mini", prompt)
+      : await callGemini(key, model || cfg.GEMINI_MODEL || "gemini-3.8-flash", prompt);
+
+    var arr = extractJsonArray(raw);
+    if (!Array.isArray(arr) || !arr.length) throw new Error("கேள்விகள் பட்டியல் வரவில்லை.");
+
     qs = arr;
     var client = getSB();
     if (client) await client.rpc("quiz_save_questions", { p_test_code: code, p_questions: qs });
+
     g("aiMsg").className = "ok";
     g("aiMsg").textContent = code + " க்கு " + qs.length + " புதிய AI கேள்விகள் தயார்!";
   } catch(e){
     g("aiMsg").className = "err";
     g("aiMsg").textContent = e.message;
+  } finally {
+    g("aiBtn1").disabled = false;
+    g("aiBtn2").disabled = false;
   }
 }
 
