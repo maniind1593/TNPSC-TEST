@@ -5,33 +5,223 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TNPSC Group 4 Live Quiz</title>
 <style>
-  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 14px; background: #f1f5f9; color: #0f172a; }
-  .box { max-width: 700px; margin: 12px auto; background: #fff; padding: 18px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-  h1, h2 { margin: 0 0 10px; }
-  label { display: block; font-weight: 700; margin: 10px 0 4px; font-size: 14px; }
-  input, select { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; box-sizing: border-box; background: #f8fafc; }
-  button { width: 100%; padding: 12px; margin-top: 10px; border: 0; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 700; font-size: 15px; cursor: pointer; }
-  button.sec { background: #0d9488; }
-  button.wa { background: #16a34a; }
-  button.ghost { background: #e2e8f0; color: #0f172a; }
-  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  :root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --soft: #f8fafc;
+    --primary: #1d4ed8;
+    --sec: #0f766e;
+    --ok: #047857;
+    --err: #b91c1c;
+    --font-scale: 1;
+  }
+
+  body.contrast-high {
+    --bg: #0b0f17;
+    --card: #111827;
+    --ink: #f9fafb;
+    --muted: #e5e7eb;
+    --border: #facc15;
+    --soft: #1f2937;
+    --primary: #facc15;
+    --sec: #38bdf8;
+    --ok: #4ade80;
+    --err: #f87171;
+  }
+
+  body.contrast-high button,
+  body.contrast-high button.sec,
+  body.contrast-high button.wa {
+    color: #090d16;
+    font-weight: 800;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 14px;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: calc(15px * var(--font-scale));
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .box {
+    max-width: 740px;
+    margin: 12px auto;
+    background: var(--card);
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  }
+
+  h1, h2, h3 {
+    margin: 0 0 10px;
+  }
+
+  label {
+    display: block;
+    font-weight: 700;
+    margin: 10px 0 4px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 1em;
+    box-sizing: border-box;
+    background: var(--soft);
+    color: var(--ink);
+  }
+
+  button {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 10px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1em;
+    cursor: pointer;
+  }
+
+  button.sec { background: var(--sec); }
+  button.wa { background: #15803d; color: #ffffff; }
+  button.ghost { background: var(--soft); color: var(--ink); border: 1px solid var(--border); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .row button { width: auto; flex: 1; min-width: 130px; }
+  .row button, .row select { width: auto; flex: 1; min-width: 130px; }
   .hidden { display: none; }
-  .err { color: #dc2626; font-weight: 700; margin-top: 8px; }
-  .ok { color: #059669; font-weight: 700; margin-top: 8px; }
-  .muted { color: #64748b; font-size: 13px; }
-  .q { background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
-  .q-en { display: block; color: #475569; font-size: 13.5px; font-weight: 600; margin-top: 4px; }
-  .opt { display: block; padding: 9px 11px; margin-top: 7px; background: #fff; border: 1px solid #cbd5e1; border-radius: 9px; cursor: pointer; }
-  .opt-en { display: block; color: #475569; font-size: 13px; margin-left: 22px; }
-  .banner { padding: 18px; border-radius: 12px; text-align: center; font-weight: 800; font-size: 19px; margin-bottom: 12px; }
+  .err { color: var(--err); font-weight: 700; margin-top: 8px; }
+  .ok { color: var(--ok); font-weight: 700; margin-top: 8px; }
+  .muted { color: var(--muted); font-size: 0.9em; }
+
+  .timer-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--soft);
+    border: 2px solid var(--primary);
+    margin-bottom: 12px;
+    font-weight: 800;
+  }
+
+  .timer-urgent {
+    border-color: var(--err);
+    color: var(--err);
+    animation: pulseWarn 1s infinite alternate;
+  }
+
+  @keyframes pulseWarn {
+    from { opacity: 1; }
+    to { opacity: 0.65; }
+  }
+
+  .user-meta {
+    background: var(--soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 0.95em;
+  }
+
+  .q {
+    background: var(--soft);
+    padding: 14px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .q-en {
+    display: block;
+    color: var(--muted);
+    font-size: 0.92em;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .opt {
+    display: block;
+    padding: 10px 12px;
+    margin-top: 7px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .opt-en {
+    display: block;
+    color: var(--muted);
+    font-size: 0.88em;
+    margin-left: 22px;
+  }
+
+  .contact-box {
+    background: var(--soft);
+    border: 1.5px solid var(--sec);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+
+  .banner {
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.2em;
+    margin-bottom: 12px;
+  }
+
   .champ { background: #fef08a; color: #713f12; animation: pop 1s infinite alternate; }
   .good { background: #dcfce7; color: #14532d; }
   .imp { background: #fee2e2; color: #7f1d1d; }
-  @keyframes pop { from { transform: scale(1); } to { transform: scale(1.04); } }
-  .admin-trigger-wrap { max-width: 700px; margin: 18px auto 0; text-align: center; }
-  .admin-trigger-wrap button { width: auto; padding: 8px 16px; font-size: 13px; }
+
+  @keyframes pop {
+    from { transform: scale(1); }
+    to { transform: scale(1.03); }
+  }
+
+  .acc-panel {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--soft);
+    border: 1px solid var(--border);
+  }
+
+  .admin-trigger-wrap {
+    max-width: 740px;
+    margin: 18px auto 0;
+    text-align: center;
+  }
+
+  .admin-trigger-wrap button {
+    width: auto;
+    padding: 8px 16px;
+    font-size: 0.88em;
+  }
 </style>
 </head>
 <body>
@@ -39,92 +229,147 @@
 <!-- USER JOIN SCREEN -->
 <div class="box" id="joinBox">
   <h1>TNPSC Group 4 Live Quiz</h1>
-  <p class="muted">Group 4 பாடத்திட்டம் • தமிழ் &amp; ஆங்கிலம் (Bilingual) கேள்விகள் • தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே</p>
-  <label>Test Batch / Code</label>
-  <input id="code" type="text" value="GRP4_01">
-  <label>உங்கள் பெயர் (Your Name)</label>
+  <p class="muted">Revised Scheme • 1 கேள்வி = 1 நிமிடம் • தமிழ் &amp; ஆங்கிலம் • தனிப்பட்ட மதிப்பெண் &amp; Position மட்டுமே</p>
+
+  <label for="code">Test Batch / Code</label>
+  <input id="code" type="text" value="G4_REV01">
+
+  <label for="name">உங்கள் பெயர் (Your Name)</label>
   <input id="name" type="text" placeholder="பெயர் உள்ளிடவும் / Enter your name">
+
   <button type="button" id="joinBtn">Join Quiz (தேர்வைத் தொடங்குக)</button>
-  <div id="joinMsg" class="err"></div>
+  <div id="joinMsg" class="err" role="alert" aria-live="polite"></div>
+
+  <button type="button" class="ghost" id="accToggleBtn" aria-expanded="false">Accessibility Settings (எழுத்து / Contrast / மொழி)</button>
+  <div class="acc-panel hidden" id="accPanel">
+    <div class="row">
+      <div>
+        <label for="fontSizeSel">Font Size (எழுத்து அளவு)</label>
+        <select id="fontSizeSel">
+          <option value="1" selected>Normal (100%)</option>
+          <option value="1.15">Large (115%)</option>
+          <option value="1.3">Extra Large (130%)</option>
+        </select>
+      </div>
+      <div>
+        <label for="contrastSel">Contrast Mode</label>
+        <select id="contrastSel">
+          <option value="normal" selected>Standard Light</option>
+          <option value="high">High Contrast</option>
+        </select>
+      </div>
+      <div>
+        <label for="langModeSel">Language View</label>
+        <select id="langModeSel">
+          <option value="both" selected>Tamil + English</option>
+          <option value="ta">Tamil Only (தமிழ் மட்டும்)</option>
+          <option value="en">English Only (ஆங்கிலம் மட்டும்)</option>
+        </select>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- USER EXAM SCREEN -->
 <div class="box hidden" id="examBox">
-  <h2 id="whoTitle">தேர்வு</h2>
+  <div class="timer-box" id="timerBox" aria-live="polite">
+    <span id="timerLabel">Time Remaining: --:--</span>
+    <span id="progressLabel">Answered: 0 / 0</span>
+  </div>
+
+  <div class="user-meta" id="whoTitle">பங்கேற்பாளர் விவரம்</div>
+
   <div id="qArea"></div>
-  <button type="button" class="sec" id="submitBtn">Submit Answers (பதில்களைச் சமர்ப்பிக்கவும்)</button>
-  <div id="examMsg" class="err"></div>
+
+  <button type="button" class="sec" id="finishedBtn">Finished (அனைத்து கேள்விகளும் முடிந்தன)</button>
+  <div id="finishStatusMsg" class="ok" role="status" aria-live="polite"></div>
+
+  <div class="contact-box hidden" id="contactSubmitBox">
+    <h3>இறுதிச் சமர்ப்பிப்பு (Final Submission)</h3>
+    <p class="muted">Email அல்லது Phone Number இரண்டில் ஏதேனும் ஒன்றை (அல்லது இரண்டையும்) கட்டாயம் உள்ளிடவும்.</p>
+    <label for="userEmail">Email Address</label>
+    <input id="userEmail" type="email" placeholder="name@example.com">
+    <label for="userPhone">Phone Number</label>
+    <input id="userPhone" type="tel" placeholder="9876543210">
+    <button type="button" id="submitBtn">Submit Answers (இப்போது சமர்ப்பிக்கவும்)</button>
+  </div>
+
+  <div id="examMsg" class="err" role="alert" aria-live="polite"></div>
 </div>
 
 <!-- USER RESULT SCREEN -->
 <div class="box hidden" id="resBox">
   <h2>உங்கள் தனிப்பட்ட தேர்வு முடிவு (Personal Result)</h2>
-  <div id="banner" class="banner"></div>
-  <div id="statsText" style="font-weight:700;margin-bottom:12px;"></div>
+  <div id="banner" class="banner" aria-live="polite"></div>
+  <div id="statsText" style="font-weight:700;margin-bottom:6px;"></div>
+  <div id="timeLeftText" class="ok" style="margin-bottom:12px;"></div>
+
   <div class="row">
+    <button type="button" class="sec" id="reviewToggleBtn" aria-expanded="false">Review Answers (கேள்வி &amp; பதில் விவரம்)</button>
     <button type="button" class="wa" id="waBtn">WhatsApp Invite</button>
     <button type="button" id="shareBtn">Share / Copy Invite</button>
     <button type="button" class="ghost" id="homeBtn">புதிய தேர்வு (Home)</button>
   </div>
-  <div id="shareMsg" class="ok"></div>
-  <div id="reviewArea" style="margin-top:14px;"></div>
+
+  <div id="shareMsg" class="ok" role="status" aria-live="polite"></div>
+
+  <div id="reviewArea" class="hidden" style="margin-top:14px;"></div>
 </div>
 
 <!-- SEPARATE ADMIN LOGIN SCREEN -->
 <div class="box hidden" id="adminLoginBox">
   <h2>Group 4 Admin Login</h2>
   <p class="muted">Admin PIN உள்ளிட்டு தனியான Admin Control திரையைத் திறக்கவும்.</p>
-  <label>Admin PIN</label>
+  <label for="pin">Admin PIN</label>
   <input id="pin" type="password" placeholder="Admin PIN உள்ளிடவும்">
   <div class="row">
     <button type="button" id="adminOpenBtn">Admin திறக்கவும்</button>
     <button type="button" class="ghost" id="adminBackBtn1">User திரைக்குச் செல்ல</button>
   </div>
-  <div id="adminLoginMsg" class="err"></div>
+  <div id="adminLoginMsg" class="err" role="alert" aria-live="polite"></div>
 </div>
 
 <!-- SEPARATE ADMIN CONTROL SCREEN -->
 <div class="box hidden" id="adminBox">
-  <h2>Group 4 Admin Control Panel</h2>
-  <p class="muted">Group 4 Subject மற்றும் Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A தானாகத் தயாராகும்.</p>
+  <h2>Group 4 Admin Control Panel (Revised Scheme)</h2>
+  <p class="muted">Subject மற்றும் Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A மற்றும் (1 கேள்வி = 1 நிமிடம்) நேரம் தானாகத் தயாராகும்.</p>
 
-  <label>Test Batch / Code</label>
-  <input id="adminCode" type="text" value="GRP4_01">
+  <label for="adminCode">Test Batch / Code</label>
+  <input id="adminCode" type="text" value="G4_REV01">
 
-  <label>TNPSC Group 4 Subject (பாடம்)</label>
+  <label for="subj">Group 4 Subject / Part (பாடம்)</label>
   <select id="subj">
-    <option value="General Tamil">General Tamil &amp; Literature (பொதுத் தமிழ் &amp; இலக்கியம்)</option>
-    <option value="General English">General English &amp; Grammar (பொது ஆங்கிலம்)</option>
-    <option value="Indian Polity & Economy">Polity &amp; Indian Economy (அரசியலமைப்பு &amp; பொருளாதாரம்)</option>
-    <option value="History & TN Culture">History &amp; TN Culture (வரலாறு &amp; தமிழக மரபு)</option>
-    <option value="Geography & Science">Geography &amp; General Science (புவியியல் &amp; அறிவியல்)</option>
-    <option value="Aptitude & Mental Ability">Aptitude &amp; Mental Ability (திறனறிவு &amp; மனக்கணக்கு)</option>
+    <option value="Part-A: Tamil Eligibility & Literature">Part-A: Tamil Eligibility &amp; Literature (பொதுத் தமிழ் &amp; இலக்கியம்)</option>
+    <option value="Part-B: Indian Polity & Economy">Part-B: Indian Polity &amp; Economy (அரசியலமைப்பு &amp; பொருளாதாரம்)</option>
+    <option value="Part-B: History, INM & TN Culture">Part-B: History, INM &amp; TN Culture (வரலாறு, தேசிய இயக்கம் &amp; தமிழக மரபு)</option>
+    <option value="Part-B: Geography & General Science">Part-B: Geography &amp; General Science (புவியியல் &amp; பொது அறிவியல்)</option>
+    <option value="Part-B: Aptitude & Mental Ability">Part-B: Aptitude &amp; Mental Ability (திறனறிவு &amp; மனக்கணக்கு)</option>
   </select>
 
-  <label>ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை</label>
+  <label for="qCount">ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை (1 கேள்வி = 1 நிமிடம்)</label>
   <select id="qCount">
-    <option value="10" selected>10 Questions (10 கேள்விகள்)</option>
-    <option value="20">20 Questions (20 கேள்விகள்)</option>
-    <option value="25">25 Questions (25 கேள்விகள்)</option>
+    <option value="10" selected>10 Questions (10 நிமிடங்கள்)</option>
+    <option value="20">20 Questions (20 நிமிடங்கள்)</option>
+    <option value="25">25 Questions (25 நிமிடங்கள்)</option>
   </select>
 
-  <label>AI Provider (Gemini / ChatGPT)</label>
+  <label for="aiProvider">AI Provider (Gemini / ChatGPT)</label>
   <select id="aiProvider">
     <option value="gemini">Gemini (Google API)</option>
     <option value="openai">ChatGPT (OpenAI API)</option>
   </select>
 
-  <label id="keyLabel">Gemini API Key (AIza...)</label>
+  <label id="keyLabel" for="gkey">Gemini API Key (AIza...)</label>
   <input id="gkey" type="password" placeholder="AIza... அல்லது sk-... API Key உள்ளிடவும்">
 
-  <label>AI Model</label>
+  <label for="aiModel">AI Model</label>
   <input id="aiModel" type="text" value="gemini-3.8-flash" placeholder="எ.கா: gemini-3.8-flash அல்லது gpt-4o-mini">
 
   <div class="row">
     <button type="button" id="aiBtn1">AI கேள்விகள்</button>
     <button type="button" class="sec" id="aiBtn2">புதிய Batch / Test</button>
   </div>
-  <div id="aiMsg" class="ok"></div>
+  <div id="aiMsg" class="ok" role="status" aria-live="polite"></div>
 
   <button type="button" class="ghost" id="adminBackBtn2">User Quiz திரைக்குத் திரும்புக</button>
 </div>
@@ -140,7 +385,113 @@ function g(id) { return document.getElementById(id); }
 function show(id) { if (g(id)) g(id).classList.remove("hidden"); }
 function hide(id) { if (g(id)) g(id).classList.add("hidden"); }
 
+var langMode = "both";
+var totalSeconds = 600;
+var remainingSeconds = 600;
+var countdownId = null;
+var finishedClicked = false;
+var lastTimeLeftLabel = "";
+
+function applyAccessibility() {
+  var scaleVal = g("fontSizeSel") ? g("fontSizeSel").value : "1";
+  document.documentElement.style.setProperty("--font-scale", scaleVal);
+
+  var contrastVal = g("contrastSel") ? g("contrastSel").value : "normal";
+  if (contrastVal === "high") {
+    document.body.classList.add("contrast-high");
+  } else {
+    document.body.classList.remove("contrast-high");
+  }
+
+  langMode = g("langModeSel") ? g("langModeSel").value : "both";
+  if (g("examBox") && !g("examBox").classList.contains("hidden")) {
+    renderQ();
+  }
+  if (g("resBox") && !g("resBox").classList.contains("hidden") && g("reviewArea") && !g("reviewArea").classList.contains("hidden")) {
+    buildReviewHtml();
+  }
+}
+
+function toggleAccessibilityPanel() {
+  var panel = g("accPanel");
+  var btn = g("accToggleBtn");
+  if (!panel || !btn) return;
+  var isHidden = panel.classList.contains("hidden");
+  if (isHidden) {
+    panel.classList.remove("hidden");
+    btn.setAttribute("aria-expanded", "true");
+  } else {
+    panel.classList.add("hidden");
+    btn.setAttribute("aria-expanded", "false");
+  }
+}
+
+function formatClock(sec) {
+  var safe = Math.max(0, Number(sec) || 0);
+  var mins = Math.floor(safe / 60);
+  var secs = safe % 60;
+  return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+}
+
+function updateAnsweredProgress() {
+  var answered = 0;
+  for (var i = 0; i < qs.length; i++) {
+    if (document.querySelector('input[name="q' + i + '"]:checked')) {
+      answered++;
+    }
+  }
+  if (g("progressLabel")) {
+    g("progressLabel").textContent = "Answered: " + answered + " / " + qs.length;
+  }
+}
+
+function startExamTimer(questionCount) {
+  stopExamTimer();
+  totalSeconds = (Number(questionCount) || qs.length || 10) * 60;
+  remainingSeconds = totalSeconds;
+  paintTimer();
+
+  countdownId = setInterval(function() {
+    remainingSeconds--;
+    paintTimer();
+    if (remainingSeconds <= 0) {
+      stopExamTimer();
+      lastTimeLeftLabel = "00:00 (நேரம் முடிந்தது / Time Up)";
+      if (g("examMsg")) {
+        g("examMsg").textContent = "நேரம் முடிந்துவிட்டது! உங்கள் விடைகள் சமர்ப்பிக்கப்படுகின்றன.";
+      }
+      var tempEmail = g("userEmail") && g("userEmail").value.trim() ? g("userEmail").value.trim() : "auto-submit@tnpsc.local";
+      if (g("userEmail") && !g("userEmail").value.trim() && (!g("userPhone") || !g("userPhone").value.trim())) {
+        g("userEmail").value = tempEmail;
+      }
+      finalizeSubmission(true);
+    }
+  }, 1000);
+}
+
+function stopExamTimer() {
+  if (countdownId) {
+    clearInterval(countdownId);
+    countdownId = null;
+  }
+}
+
+function paintTimer() {
+  var tBox = g("timerBox");
+  var tLbl = g("timerLabel");
+  if (!tLbl) return;
+  tLbl.textContent = "Time Remaining: " + formatClock(remainingSeconds) + " (" + qs.length + " கேள்விகள் = " + qs.length + " நிமிடம்)";
+  if (tBox) {
+    if (remainingSeconds <= 60) {
+      tBox.classList.add("timer-urgent");
+    } else {
+      tBox.classList.remove("timer-urgent");
+    }
+  }
+}
+
 function showAdminLogin() {
+  stopExamTimer();
   hide("joinBox");
   hide("examBox");
   hide("resBox");
@@ -171,7 +522,7 @@ function openAdminPanel() {
   hide("adminLoginBox");
   show("adminBox");
   if (g("adminCode") && g("code")) {
-    g("adminCode").value = (g("code").value.trim() || "GRP4_01").toUpperCase();
+    g("adminCode").value = (g("code").value.trim() || "G4_REV01").toUpperCase();
   }
   refreshSubjectBatchQuestions();
 }
@@ -198,11 +549,11 @@ function nextRand(stateObj) {
   return stateObj.seed;
 }
 
-var GROUP4_TEMPLATES = {
-  "General Tamil": [
+var G4_REVISED_TEMPLATES = {
+  "Part-A: Tamil Eligibility & Literature": [
     {
-      ta: "திருக்குறளில் உள்ள மொத்த அதிகாரங்களின் எண்ணிக்கை எத்தனை?",
-      en: "What is the total number of chapters (Adhikarams) in Thirukkural?",
+      ta: "திருக்குறளில் உள்ள அதிகாரங்களின் எண்ணிக்கை எத்தனை?",
+      en: "How many chapters (Adhikarams) are there in Thirukkural?",
       correctTa: "133 அதிகாரங்கள்",
       correctEn: "133 Chapters",
       wrong: [
@@ -210,107 +561,53 @@ var GROUP4_TEMPLATES = {
         { ta: "150 அதிகாரங்கள்", en: "150 Chapters" },
         { ta: "170 அதிகாரங்கள்", en: "170 Chapters" }
       ],
-      whyTa: "திருக்குறளில் 133 அதிகாரங்களும் 1,330 குறள்களும் உள்ளன.",
-      whyEn: "Thirukkural consists of 133 chapters and 1,330 couplets."
+      whyTa: "திருக்குறள் 133 அதிகாரங்களையும் 1,330 குறள்களையும் கொண்டது.",
+      whyEn: "Thirukkural has 133 chapters and 1,330 couplets."
     },
     {
-      ta: "சங்க இலக்கிய எட்டுத்தொகை நூல்களில் ஒன்று எது?",
-      en: "Which work belongs to the Ettuthokai (Eight Anthologies) of Sangam literature?",
-      correctTa: "புறநானூறு",
-      correctEn: "Purananuru",
+      ta: "எட்டுத்தொகை நூல்களில் புறநானூறு எந்தப் பிரிவைச் சேர்ந்தது?",
+      en: "To which division of Ettuthokai does Purananuru belong?",
+      correctTa: "புறம் சார்ந்த நூல்",
+      correctEn: "Puram anthology",
       wrong: [
-        { ta: "சிலப்பதிகாரம்", en: "Silappathikaram" },
-        { ta: "மணிமேகலை", en: "Manimekalai" },
-        { ta: "திருப்பாவை", en: "Thiruppavai" }
+        { ta: "அகம் சார்ந்த நூல்", en: "Agam anthology" },
+        { ta: "பத்துப்பாட்டு நூல்", en: "Pathuppattu work" },
+        { ta: "பதினெண் கீழ்க்கணக்கு", en: "Pathinen Kilkanakku" }
       ],
-      whyTa: "புறநானூறு எட்டுத்தொகை நூல்களில் ஒன்றாகும்.",
-      whyEn: "Purananuru is one of the eight Ettuthokai collections."
-    },
-    {
-      ta: "'தமிழ் தாத்தா' எனப் போற்றப்படுபவர் யார்?",
-      en: "Who is affectionately called 'Tamil Thatha' (Grandfather of Tamil)?",
-      correctTa: "உ.வே. சாமிநாதர்",
-      correctEn: "U. V. Swaminatha Iyer",
-      wrong: [
-        { ta: "மறைமலை அடிகள்", en: "Maraimalai Adigal" },
-        { ta: "திரு.வி. கல்யாணசுந்தரனார்", en: "Thiru. Vi. Ka." },
-        { ta: "பரிதிமாற் கலைஞர்", en: "Parithimar Kalaignar" }
-      ],
-      whyTa: "பல ஓலைச்சுவடிகளைத் தேடி அச்சிட்டுத் தமிழ் இலக்கியத்தைக் காத்தவர் உ.வே.சா.",
-      whyEn: "U. V. Swaminatha Iyer revived palm-leaf Tamil manuscripts."
+      whyTa: "புறநானூறு மன்னர்களின் வீரம், கொடை, தமிழ்ப் பண்பாடு ஆகியவற்றைக் கூறும் புறநூல்.",
+      whyEn: "Purananuru is a Puram work depicting valour, charity, and Tamil culture."
     },
     {
       ta: "தனித் தமிழ் இயக்கத்தைத் தொடங்கியவர் யார்?",
-      en: "Who started the Pure Tamil Movement (Thani Thamizh Iyakkam)?",
+      en: "Who initiated the Thani Thamizh Iyakkam (Pure Tamil Movement)?",
       correctTa: "மறைமலை அடிகள்",
       correctEn: "Maraimalai Adigal",
       wrong: [
+        { ta: "உ.வே. சாமிநாதர்", en: "U. V. Swaminatha Iyer" },
         { ta: "பாரதிதாசன்", en: "Bharathidasan" },
-        { ta: "கண்ணதாசன்", en: "Kannadasan" },
-        { ta: "நாமக்கல் கவிஞர்", en: "Namakkal Kavignar" }
+        { ta: "கண்ணதாசன்", en: "Kannadasan" }
       ],
-      whyTa: "மறைமலை அடிகள் தனித் தமிழ் இயக்கத்தைத் தொடங்கினார்.",
+      whyTa: "மறைமலை அடிகள் தனித் தமிழ் இயக்கத்தின் தந்தையாகக் கருதப்படுகிறார்.",
       whyEn: "Maraimalai Adigal founded the Pure Tamil Movement."
+    },
+    {
+      ta: "சிலப்பதிகாரத்தின் காப்பியத் தலைவி யார்?",
+      en: "Who is the central heroine of the epic Silappathikaram?",
+      correctTa: "கண்ணகி",
+      correctEn: "Kannagi",
+      wrong: [
+        { ta: "மணிமேகலை", en: "Manimekalai" },
+        { ta: "மாதவி", en: "Madhavi" },
+        { ta: "வாசுகி", en: "Vasuki" }
+      ],
+      whyTa: "இளங்கோவடிகள் இயற்றிய சிலப்பதிகாரத்தின் முக்கியக் கதாநாயகி கண்ணகி.",
+      whyEn: "Kannagi is the central figure in Ilango Adigal's Silappathikaram."
     }
   ],
-  "General English": [
-    {
-      ta: "ஆங்கிலத்தில் 'Benevolent' என்பதன் சரியான பொருள் எது?",
-      en: "Choose the closest synonym for the word 'Benevolent':",
-      correctTa: "தயாள குணமுள்ள / கருணையுள்ள",
-      correctEn: "Kind and charitable",
-      wrong: [
-        { ta: "கோபமான / கடுமையான", en: "Cruel and harsh" },
-        { ta: "சோம்பலான", en: "Lazy and slow" },
-        { ta: "பயந்த சுபாவமுள்ள", en: "Timid and shy" }
-      ],
-      whyTa: "'Benevolent' என்றால் நன்மை செய்யும் / கருணையுள்ள என்று பொருள்.",
-      whyEn: "Benevolent means well-meaning and kindly disposed."
-    },
-    {
-      ta: "சரியான Preposition-ஐத் தேர்ந்தெடுக்கவும்: 'He is good ___ Mathematics.'",
-      en: "Fill in the blank with the correct preposition: 'He is good ___ Mathematics.'",
-      correctTa: "at (good at)",
-      correctEn: "at",
-      wrong: [
-        { ta: "in", en: "in" },
-        { ta: "on", en: "on" },
-        { ta: "for", en: "for" }
-      ],
-      whyTa: "ஒரு பாடத்தில் அல்லது திறனில் சிறப்பாக உள்ளதைக் குறிக்க 'good at' பயன்படுத்த வேண்டும்.",
-      whyEn: "The standard collocation is 'good at' a subject or skill."
-    },
-    {
-      ta: "'Ancient' என்பதன் எதிர்ச்சொல் (Antonym) எது?",
-      en: "Choose the correct antonym for 'Ancient':",
-      correctTa: "பழமையானதல்லாத / நவீன (Modern)",
-      correctEn: "Modern",
-      wrong: [
-        { ta: "பழங்காலத்து", en: "Antique" },
-        { ta: "முந்தைய", en: "Olden" },
-        { ta: "ஆரம்பகால", en: "Primitive" }
-      ],
-      whyTa: "'Ancient' (பழங்கால) என்பதன் எதிர்ச்சொல் 'Modern' (நவீன) ஆகும்.",
-      whyEn: "Modern is the direct opposite of ancient."
-    },
-    {
-      ta: "'Abundant' என்பதன் பொருள் என்ன?",
-      en: "What is the meaning of 'Abundant'?",
-      correctTa: "ஏராளமான / மிகுதியான",
-      correctEn: "Plentiful / Existing in large quantities",
-      wrong: [
-        { ta: "மிகக் குறைவான", en: "Scarce" },
-        { ta: "அரிய", en: "Rare" },
-        { ta: "பலவீனமான", en: "Weak" }
-      ],
-      whyTa: "'Abundant' என்றால் மிகுதியாக / ஏராளமாக உள்ளது என்று பொருள்.",
-      whyEn: "Abundant means existing or available in large quantities."
-    }
-  ],
-  "Indian Polity & Economy": [
+  "Part-B: Indian Polity & Economy": [
     {
       ta: "இந்திய அரசியலமைப்பில் அடிப்படை உரிமைகள் எந்தப் பகுதியில் உள்ளன?",
-      en: "Fundamental Rights are in which Part of the Indian Constitution?",
+      en: "Fundamental Rights are placed in which Part of the Indian Constitution?",
       correctTa: "பகுதி III (சரத்து 12 - 35)",
       correctEn: "Part III (Articles 12 - 35)",
       wrong: [
@@ -318,12 +615,12 @@ var GROUP4_TEMPLATES = {
         { ta: "பகுதி IV", en: "Part IV" },
         { ta: "பகுதி V", en: "Part V" }
       ],
-      whyTa: "அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்து 12-35) உள்ளன.",
-      whyEn: "Fundamental Rights are covered under Part III (Articles 12-35)."
+      whyTa: "அடிப்படை உரிமைகள் பகுதி III-ல் (சரத்துகள் 12-35) இடம் பெற்றுள்ளன.",
+      whyEn: "Fundamental Rights are in Part III (Articles 12-35)."
     },
     {
       ta: "இந்திய ரிசர்வ் வங்கி (RBI) நாட்டுடைமையாக்கப்பட்ட ஆண்டு எது?",
-      en: "In which year was the Reserve Bank of India (RBI) nationalised?",
+      en: "In which year was the Reserve Bank of India nationalised?",
       correctTa: "1949",
       correctEn: "1949",
       wrong: [
@@ -331,12 +628,12 @@ var GROUP4_TEMPLATES = {
         { ta: "1947", en: "1947" },
         { ta: "1969", en: "1969" }
       ],
-      whyTa: "1949 ஜனவரி 1 அன்று RBI நாட்டுடைமையாக்கப்பட்டது.",
+      whyTa: "1949 ஜனவரி 1 அன்று இந்திய ரிசர்வ் வங்கி நாட்டுடைமையாக்கப்பட்டது.",
       whyEn: "RBI was nationalised on January 1, 1949."
     },
     {
-      ta: "ஊரக உள்ளாட்சி அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம்?",
-      en: "Which Constitutional Amendment gave status to Panchayati Raj?",
+      ta: "பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கிய திருத்தம்?",
+      en: "Which Amendment gave constitutional status to Panchayati Raj institutions?",
       correctTa: "73வது திருத்தம்",
       correctEn: "73rd Amendment",
       wrong: [
@@ -344,12 +641,12 @@ var GROUP4_TEMPLATES = {
         { ta: "44வது திருத்தம்", en: "44th Amendment" },
         { ta: "86வது திருத்தம்", en: "86th Amendment" }
       ],
-      whyTa: "73வது திருத்தச் சட்டம் பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அங்கீகாரம் தந்தது.",
+      whyTa: "73வது அரசியலமைப்புத் திருத்தம் ஊரக உள்ளாட்சி அமைப்புகளுக்கு அங்கீகாரம் தந்தது.",
       whyEn: "The 73rd Amendment granted constitutional status to Panchayati Raj."
     },
     {
-      ta: "நிதி ஆயோக் (NITI Aayog)-ன் தலைவர் யார்?",
-      en: "Who is the Chairperson of NITI Aayog?",
+      ta: "நிதி ஆயோக்கின் (NITI Aayog) தலைவர் யார்?",
+      en: "Who serves as the Chairperson of NITI Aayog?",
       correctTa: "இந்தியப் பிரதமர்",
       correctEn: "Prime Minister of India",
       wrong: [
@@ -357,11 +654,11 @@ var GROUP4_TEMPLATES = {
         { ta: "குடியரசுத் தலைவர்", en: "President of India" },
         { ta: "RBI ஆளுநர்", en: "RBI Governor" }
       ],
-      whyTa: "இந்தியப் பிரதமர் நிதி ஆயோக்கின் தலைவராகச் செயல்படுவார்.",
-      whyEn: "The Prime Minister of India chairs NITI Aayog."
+      whyTa: "இந்தியப் பிரதமர் நிதி ஆயோக்கின் தலைவராக உள்ளார்.",
+      whyEn: "The Prime Minister of India is the Chairperson of NITI Aayog."
     }
   ],
-  "History & TN Culture": [
+  "Part-B: History, INM & TN Culture": [
     {
       ta: "வேலூர் சிப்பாய் கிளர்ச்சி நடைபெற்ற ஆண்டு எது?",
       en: "In which year did the Vellore Mutiny take place?",
@@ -373,7 +670,7 @@ var GROUP4_TEMPLATES = {
         { ta: "1905", en: "1905" }
       ],
       whyTa: "வேலூர் சிப்பாய் கிளர்ச்சி 1806 ஜூலை 10 அன்று நடைபெற்றது.",
-      whyEn: "The Vellore Mutiny took place on July 10, 1806."
+      whyEn: "The Vellore Mutiny occurred on July 10, 1806."
     },
     {
       ta: "சுயமரியாதை இயக்கத்தைத் தொடங்கியவர் யார்?",
@@ -389,8 +686,8 @@ var GROUP4_TEMPLATES = {
       whyEn: "Periyar E. V. Ramasamy founded the Self-Respect Movement."
     },
     {
-      ta: "இந்திய தேசிய காங்கிரஸ் தொடங்கப்பட்ட ஆண்டு எது?",
-      en: "In which year was the Indian National Congress founded?",
+      ta: "இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",
+      en: "In which year was the Indian National Congress established?",
       correctTa: "1885",
       correctEn: "1885",
       wrong: [
@@ -398,7 +695,7 @@ var GROUP4_TEMPLATES = {
         { ta: "1919", en: "1919" },
         { ta: "1942", en: "1942" }
       ],
-      whyTa: "1885-ஆம் ஆண்டு இந்திய தேசிய காங்கிரஸ் தொடங்கப்பட்டது.",
+      whyTa: "இந்திய தேசிய காங்கிரஸ் 1885-ஆம் ஆண்டு தொடங்கப்பட்டது.",
       whyEn: "Indian National Congress was founded in 1885."
     },
     {
@@ -415,7 +712,7 @@ var GROUP4_TEMPLATES = {
       whyEn: "The Justice Party was founded in 1916."
     }
   ],
-  "Geography & Science": [
+  "Part-B: Geography & General Science": [
     {
       ta: "இந்தியாவின் மிக நீளமான நதி எது?",
       en: "Which is the longest river in India?",
@@ -426,7 +723,7 @@ var GROUP4_TEMPLATES = {
         { ta: "நர்மதை", en: "Narmada" },
         { ta: "கிருஷ்ணா", en: "Krishna" }
       ],
-      whyTa: "இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமானது.",
+      whyTa: "இந்தியாவுக்குள் பாயும் நீளத்தின் அடிப்படையில் கங்கை மிக நீளமான நதியாகும்.",
       whyEn: "The Ganga is the longest river within India."
     },
     {
@@ -443,7 +740,7 @@ var GROUP4_TEMPLATES = {
       whyEn: "Beta cells of the pancreas secrete insulin."
     },
     {
-      ta: "வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு வரும் நோய் எது?",
+      ta: "வைட்டமின் D குறைபாட்டால் குழந்தைகளுக்கு ஏற்படும் நோய் எது?",
       en: "Which deficiency disease in children is caused by lack of Vitamin D?",
       correctTa: "ரிக்கெட்ஸ்",
       correctEn: "Rickets",
@@ -469,7 +766,7 @@ var GROUP4_TEMPLATES = {
       whyEn: "Anaimudi is the highest peak in South India."
     }
   ],
-  "Aptitude & Mental Ability": [
+  "Part-B: Aptitude & Mental Ability": [
     {
       ta: "200-ன் 25% மதிப்பு என்ன?",
       en: "What is 25% of 200?",
@@ -494,10 +791,10 @@ var GROUP4_TEMPLATES = {
         { ta: "36", en: "36" }
       ],
       whyTa: "வித்தியாசங்கள் +4, +6, +8, +10 என அதிகரிக்கின்றன; 20 + 10 = 30.",
-      whyEn: "Differences are +4, +6, +8, +10; 20 + 10 = 30."
+      whyEn: "Differences increase by +4, +6, +8, +10; 20 + 10 = 30."
     },
     {
-      ta: "10, 20, 30 ஆகிய எண்களின் சராசரி (Average) என்ன?",
+      ta: "10, 20, 30 ஆகிய எண்களின் சராசரி என்ன?",
       en: "What is the average of 10, 20, and 30?",
       correctTa: "20",
       correctEn: "20",
@@ -507,7 +804,7 @@ var GROUP4_TEMPLATES = {
         { ta: "30", en: "30" }
       ],
       whyTa: "(10 + 20 + 30) / 3 = 60 / 3 = 20.",
-      whyEn: "Sum is 60 divided by 3 numbers = 20."
+      whyEn: "(10 + 20 + 30) / 3 = 20."
     },
     {
       ta: "A : B = 2 : 3 எனில், மொத்தம் 50-ல் A-ன் பங்கு எவ்வளவு?",
@@ -527,11 +824,11 @@ var GROUP4_TEMPLATES = {
 
 function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   var qLimit = Number(totalQuestions) || 10;
-  var cleanSubj = GROUP4_TEMPLATES[subject] ? subject : "General Tamil";
-  var cleanBatch = String(batchCode || "GRP4_01").trim().toUpperCase();
+  var cleanSubj = G4_REVISED_TEMPLATES[subject] ? subject : "Part-A: Tamil Eligibility & Literature";
+  var cleanBatch = String(batchCode || "G4_REV01").trim().toUpperCase();
   var dayKey = getTodayDateKey();
   var state = { seed: createSeedNumber(dayKey + "|" + cleanSubj + "|" + cleanBatch) };
-  var templates = GROUP4_TEMPLATES[cleanSubj];
+  var templates = G4_REVISED_TEMPLATES[cleanSubj];
   var generated = [];
 
   for (var idx = 0; idx < qLimit; idx++) {
@@ -570,7 +867,7 @@ function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   return generated;
 }
 
-var qs = buildDailyQuestionsForSubject("General Tamil", "GRP4_01", 10);
+var qs = buildDailyQuestionsForSubject("Part-A: Tamil Eligibility & Literature", "G4_REV01", 10);
 var sb = null, me = null, myAns = [], myScore = 0;
 
 function getSB() {
@@ -582,13 +879,13 @@ function getSB() {
 }
 
 function refreshSubjectBatchQuestions() {
-  var subj = g("subj") ? g("subj").value : "General Tamil";
-  var batch = g("code") ? g("code").value.trim().toUpperCase() : "GRP4_01";
+  var subj = g("subj") ? g("subj").value : "Part-A: Tamil Eligibility & Literature";
+  var batch = g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01";
   var countVal = g("qCount") ? Number(g("qCount").value) || 10 : 10;
   qs = buildDailyQuestionsForSubject(subj, batch, countVal);
   if (g("aiMsg")) {
     g("aiMsg").className = "ok";
-    g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Group 4 Q&A தயார்)";
+    g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Q&A • " + qs.length + " நிமிடம்)";
   }
 }
 
@@ -657,7 +954,7 @@ async function callGemini(apiKey, model, prompt) {
 
 async function genAI(newCode) {
   if (newCode && g("code")) {
-    g("code").value = "GRP4_" + Math.floor(100 + Math.random() * 900);
+    g("code").value = "G4_" + Math.floor(100 + Math.random() * 900);
     if (g("adminCode")) g("adminCode").value = g("code").value;
     refreshSubjectBatchQuestions();
   }
@@ -678,7 +975,7 @@ async function genAI(newCode) {
   g("aiMsg").className = "ok";
   g("aiMsg").textContent = (prov === "openai" ? "ChatGPT" : "Gemini") + " மூலம் Group 4 கேள்விகள் உருவாக்குகிறது...";
 
-  var prompt = 'Create ' + qLimit + ' bilingual (Tamil + English) TNPSC Group 4 multiple-choice questions on "' + s + '" for batch "' + code + '" (' + getTodayDateKey() + '). ' +
+  var prompt = 'Create ' + qLimit + ' bilingual (Tamil + English) TNPSC Group 4 (Revised Scheme) multiple-choice questions on "' + s + '" for batch "' + code + '" (' + getTodayDateKey() + '). ' +
     'Return ONLY JSON array: [{"ta":"...","en":"...","opts":[{"ta":"...","en":"..."},{"ta":"...","en":"..."},{"ta":"...","en":"..."},{"ta":"...","en":"..."}],"a":0,"whyTa":"...","whyEn":"..."}]';
 
   try {
@@ -707,12 +1004,13 @@ async function genAI(newCode) {
 
 async function joinQuiz() {
   refreshSubjectBatchQuestions();
-  g("joinMsg").textContent = "";
-  var name = g("name").value.trim();
-  var code = g("code").value.trim().toUpperCase();
-  g("code").value = code;
+  if (g("joinMsg")) g("joinMsg").textContent = "";
+  var name = g("name") ? g("name").value.trim() : "";
+  var code = g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01";
+  if (g("code")) g("code").value = code;
+
   if (!name || code.length < 3) {
-    g("joinMsg").textContent = "பெயர் மற்றும் Test Batch / Code உள்ளிடவும்.";
+    if (g("joinMsg")) g("joinMsg").textContent = "பெயர் மற்றும் Test Batch / Code உள்ளிடவும்.";
     return;
   }
 
@@ -730,44 +1028,130 @@ async function joinQuiz() {
     } catch (e) {}
   }
 
-  g("whoTitle").textContent = name + " (" + code + ")";
+  finishedClicked = false;
+  hide("contactSubmitBox");
+  if (g("finishStatusMsg")) g("finishStatusMsg").textContent = "";
+  if (g("examMsg")) g("examMsg").textContent = "";
+  if (g("userEmail")) g("userEmail").value = "";
+  if (g("userPhone")) g("userPhone").value = "";
+
+  var subjText = g("subj") ? g("subj").value : "Group 4";
+  if (g("whoTitle")) {
+    g("whoTitle").innerHTML = "<b>பங்கேற்பாளர் (Candidate):</b> " + name +
+      " &nbsp;|&nbsp; <b>Batch:</b> " + code +
+      " &nbsp;|&nbsp; <b>Subject:</b> " + subjText;
+  }
+
   renderQ();
+  updateAnsweredProgress();
+  startExamTimer(qs.length);
   hide("joinBox");
   hide("adminTrigger");
   show("examBox");
+}
+
+function formatTextByLang(taText, enText) {
+  if (langMode === "ta") return "<b>" + (taText || "") + "</b>";
+  if (langMode === "en") return "<b>" + (enText || taText || "") + "</b>";
+  return "<b>" + (taText || "") + "</b>" + (enText ? '<span class="q-en">' + enText + '</span>' : '');
 }
 
 function renderQ() {
   var h = "";
   for (var i = 0; i < qs.length; i++) {
     var item = qs[i];
-    h += '<div class="q"><b>' + (i + 1) + '. ' + item.ta + '</b>' +
-      '<span class="q-en">' + (item.en || "") + '</span>';
+    h += '<div class="q">' + (i + 1) + '. ' + formatTextByLang(item.ta, item.en);
     for (var j = 0; j < item.opts.length; j++) {
       var optObj = item.opts[j];
       var optTa = typeof optObj === "string" ? optObj : optObj.ta;
       var optEn = typeof optObj === "string" ? "" : (optObj.en || "");
-      h += '<label class="opt"><input type="radio" name="q' + i + '" value="' + j + '"> <b>' + optTa + '</b>' +
-        (optEn ? '<span class="opt-en">' + optEn + '</span>' : '') + '</label>';
+      var optLabelHtml = "";
+      if (langMode === "ta") {
+        optLabelHtml = "<b>" + optTa + "</b>";
+      } else if (langMode === "en") {
+        optLabelHtml = "<b>" + (optEn || optTa) + "</b>";
+      } else {
+        optLabelHtml = "<b>" + optTa + "</b>" + (optEn ? '<span class="opt-en">' + optEn + '</span>' : '');
+      }
+      h += '<label class="opt"><input type="radio" name="q' + i + '" value="' + j + '"> ' + optLabelHtml + '</label>';
     }
     h += '</div>';
   }
   g("qArea").innerHTML = h;
+
+  var radios = g("qArea").querySelectorAll('input[type="radio"]');
+  for (var r = 0; r < radios.length; r++) {
+    radios[r].addEventListener("change", updateAnsweredProgress);
+  }
+}
+
+function handleFinishedClick() {
+  if (g("examMsg")) g("examMsg").textContent = "";
+  var missing = [];
+  for (var i = 0; i < qs.length; i++) {
+    var el = document.querySelector('input[name="q' + i + '"]:checked');
+    if (!el) missing.push(i + 1);
+  }
+
+  if (missing.length > 0) {
+    if (g("examMsg")) {
+      g("examMsg").textContent = "அனைத்து கேள்விகளையும் முடிக்கவும்! விடுபட்ட கேள்விகள்: " + missing.join(", ");
+    }
+    return;
+  }
+
+  finishedClicked = true;
+  show("contactSubmitBox");
+  if (g("finishStatusMsg")) {
+    g("finishStatusMsg").textContent = "அனைத்து " + qs.length + " கேள்விகளும் முடிந்தன! இப்போது Email அல்லது Phone Number உள்ளிட்டு Submit செய்யவும்.";
+  }
+  if (g("userEmail")) g("userEmail").focus();
 }
 
 async function submitQuiz() {
-  g("examMsg").textContent = "";
+  if (g("examMsg")) g("examMsg").textContent = "";
+
+  if (!finishedClicked) {
+    if (g("examMsg")) {
+      g("examMsg").textContent = "முதலில் அனைத்து கேள்விகளையும் முடித்து 'Finished' பொத்தானை அழுத்தவும்.";
+    }
+    return;
+  }
+
+  var emailVal = g("userEmail") ? g("userEmail").value.trim() : "";
+  var phoneVal = g("userPhone") ? g("userPhone").value.trim() : "";
+
+  if (!emailVal && !phoneVal) {
+    if (g("examMsg")) {
+      g("examMsg").textContent = "Submit செய்ய Email அல்லது Phone Number இரண்டில் ஏதேனும் ஒன்றைக் கட்டாயம் உள்ளிடவும்.";
+    }
+    return;
+  }
+
+  await finalizeSubmission(false);
+}
+
+async function finalizeSubmission(isAutoSubmit) {
   var arr = [];
   var sc = 0;
   for (var i = 0; i < qs.length; i++) {
     var el = document.querySelector('input[name="q' + i + '"]:checked');
     if (!el) {
-      g("examMsg").textContent = "அனைத்து கேள்விகளுக்கும் பதில் அளிக்கவும் (Please answer all questions).";
-      return;
+      if (!isAutoSubmit) {
+        if (g("examMsg")) g("examMsg").textContent = "அனைத்து கேள்விகளுக்கும் பதில் அளிக்கவும்.";
+        return;
+      }
+      arr.push(-1);
+    } else {
+      var v = Number(el.value);
+      arr.push(v);
+      if (v === qs[i].a) sc++;
     }
-    var v = Number(el.value);
-    arr.push(v);
-    if (v === qs[i].a) sc++;
+  }
+
+  stopExamTimer();
+  if (!lastTimeLeftLabel) {
+    lastTimeLeftLabel = formatClock(remainingSeconds) + " / " + formatClock(totalSeconds);
   }
 
   myAns = arr;
@@ -797,7 +1181,7 @@ async function submitQuiz() {
     } catch (e) {}
   }
 
-  showResult({ my_score: sc, rank: rankVal, total_players: totalVal });
+  showResult({ my_score: sc, rank: rankVal, total_players: totalVal, timeLeft: lastTimeLeftLabel });
   hide("examBox");
   show("resBox");
   show("adminTrigger");
@@ -823,24 +1207,73 @@ function showResult(d) {
   }
 
   g("statsText").textContent = "உங்கள் மதிப்பெண் (Score): " + sc + "/" + qs.length + " | உங்கள் Position: #" + rank + " / " + tot;
+  g("timeLeftText").textContent = "Total Time Left (மீதமுள்ள நேரம்): " + (d.timeLeft || lastTimeLeftLabel || formatClock(remainingSeconds));
 
+  hide("reviewArea");
+  if (g("reviewToggleBtn")) {
+    g("reviewToggleBtn").setAttribute("aria-expanded", "false");
+    g("reviewToggleBtn").textContent = "Review Answers (கேள்வி & பதில் விவரம்)";
+  }
+}
+
+function buildReviewHtml() {
   var rv = "";
   for (var i = 0; i < qs.length; i++) {
     var qItem = qs[i];
-    var ok = myAns[i] === qItem.a;
+    var pickedIdx = myAns[i];
+    var ok = pickedIdx === qItem.a;
+
+    var userOptTa = "பதில் அளிக்கப்படவில்லை";
+    var userOptEn = "Not Answered";
+    if (typeof pickedIdx === "number" && pickedIdx >= 0 && qItem.opts[pickedIdx]) {
+      var uOpt = qItem.opts[pickedIdx];
+      userOptTa = typeof uOpt === "string" ? uOpt : uOpt.ta;
+      userOptEn = typeof uOpt === "string" ? "" : (uOpt.en || "");
+    }
+
     var rightOpt = qItem.opts[qItem.a];
     var rightTa = typeof rightOpt === "string" ? rightOpt : rightOpt.ta;
     var rightEn = typeof rightOpt === "string" ? "" : (rightOpt.en || "");
 
-    rv += '<div class="q"><b>' + (i + 1) + '. ' + qItem.ta + '</b><span class="q-en">' + (qItem.en || "") + '</span><br>' +
-      (ok ? '<span class="ok">சரி / Correct</span>' : '<span class="err">தவறு / Wrong</span>') +
-      ' — சரியான பதில்: <b>' + rightTa + (rightEn ? ' (' + rightEn + ')' : '') + '</b>' +
-      '<br><small>' + (qItem.whyTa || "") + (qItem.whyEn ? ' | ' + qItem.whyEn : '') + '</small></div>';
+    var userAnsText = langMode === "en"
+      ? (userOptEn || userOptTa)
+      : (langMode === "ta" ? userOptTa : userOptTa + (userOptEn ? " (" + userOptEn + ")" : ""));
+
+    var rightAnsText = langMode === "en"
+      ? (rightEn || rightTa)
+      : (langMode === "ta" ? rightTa : rightTa + (rightEn ? " (" + rightEn + ")" : ""));
+
+    var expText = langMode === "en"
+      ? (qItem.whyEn || qItem.whyTa || "")
+      : (langMode === "ta" ? (qItem.whyTa || "") : (qItem.whyTa || "") + (qItem.whyEn ? " | " + qItem.whyEn : ""));
+
+    rv += '<div class="q">' + (i + 1) + '. ' + formatTextByLang(qItem.ta, qItem.en) + '<br>' +
+      (ok ? '<span class="ok">✔ சரி / Correct</span>' : '<span class="err">✘ தவறு / Wrong</span>') +
+      '<br><span><b>உங்கள் பதில் (Your Answer):</b> ' + userAnsText + '</span>' +
+      '<br><span class="ok"><b>சரியான பதில் (Correct Answer):</b> ' + rightAnsText + '</span>' +
+      '<br><small><b>விளக்கம் (Explanation):</b> ' + expText + '</small></div>';
   }
   g("reviewArea").innerHTML = rv;
 }
 
+function toggleReviewAnswers() {
+  var area = g("reviewArea");
+  var btn = g("reviewToggleBtn");
+  if (!area || !btn) return;
+  if (area.classList.contains("hidden")) {
+    buildReviewHtml();
+    area.classList.remove("hidden");
+    btn.setAttribute("aria-expanded", "true");
+    btn.textContent = "Hide Review (விடைகளை மறைக்கவும்)";
+  } else {
+    area.classList.add("hidden");
+    btn.setAttribute("aria-expanded", "false");
+    btn.textContent = "Review Answers (கேள்வி & பதில் விவரம்)";
+  }
+}
+
 function backToHome() {
+  stopExamTimer();
   hide("resBox");
   hide("examBox");
   show("joinBox");
@@ -866,18 +1299,26 @@ async function shareSocial() {
   catch (e) { g("shareMsg").textContent = t; }
 }
 
+if (g("accToggleBtn")) g("accToggleBtn").addEventListener("click", toggleAccessibilityPanel);
+if (g("fontSizeSel")) g("fontSizeSel").addEventListener("change", applyAccessibility);
+if (g("contrastSel")) g("contrastSel").addEventListener("change", applyAccessibility);
+if (g("langModeSel")) g("langModeSel").addEventListener("change", applyAccessibility);
+
 if (g("adminBtn")) g("adminBtn").addEventListener("click", showAdminLogin);
 if (g("adminOpenBtn")) g("adminOpenBtn").addEventListener("click", openAdminPanel);
 if (g("adminBackBtn1")) g("adminBackBtn1").addEventListener("click", closeAdminViews);
 if (g("adminBackBtn2")) g("adminBackBtn2").addEventListener("click", closeAdminViews);
 if (g("joinBtn")) g("joinBtn").addEventListener("click", joinQuiz);
+if (g("finishedBtn")) g("finishedBtn").addEventListener("click", handleFinishedClick);
 if (g("submitBtn")) g("submitBtn").addEventListener("click", submitQuiz);
+if (g("reviewToggleBtn")) g("reviewToggleBtn").addEventListener("click", toggleReviewAnswers);
 if (g("waBtn")) g("waBtn").addEventListener("click", shareWA);
 if (g("shareBtn")) g("shareBtn").addEventListener("click", shareSocial);
 if (g("homeBtn")) g("homeBtn").addEventListener("click", backToHome);
+
 if (g("code")) g("code").addEventListener("input", refreshSubjectBatchQuestions);
 if (g("adminCode")) g("adminCode").addEventListener("input", function() {
-  if (g("code")) g("code").value = (g("adminCode").value.trim() || "GRP4_01").toUpperCase();
+  if (g("code")) g("code").value = (g("adminCode").value.trim() || "G4_REV01").toUpperCase();
   refreshSubjectBatchQuestions();
 });
 if (g("subj")) g("subj").addEventListener("change", refreshSubjectBatchQuestions);
