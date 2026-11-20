@@ -64,15 +64,9 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
   }
 
-  h1, h2, h3 {
-    margin: 0 0 10px;
-  }
+  h1, h2, h3 { margin: 0 0 10px; }
 
-  label {
-    display: block;
-    font-weight: 700;
-    margin: 10px 0 4px;
-  }
+  label { display: block; font-weight: 700; margin: 10px 0 4px; }
 
   input, select {
     width: 100%;
@@ -211,6 +205,14 @@
     border: 1px solid var(--border);
   }
 
+  .player-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--soft);
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+
   .admin-trigger-wrap {
     max-width: 740px;
     margin: 18px auto 0;
@@ -289,8 +291,8 @@
     <p class="muted">Email அல்லது Phone Number இரண்டில் ஏதேனும் ஒன்றை (அல்லது இரண்டையும்) கட்டாயம் உள்ளிடவும்.</p>
     <label for="userEmail">Email Address</label>
     <input id="userEmail" type="email" placeholder="name@example.com">
-    <label for="userPhone">Phone Number</label>
-    <input id="userPhone" type="tel" placeholder="9876543210">
+    <label for="userPhone">Phone Number (WhatsApp அனுப்பப் பயன்படும்)</label>
+    <input id="userPhone" type="tel" placeholder="919876543210">
     <button type="button" id="submitBtn">Submit Answers (இப்போது சமர்ப்பிக்கவும்)</button>
   </div>
 
@@ -303,6 +305,11 @@
   <div id="banner" class="banner" aria-live="polite"></div>
   <div id="statsText" style="font-weight:700;margin-bottom:6px;"></div>
   <div id="timeLeftText" class="ok" style="margin-bottom:12px;"></div>
+
+  <div class="user-meta" id="attendedUsersBox">
+    <b>தேர்வு எழுதியவர்கள் (Participants in Batch):</b>
+    <div id="attendedUsersList" class="muted" style="margin-top:6px;"></div>
+  </div>
 
   <div class="row">
     <button type="button" class="sec" id="reviewToggleBtn" aria-expanded="false">Review Answers (கேள்வி &amp; பதில் விவரம்)</button>
@@ -371,6 +378,14 @@
   </div>
   <div id="aiMsg" class="ok" role="status" aria-live="polite"></div>
 
+  <hr style="margin:18px 0;border:0;border-top:1px solid var(--border);">
+
+  <h3>Post Results &amp; Rank Position (WhatsApp)</h3>
+  <p class="muted">அனைவரும் தேர்வு முடித்த பிறகு Post Results &amp; Rank Position அழுத்தி, ஒவ்வொருவரின் மொபைல் எண்ணிற்கும் Position &amp; Wishes WhatsApp-ல் அனுப்பலாம்.</p>
+  <button type="button" class="wa" id="postResultsBtn">Post Results &amp; Rank Position (WhatsApp)</button>
+  <div id="postResultsStatus" class="ok" role="status" aria-live="polite"></div>
+  <div id="adminDispatchList" style="margin-top:10px;"></div>
+
   <button type="button" class="ghost" id="adminBackBtn2">User Quiz திரைக்குத் திரும்புக</button>
 </div>
 
@@ -391,6 +406,144 @@ var remainingSeconds = 600;
 var countdownId = null;
 var finishedClicked = false;
 var lastTimeLeftLabel = "";
+var batchSubmissions = {};
+
+function getBatchKey() {
+  var c = g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01";
+  return "TNPSC_BATCH_" + (c || "G4_REV01");
+}
+
+function loadBatchSubmissions() {
+  try {
+    var raw = localStorage.getItem(getBatchKey());
+    batchSubmissions = raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    batchSubmissions = {};
+  }
+}
+
+function saveBatchSubmission(entry) {
+  loadBatchSubmissions();
+  var key = entry.name.toLowerCase();
+  batchSubmissions[key] = entry;
+  try {
+    localStorage.setItem(getBatchKey(), JSON.stringify(batchSubmissions));
+  } catch (e) {}
+}
+
+function computeRankedParticipants() {
+  loadBatchSubmissions();
+  var list = [];
+  for (var k in batchSubmissions) {
+    if (Object.prototype.hasOwnProperty.call(batchSubmissions, k)) {
+      list.push(batchSubmissions[k]);
+    }
+  }
+  list.sort(function(a, b) {
+    if (b.score !== a.score) return b.score - a.score;
+    return (a.submittedAt || 0) - (b.submittedAt || 0);
+  });
+  for (var i = 0; i < list.length; i++) {
+    list[i].rank = i + 1;
+  }
+  return list;
+}
+
+function buildWishMessage(p, totalQ, batchCode) {
+  var pct = totalQ ? (p.score / totalQ) * 100 : 0;
+  var wish = pct > 80
+    ? "🏆 அருமையான சாதனை! Champion போல சிறப்பாகச் செய்துள்ளீர்கள்! வாழ்த்துக்கள்!"
+    : (pct >= 50
+      ? "👏 மிக நன்று! நல்ல முயற்சி, தொடர்ந்து பயிற்சி செய்யுங்கள்! வாழ்த்துக்கள்!"
+      : "📚 வாழ்த்துக்கள்! இன்னும் கொஞ்சம் பயிற்சி செய்தால் நிச்சயம் உயர்ந்த Rank பெறலாம்!");
+  return "TNPSC Group 4 Live Quiz (" + batchCode + ")\n" +
+    "வணக்கம் " + p.name + "!\n" +
+    "உங்கள் மதிப்பெண் (Score): " + p.score + "/" + totalQ + "\n" +
+    "உங்கள் Rank Position: #" + p.rank + "\n" +
+    wish;
+}
+
+function cleanPhoneForWhatsApp(rawPhone) {
+  var digits = String(rawPhone || "").replace(/\D/g, "");
+  if (digits.length === 10) return "91" + digits;
+  return digits;
+}
+
+function renderAttendedUsernamesOnly() {
+  var listEl = g("attendedUsersList");
+  if (!listEl) return;
+  var ranked = computeRankedParticipants();
+  if (!ranked.length) {
+    listEl.textContent = "பங்கேற்பாளர்கள் விவரம் இல்லை.";
+    return;
+  }
+  var namesOnly = ranked.map(function(item) {
+    return item.name;
+  });
+  listEl.textContent = namesOnly.join(", ");
+}
+
+function handlePostResultsAndRank() {
+  var code = g("adminCode") && g("adminCode").value.trim()
+    ? g("adminCode").value.trim().toUpperCase()
+    : (g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01");
+  if (g("code")) g("code").value = code;
+
+  var ranked = computeRankedParticipants();
+  var listDiv = g("adminDispatchList");
+  var statusEl = g("postResultsStatus");
+  if (!listDiv) return;
+
+  if (!ranked.length) {
+    if (statusEl) {
+      statusEl.className = "err";
+      statusEl.textContent = code + " Batch-ல் இன்னும் யாரும் தேர்வு சமர்ப்பிக்கவில்லை.";
+    }
+    listDiv.innerHTML = "";
+    return;
+  }
+
+  if (statusEl) {
+    statusEl.className = "ok";
+    statusEl.textContent = code + " Batch முடிவுகள் & Rank Position (" + ranked.length + " பங்கேற்பாளர்கள்) தயார்!";
+  }
+
+  var html = "";
+  for (var i = 0; i < ranked.length; i++) {
+    var p = ranked[i];
+    var msg = buildWishMessage(p, p.total || qs.length, code);
+    var waPhone = cleanPhoneForWhatsApp(p.phone);
+    var waUrl = waPhone
+      ? "https://wa.me/" + waPhone + "?text=" + encodeURIComponent(msg)
+      : "https://wa.me/?text=" + encodeURIComponent(msg);
+
+    html += '<div class="player-item">' +
+      '<div><b>Rank #' + p.rank + ' — ' + p.name + '</b> (Score: ' + p.score + '/' + (p.total || qs.length) + ')</div>' +
+      '<div class="muted">' + (waPhone ? 'WhatsApp Number: +' + waPhone : 'Mobile number வழங்கப்படவில்லை (General Share)') + '</div>' +
+      '<button type="button" class="wa send-wa-row" data-url="' + encodeURIComponent(waUrl) + '" data-name="' + encodeURIComponent(p.name) + '">Send Rank &amp; Wishes to ' + p.name + ' (WhatsApp)</button>' +
+      '</div>';
+  }
+  listDiv.innerHTML = html;
+
+  var btns = listDiv.querySelectorAll(".send-wa-row");
+  for (var b = 0; b < btns.length; b++) {
+    btns[b].addEventListener("click", function() {
+      var targetUrl = decodeURIComponent(this.getAttribute("data-url") || "");
+      if (targetUrl) {
+        window.open(targetUrl, "_blank", "noopener,noreferrer");
+      }
+    });
+  }
+
+  if (ranked[0]) {
+    var firstWa = cleanPhoneForWhatsApp(ranked[0].phone);
+    var firstMsg = buildWishMessage(ranked[0], ranked[0].total || qs.length, code);
+    var firstUrl = firstWa
+      ? "https://wa.me/" + firstWa + "?text=" + encodeURIComponent(firstMsg)
+      : "https://wa.me/?text=" + encodeURIComponent(firstMsg);
+    window.open(firstUrl, "_blank", "noopener,noreferrer");
+  }
+}
 
 function applyAccessibility() {
   var scaleVal = g("fontSizeSel") ? g("fontSizeSel").value : "1";
@@ -449,6 +602,7 @@ function startExamTimer(questionCount) {
   stopExamTimer();
   totalSeconds = (Number(questionCount) || qs.length || 10) * 60;
   remainingSeconds = totalSeconds;
+  lastTimeLeftLabel = "";
   paintTimer();
 
   countdownId = setInterval(function() {
@@ -460,9 +614,8 @@ function startExamTimer(questionCount) {
       if (g("examMsg")) {
         g("examMsg").textContent = "நேரம் முடிந்துவிட்டது! உங்கள் விடைகள் சமர்ப்பிக்கப்படுகின்றன.";
       }
-      var tempEmail = g("userEmail") && g("userEmail").value.trim() ? g("userEmail").value.trim() : "auto-submit@tnpsc.local";
       if (g("userEmail") && !g("userEmail").value.trim() && (!g("userPhone") || !g("userPhone").value.trim())) {
-        g("userEmail").value = tempEmail;
+        g("userEmail").value = "auto-submit@tnpsc.local";
       }
       finalizeSubmission(true);
     }
@@ -1157,8 +1310,28 @@ async function finalizeSubmission(isAutoSubmit) {
   myAns = arr;
   myScore = sc;
 
+  var candidateName = g("name") ? g("name").value.trim() : "Participant";
+  var candidatePhone = g("userPhone") ? g("userPhone").value.trim() : "";
+  var candidateEmail = g("userEmail") ? g("userEmail").value.trim() : "";
+
+  saveBatchSubmission({
+    name: candidateName,
+    phone: candidatePhone,
+    email: candidateEmail,
+    score: sc,
+    total: qs.length,
+    submittedAt: Date.now()
+  });
+
+  var ranked = computeRankedParticipants();
   var rankVal = 1;
-  var totalVal = 1;
+  var totalVal = ranked.length || 1;
+  for (var rIdx = 0; rIdx < ranked.length; rIdx++) {
+    if (ranked[rIdx].name.toLowerCase() === candidateName.toLowerCase()) {
+      rankVal = ranked[rIdx].rank;
+      break;
+    }
+  }
 
   var client = getSB();
   if (client && me && me.participant_id) {
@@ -1169,19 +1342,11 @@ async function finalizeSubmission(isAutoSubmit) {
         p_token: me.token,
         p_answers: arr
       });
-      var st = await client.rpc("quiz_status", {
-        p_test_code: g("code").value.trim().toUpperCase(),
-        p_participant_id: me.participant_id
-      });
-      if (!st.error && st.data) {
-        if (typeof st.data.my_score === "number") sc = st.data.my_score;
-        if (st.data.rank) rankVal = st.data.rank;
-        if (st.data.total_players) totalVal = st.data.total_players;
-      }
     } catch (e) {}
   }
 
   showResult({ my_score: sc, rank: rankVal, total_players: totalVal, timeLeft: lastTimeLeftLabel });
+  renderAttendedUsernamesOnly();
   hide("examBox");
   show("resBox");
   show("adminTrigger");
@@ -1206,7 +1371,7 @@ function showResult(d) {
     b.textContent = "📚 இன்னும் improve பண்ணனும் (" + sc + "/" + qs.length + ")";
   }
 
-  g("statsText").textContent = "உங்கள் மதிப்பெண் (Score): " + sc + "/" + qs.length + " | உங்கள் Position: #" + rank + " / " + tot;
+  g("statsText").textContent = "Score: " + sc + "/" + qs.length + " | Position: #" + rank + " / " + tot;
   g("timeLeftText").textContent = "Total Time Left (மீதமுள்ள நேரம்): " + (d.timeLeft || lastTimeLeftLabel || formatClock(remainingSeconds));
 
   hide("reviewArea");
@@ -1308,6 +1473,7 @@ if (g("adminBtn")) g("adminBtn").addEventListener("click", showAdminLogin);
 if (g("adminOpenBtn")) g("adminOpenBtn").addEventListener("click", openAdminPanel);
 if (g("adminBackBtn1")) g("adminBackBtn1").addEventListener("click", closeAdminViews);
 if (g("adminBackBtn2")) g("adminBackBtn2").addEventListener("click", closeAdminViews);
+if (g("postResultsBtn")) g("postResultsBtn").addEventListener("click", handlePostResultsAndRank);
 if (g("joinBtn")) g("joinBtn").addEventListener("click", joinQuiz);
 if (g("finishedBtn")) g("finishedBtn").addEventListener("click", handleFinishedClick);
 if (g("submitBtn")) g("submitBtn").addEventListener("click", submitQuiz);
