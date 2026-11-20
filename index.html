@@ -34,7 +34,8 @@
 
   body.contrast-high button,
   body.contrast-high button.sec,
-  body.contrast-high button.wa {
+  body.contrast-high button.wa,
+  body.contrast-high button.danger {
     color: #090d16;
     font-weight: 800;
   }
@@ -55,7 +56,7 @@
   }
 
   .box {
-    max-width: 740px;
+    max-width: 780px;
     margin: 12px auto;
     background: var(--card);
     padding: 18px;
@@ -81,24 +82,25 @@
 
   button {
     width: 100%;
-    padding: 12px 14px;
+    padding: 11px 14px;
     margin-top: 10px;
     border: 0;
     border-radius: 10px;
     background: var(--primary);
     color: #ffffff;
     font-weight: 700;
-    font-size: 1em;
+    font-size: 0.98em;
     cursor: pointer;
   }
 
   button.sec { background: var(--sec); }
   button.wa { background: #15803d; color: #ffffff; }
+  button.danger { background: #b91c1c; color: #ffffff; }
   button.ghost { background: var(--soft); color: var(--ink); border: 1px solid var(--border); }
   button:disabled { opacity: 0.55; cursor: not-allowed; }
 
   .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .row button, .row select { width: auto; flex: 1; min-width: 130px; }
+  .row button, .row select, .row input { width: auto; flex: 1; min-width: 130px; }
   .hidden { display: none; }
   .err { color: var(--err); font-weight: 700; margin-top: 8px; }
   .ok { color: var(--ok); font-weight: 700; margin-top: 8px; }
@@ -213,8 +215,71 @@
     margin-bottom: 8px;
   }
 
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin: 10px 0;
+  }
+
+  .stat-card {
+    background: var(--soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .stat-card b {
+    display: block;
+    font-size: 1.15em;
+    color: var(--primary);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92em;
+  }
+
+  th, td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    background: var(--soft);
+    font-weight: 800;
+  }
+
+  .badge-pill {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--soft);
+    border: 1px solid var(--border);
+    font-size: 0.85em;
+    font-weight: 700;
+    margin: 3px 4px 3px 0;
+    cursor: pointer;
+  }
+
+  .badge-pill.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
   .admin-trigger-wrap {
-    max-width: 740px;
+    max-width: 780px;
     margin: 18px auto 0;
     text-align: center;
   }
@@ -338,53 +403,107 @@
 
 <!-- SEPARATE ADMIN CONTROL SCREEN -->
 <div class="box hidden" id="adminBox">
-  <h2>Group 4 Admin Control Panel (Revised Scheme)</h2>
-  <p class="muted">Subject மற்றும் Batch மாறும்போது அன்றைய நாளுக்கான புதிய தமிழ்-ஆங்கில Q&amp;A மற்றும் (1 கேள்வி = 1 நிமிடம்) நேரம் தானாகத் தயாராகும்.</p>
+  <h2>Group 4 Admin Dashboard (Revised Scheme)</h2>
+  <p class="muted">புதிய Batch உருவாக்கலாம், பழைய Test Batch முடிவுகளைப் பார்க்கலாம், CSV Export &amp; WhatsApp Rank அனுப்பலாம்.</p>
 
-  <label for="adminCode">Test Batch / Code</label>
-  <input id="adminCode" type="text" value="G4_REV01">
+  <!-- 1. NEW TEST / BATCH SETUP -->
+  <div class="q">
+    <h3>1. Test Batch &amp; Question Generator</h3>
+    <label for="adminCode">Active Test Batch / Code</label>
+    <input id="adminCode" type="text" value="G4_REV01">
 
-  <label for="subj">Group 4 Subject / Part (பாடம்)</label>
-  <select id="subj">
-    <option value="Part-A: Tamil Eligibility & Literature">Part-A: Tamil Eligibility &amp; Literature (பொதுத் தமிழ் &amp; இலக்கியம்)</option>
-    <option value="Part-B: Indian Polity & Economy">Part-B: Indian Polity &amp; Economy (அரசியலமைப்பு &amp; பொருளாதாரம்)</option>
-    <option value="Part-B: History, INM & TN Culture">Part-B: History, INM &amp; TN Culture (வரலாறு, தேசிய இயக்கம் &amp; தமிழக மரபு)</option>
-    <option value="Part-B: Geography & General Science">Part-B: Geography &amp; General Science (புவியியல் &amp; பொது அறிவியல்)</option>
-    <option value="Part-B: Aptitude & Mental Ability">Part-B: Aptitude &amp; Mental Ability (திறனறிவு &amp; மனக்கணக்கு)</option>
-  </select>
+    <label for="subj">Group 4 Subject / Part (பாடம்)</label>
+    <select id="subj">
+      <option value="Part-A: Tamil Eligibility & Literature">Part-A: Tamil Eligibility &amp; Literature (பொதுத் தமிழ் &amp; இலக்கியம்)</option>
+      <option value="Part-B: Indian Polity & Economy">Part-B: Indian Polity &amp; Economy (அரசியலமைப்பு &amp; பொருளாதாரம்)</option>
+      <option value="Part-B: History, INM & TN Culture">Part-B: History, INM &amp; TN Culture (வரலாறு, தேசிய இயக்கம் &amp; தமிழக மரபு)</option>
+      <option value="Part-B: Geography & General Science">Part-B: Geography &amp; General Science (புவியியல் &amp; பொது அறிவியல்)</option>
+      <option value="Part-B: Aptitude & Mental Ability">Part-B: Aptitude &amp; Mental Ability (திறனறிவு &amp; மனக்கணக்கு)</option>
+    </select>
 
-  <label for="qCount">ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை (1 கேள்வி = 1 நிமிடம்)</label>
-  <select id="qCount">
-    <option value="10" selected>10 Questions (10 நிமிடங்கள்)</option>
-    <option value="20">20 Questions (20 நிமிடங்கள்)</option>
-    <option value="25">25 Questions (25 நிமிடங்கள்)</option>
-  </select>
+    <label for="qCount">ஒரு Test-க்கு கேள்விகள் எண்ணிக்கை (1 கேள்வி = 1 நிமிடம்)</label>
+    <select id="qCount">
+      <option value="10" selected>10 Questions (10 நிமிடங்கள்)</option>
+      <option value="20">20 Questions (20 நிமிடங்கள்)</option>
+      <option value="25">25 Questions (25 நிமிடங்கள்)</option>
+    </select>
 
-  <label for="aiProvider">AI Provider (Gemini / ChatGPT)</label>
-  <select id="aiProvider">
-    <option value="gemini">Gemini (Google API)</option>
-    <option value="openai">ChatGPT (OpenAI API)</option>
-  </select>
+    <label for="aiProvider">AI Provider (Gemini / ChatGPT)</label>
+    <select id="aiProvider">
+      <option value="gemini">Gemini (Google API)</option>
+      <option value="openai">ChatGPT (OpenAI API)</option>
+    </select>
 
-  <label id="keyLabel" for="gkey">Gemini API Key (AIza...)</label>
-  <input id="gkey" type="password" placeholder="AIza... அல்லது sk-... API Key உள்ளிடவும்">
+    <label id="keyLabel" for="gkey">Gemini API Key (AIza...)</label>
+    <input id="gkey" type="password" placeholder="Optional — Browser-ல் மட்டும் சேமிக்கப்படும்">
 
-  <label for="aiModel">AI Model</label>
-  <input id="aiModel" type="text" value="gemini-3.8-flash" placeholder="எ.கா: gemini-3.8-flash அல்லது gpt-4o-mini">
+    <label for="aiModel">AI Model</label>
+    <input id="aiModel" type="text" value="gemini-3.8-flash" placeholder="எ.கா: gemini-3.8-flash அல்லது gpt-4o-mini">
 
-  <div class="row">
-    <button type="button" id="aiBtn1">AI கேள்விகள்</button>
-    <button type="button" class="sec" id="aiBtn2">புதிய Batch / Test</button>
+    <div class="row">
+      <button type="button" id="aiBtn1">AI கேள்விகள்</button>
+      <button type="button" class="sec" id="aiBtn2">புதிய Batch / Test</button>
+    </div>
+    <div id="aiMsg" class="ok" role="status" aria-live="polite"></div>
   </div>
-  <div id="aiMsg" class="ok" role="status" aria-live="polite"></div>
 
-  <hr style="margin:18px 0;border:0;border-top:1px solid var(--border);">
+  <!-- 2. OLD & ACTIVE BATCH HISTORY + RESULTS VIEWER -->
+  <div class="q">
+    <h3>2. Old Test Batches &amp; Results Viewer (பழைய Batch முடிவுகள்)</h3>
+    <p class="muted">கீழே உள்ள பழைய அல்லது நடப்பு Test Batch-ஐத் தேர்ந்தெடுத்து அனைவரின் Rank &amp; Score விவரங்களைப் பார்க்கலாம்.</p>
 
-  <h3>Post Results &amp; Rank Position (WhatsApp)</h3>
-  <p class="muted">அனைவரும் தேர்வு முடித்த பிறகு Post Results &amp; Rank Position அழுத்தி, ஒவ்வொருவரின் மொபைல் எண்ணிற்கும் Position &amp; Wishes WhatsApp-ல் அனுப்பலாம்.</p>
-  <button type="button" class="wa" id="postResultsBtn">Post Results &amp; Rank Position (WhatsApp)</button>
-  <div id="postResultsStatus" class="ok" role="status" aria-live="polite"></div>
-  <div id="adminDispatchList" style="margin-top:10px;"></div>
+    <label for="oldBatchSelect">Saved Test Batches (தேர்ந்தெடுக்கவும்)</label>
+    <div class="row">
+      <select id="oldBatchSelect"></select>
+      <button type="button" class="ghost" id="refreshBatchesBtn">Refresh Batches</button>
+    </div>
+
+    <div id="batchPills" style="margin-top:8px;"></div>
+
+    <div class="stat-grid" id="batchSummaryCards">
+      <div class="stat-card"><span class="muted">மொத்த பங்கேற்பாளர்கள்</span><b id="statPlayers">0</b></div>
+      <div class="stat-card"><span class="muted">சராசரி மதிப்பெண் (Avg)</span><b id="statAvg">0%</b></div>
+      <div class="stat-card"><span class="muted">முதல் இடம் (Topper)</span><b id="statTopper">-</b></div>
+      <div class="stat-card"><span class="muted">பாடம் / தேதி</span><b id="statMeta" style="font-size:0.9em;">-</b></div>
+    </div>
+
+    <label for="adminSearchInput">பங்கேற்பாளர் பெயர் தேடுக (Search Participant)</label>
+    <input id="adminSearchInput" type="text" placeholder="பெயர் அல்லது Mobile தேடவும்...">
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>பெயர் (Name)</th>
+            <th>Score</th>
+            <th>%</th>
+            <th>Mobile / Email (Admin Only)</th>
+            <th>நேரம் (Submitted)</th>
+          </tr>
+        </thead>
+        <tbody id="adminResultsTbody">
+          <tr><td colspan="6" class="muted">முடிவுகள் இல்லை.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row" style="margin-top:8px;">
+      <button type="button" class="sec" id="exportCsvBtn">Export CSV / Excel</button>
+      <button type="button" class="ghost" id="copyBoardBtn">Copy Rank Summary</button>
+      <button type="button" class="danger" id="deleteBatchBtn">Delete Selected Batch</button>
+    </div>
+    <div id="adminExportMsg" class="ok" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- 3. WHATSAPP RANK & WISHES DISPATCH -->
+  <div class="q">
+    <h3>3. Post Results &amp; Rank Position (WhatsApp)</h3>
+    <p class="muted">தேர்ந்தெடுக்கப்பட்ட Batch-ன் ஒவ்வொரு பங்கேற்பாளருக்கும் அவருடைய Position &amp; Wishes WhatsApp-ல் அனுப்பலாம்.</p>
+    <button type="button" class="wa" id="postResultsBtn">Post Results &amp; Rank Position (WhatsApp)</button>
+    <div id="postResultsStatus" class="ok" role="status" aria-live="polite"></div>
+    <div id="adminDispatchList" style="margin-top:10px;"></div>
+  </div>
 
   <button type="button" class="ghost" id="adminBackBtn2">User Quiz திரைக்குத் திரும்புக</button>
 </div>
@@ -407,36 +526,109 @@ var countdownId = null;
 var finishedClicked = false;
 var lastTimeLeftLabel = "";
 var batchSubmissions = {};
+var BATCH_PREFIX = "TNPSC_BATCH_";
+var META_PREFIX = "TNPSC_META_";
 
-function getBatchKey() {
-  var c = g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01";
-  return "TNPSC_BATCH_" + (c || "G4_REV01");
+function getSavedApiKey(provider) {
+  var cfg = window.QUIZ_CONFIG || {};
+  var storageKey = provider === "openai" ? "TNPSC_OPENAI_KEY" : "TNPSC_GEMINI_KEY";
+  var fromStorage = "";
+  try { fromStorage = localStorage.getItem(storageKey) || ""; } catch (e) {}
+  if (fromStorage.trim()) return fromStorage.trim();
+  if (provider === "openai") return String(cfg.OPENAI_API_KEY || "").trim();
+  return String(cfg.GEMINI_API_KEY || "").trim();
 }
 
-function loadBatchSubmissions() {
+function saveApiKeyToStorage(provider, keyVal) {
+  var trimmed = String(keyVal || "").trim();
+  if (!trimmed) return;
+  var storageKey = provider === "openai" ? "TNPSC_OPENAI_KEY" : "TNPSC_GEMINI_KEY";
+  try { localStorage.setItem(storageKey, trimmed); } catch (e) {}
+}
+
+function hydrateSavedKeyForProvider() {
+  var prov = g("aiProvider") ? g("aiProvider").value : "gemini";
+  var keyInput = g("gkey");
+  if (!keyInput) return;
+  var existing = getSavedApiKey(prov);
+  keyInput.value = existing || "";
+}
+
+function normalizeBatchCode(rawCode) {
+  var c = String(rawCode || "").trim().toUpperCase();
+  return c || "G4_REV01";
+}
+
+function saveBatchMeta(batchCode, subjName, qTotal) {
+  var code = normalizeBatchCode(batchCode);
   try {
-    var raw = localStorage.getItem(getBatchKey());
+    localStorage.setItem(META_PREFIX + code, JSON.stringify({
+      code: code,
+      subject: subjName || "Part-A: Tamil Eligibility & Literature",
+      totalQuestions: Number(qTotal) || 10,
+      updatedAt: getTodayDateKey()
+    }));
+  } catch (e) {}
+}
+
+function getBatchMeta(batchCode) {
+  var code = normalizeBatchCode(batchCode);
+  try {
+    var raw = localStorage.getItem(META_PREFIX + code);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return { code: code, subject: "Group 4", totalQuestions: 10, updatedAt: getTodayDateKey() };
+}
+
+function getAllSavedBatchCodes() {
+  var codesSet = {};
+  var activeCode = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
+  codesSet[activeCode] = true;
+
+  try {
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i) || "";
+      if (k.indexOf(BATCH_PREFIX) === 0) {
+        codesSet[k.slice(BATCH_PREFIX.length)] = true;
+      } else if (k.indexOf(META_PREFIX) === 0) {
+        codesSet[k.slice(META_PREFIX.length)] = true;
+      }
+    }
+  } catch (e) {}
+
+  var list = Object.keys(codesSet);
+  list.sort();
+  return list;
+}
+
+function loadBatchSubmissionsForCode(batchCode) {
+  var code = normalizeBatchCode(batchCode);
+  try {
+    var raw = localStorage.getItem(BATCH_PREFIX + code);
     batchSubmissions = raw ? JSON.parse(raw) : {};
   } catch (e) {
     batchSubmissions = {};
   }
+  return batchSubmissions;
 }
 
 function saveBatchSubmission(entry) {
-  loadBatchSubmissions();
+  var code = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
+  loadBatchSubmissionsForCode(code);
   var key = entry.name.toLowerCase();
   batchSubmissions[key] = entry;
   try {
-    localStorage.setItem(getBatchKey(), JSON.stringify(batchSubmissions));
+    localStorage.setItem(BATCH_PREFIX + code, JSON.stringify(batchSubmissions));
   } catch (e) {}
+  saveBatchMeta(code, g("subj") ? g("subj").value : "Group 4", entry.total || qs.length);
 }
 
-function computeRankedParticipants() {
-  loadBatchSubmissions();
+function computeRankedParticipantsForCode(batchCode) {
+  var dataMap = loadBatchSubmissionsForCode(batchCode);
   var list = [];
-  for (var k in batchSubmissions) {
-    if (Object.prototype.hasOwnProperty.call(batchSubmissions, k)) {
-      list.push(batchSubmissions[k]);
+  for (var k in dataMap) {
+    if (Object.prototype.hasOwnProperty.call(dataMap, k)) {
+      list.push(dataMap[k]);
     }
   }
   list.sort(function(a, b) {
@@ -447,6 +639,210 @@ function computeRankedParticipants() {
     list[i].rank = i + 1;
   }
   return list;
+}
+
+function formatSubmittedTime(ts) {
+  if (!ts) return "-";
+  try {
+    var d = new Date(ts);
+    return d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch (e) {
+    return "-";
+  }
+}
+
+function populateOldBatchesUI(preferredCode) {
+  var sel = g("oldBatchSelect");
+  var pillsWrap = g("batchPills");
+  if (!sel) return;
+
+  var codes = getAllSavedBatchCodes();
+  var chosen = normalizeBatchCode(preferredCode || sel.value || (g("adminCode") ? g("adminCode").value : "G4_REV01"));
+  if (codes.indexOf(chosen) === -1) codes.unshift(chosen);
+
+  var optsHtml = "";
+  var pillsHtml = "";
+  for (var i = 0; i < codes.length; i++) {
+    var c = codes[i];
+    var count = computeRankedParticipantsForCode(c).length;
+    optsHtml += '<option value="' + c + '"' + (c === chosen ? ' selected' : '') + '>' + c + ' (' + count + ' submissions)</option>';
+    pillsHtml += '<span class="badge-pill' + (c === chosen ? ' active' : '') + '" data-batch="' + c + '">' + c + ' (' + count + ')</span>';
+  }
+  sel.innerHTML = optsHtml;
+  if (pillsWrap) {
+    pillsWrap.innerHTML = pillsHtml;
+    var pills = pillsWrap.querySelectorAll(".badge-pill");
+    for (var p = 0; p < pills.length; p++) {
+      pills[p].addEventListener("click", function() {
+        var bCode = this.getAttribute("data-batch");
+        if (bCode) {
+          sel.value = bCode;
+          renderAdminBatchDashboard(bCode);
+        }
+      });
+    }
+  }
+
+  renderAdminBatchDashboard(chosen);
+}
+
+function renderAdminBatchDashboard(batchCode) {
+  var code = normalizeBatchCode(batchCode);
+  if (g("oldBatchSelect")) g("oldBatchSelect").value = code;
+
+  var pillsWrap = g("batchPills");
+  if (pillsWrap) {
+    var pills = pillsWrap.querySelectorAll(".badge-pill");
+    for (var p = 0; p < pills.length; p++) {
+      if (pills[p].getAttribute("data-batch") === code) {
+        pills[p].classList.add("active");
+      } else {
+        pills[p].classList.remove("active");
+      }
+    }
+  }
+
+  var ranked = computeRankedParticipantsForCode(code);
+  var meta = getBatchMeta(code);
+  var searchQuery = g("adminSearchInput") ? g("adminSearchInput").value.trim().toLowerCase() : "";
+
+  if (g("statPlayers")) g("statPlayers").textContent = String(ranked.length);
+  if (g("statMeta")) g("statMeta").textContent = (meta.subject || "Group 4") + " (" + (meta.updatedAt || "-") + ")";
+
+  if (!ranked.length) {
+    if (g("statAvg")) g("statAvg").textContent = "0%";
+    if (g("statTopper")) g("statTopper").textContent = "-";
+    if (g("adminResultsTbody")) {
+      g("adminResultsTbody").innerHTML = '<tr><td colspan="6" class="muted">' + code + ' Batch-ல் இன்னும் தேர்வு முடிவுகள் இல்லை.</td></tr>';
+    }
+    return;
+  }
+
+  var sumPct = 0;
+  for (var i = 0; i < ranked.length; i++) {
+    var totQ = ranked[i].total || meta.totalQuestions || 10;
+    sumPct += totQ ? (ranked[i].score / totQ) * 100 : 0;
+  }
+  var avgPct = Math.round(sumPct / ranked.length);
+  if (g("statAvg")) g("statAvg").textContent = avgPct + "%";
+  if (g("statTopper")) {
+    g("statTopper").textContent = ranked[0].name + " (" + ranked[0].score + "/" + (ranked[0].total || meta.totalQuestions || 10) + ")";
+  }
+
+  var filtered = ranked.filter(function(item) {
+    if (!searchQuery) return true;
+    var hay = (item.name + " " + (item.phone || "") + " " + (item.email || "")).toLowerCase();
+    return hay.indexOf(searchQuery) !== -1;
+  });
+
+  var rowsHtml = "";
+  for (var r = 0; r < filtered.length; r++) {
+    var row = filtered[r];
+    var qCount = row.total || meta.totalQuestions || 10;
+    var pct = qCount ? Math.round((row.score / qCount) * 100) : 0;
+    var contactStr = [row.phone, row.email].filter(Boolean).join(" / ") || "-";
+    rowsHtml += '<tr>' +
+      '<td><b>#' + row.rank + '</b></td>' +
+      '<td><b>' + row.name + '</b></td>' +
+      '<td>' + row.score + '/' + qCount + '</td>' +
+      '<td>' + pct + '%</td>' +
+      '<td>' + contactStr + '</td>' +
+      '<td>' + formatSubmittedTime(row.submittedAt) + '</td>' +
+      '</tr>';
+  }
+  if (!rowsHtml) {
+    rowsHtml = '<tr><td colspan="6" class="muted">தேடலுக்குப் பொருந்தும் முடிவுகள் இல்லை.</td></tr>';
+  }
+  if (g("adminResultsTbody")) g("adminResultsTbody").innerHTML = rowsHtml;
+}
+
+function exportSelectedBatchCsv() {
+  var code = normalizeBatchCode(g("oldBatchSelect") ? g("oldBatchSelect").value : "G4_REV01");
+  var ranked = computeRankedParticipantsForCode(code);
+  if (!ranked.length) {
+    if (g("adminExportMsg")) {
+      g("adminExportMsg").className = "err";
+      g("adminExportMsg").textContent = code + " Batch-ல் Export செய்ய முடிவுகள் இல்லை.";
+    }
+    return;
+  }
+
+  var lines = ["Rank,Batch,Name,Score,Total,Percentage,Phone,Email,SubmittedAt"];
+  for (var i = 0; i < ranked.length; i++) {
+    var r = ranked[i];
+    var tot = r.total || 10;
+    var pct = tot ? Math.round((r.score / tot) * 100) : 0;
+    var cols = [
+      r.rank,
+      code,
+      '"' + String(r.name || "").replace(/"/g, '""') + '"',
+      r.score,
+      tot,
+      pct + "%",
+      '"' + String(r.phone || "").replace(/"/g, '""') + '"',
+      '"' + String(r.email || "").replace(/"/g, '""') + '"',
+      '"' + formatSubmittedTime(r.submittedAt) + '"'
+    ];
+    lines.push(cols.join(","));
+  }
+
+  var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = code + "_results.csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  if (g("adminExportMsg")) {
+    g("adminExportMsg").className = "ok";
+    g("adminExportMsg").textContent = code + "_results.csv பதிவிறக்கம் செய்யப்பட்டது!";
+  }
+}
+
+async function copySelectedBatchSummary() {
+  var code = normalizeBatchCode(g("oldBatchSelect") ? g("oldBatchSelect").value : "G4_REV01");
+  var ranked = computeRankedParticipantsForCode(code);
+  if (!ranked.length) {
+    if (g("adminExportMsg")) {
+      g("adminExportMsg").className = "err";
+      g("adminExportMsg").textContent = code + " Batch-ல் Copy செய்ய முடிவுகள் இல்லை.";
+    }
+    return;
+  }
+  var lines = ["TNPSC Group 4 Results — Batch: " + code];
+  for (var i = 0; i < ranked.length; i++) {
+    var r = ranked[i];
+    lines.push("#" + r.rank + " " + r.name + " — " + r.score + "/" + (r.total || 10));
+  }
+  var text = lines.join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+    if (g("adminExportMsg")) {
+      g("adminExportMsg").className = "ok";
+      g("adminExportMsg").textContent = "Rank Summary Copy செய்யப்பட்டது!";
+    }
+  } catch (e) {
+    if (g("adminExportMsg")) {
+      g("adminExportMsg").className = "ok";
+      g("adminExportMsg").textContent = text;
+    }
+  }
+}
+
+function deleteSelectedBatch() {
+  var code = normalizeBatchCode(g("oldBatchSelect") ? g("oldBatchSelect").value : "G4_REV01");
+  try {
+    localStorage.removeItem(BATCH_PREFIX + code);
+    localStorage.removeItem(META_PREFIX + code);
+  } catch (e) {}
+  if (g("adminExportMsg")) {
+    g("adminExportMsg").className = "ok";
+    g("adminExportMsg").textContent = code + " Batch முடிவுகள் நீக்கப்பட்டன.";
+  }
+  populateOldBatchesUI(g("adminCode") ? g("adminCode").value : "G4_REV01");
 }
 
 function buildWishMessage(p, totalQ, batchCode) {
@@ -472,7 +868,8 @@ function cleanPhoneForWhatsApp(rawPhone) {
 function renderAttendedUsernamesOnly() {
   var listEl = g("attendedUsersList");
   if (!listEl) return;
-  var ranked = computeRankedParticipants();
+  var code = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
+  var ranked = computeRankedParticipantsForCode(code);
   if (!ranked.length) {
     listEl.textContent = "பங்கேற்பாளர்கள் விவரம் இல்லை.";
     return;
@@ -484,12 +881,13 @@ function renderAttendedUsernamesOnly() {
 }
 
 function handlePostResultsAndRank() {
-  var code = g("adminCode") && g("adminCode").value.trim()
-    ? g("adminCode").value.trim().toUpperCase()
-    : (g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01");
-  if (g("code")) g("code").value = code;
+  var code = normalizeBatchCode(
+    (g("oldBatchSelect") && g("oldBatchSelect").value) ||
+    (g("adminCode") && g("adminCode").value) ||
+    (g("code") ? g("code").value : "G4_REV01")
+  );
 
-  var ranked = computeRankedParticipants();
+  var ranked = computeRankedParticipantsForCode(code);
   var listDiv = g("adminDispatchList");
   var statusEl = g("postResultsStatus");
   if (!listDiv) return;
@@ -520,7 +918,7 @@ function handlePostResultsAndRank() {
     html += '<div class="player-item">' +
       '<div><b>Rank #' + p.rank + ' — ' + p.name + '</b> (Score: ' + p.score + '/' + (p.total || qs.length) + ')</div>' +
       '<div class="muted">' + (waPhone ? 'WhatsApp Number: +' + waPhone : 'Mobile number வழங்கப்படவில்லை (General Share)') + '</div>' +
-      '<button type="button" class="wa send-wa-row" data-url="' + encodeURIComponent(waUrl) + '" data-name="' + encodeURIComponent(p.name) + '">Send Rank &amp; Wishes to ' + p.name + ' (WhatsApp)</button>' +
+      '<button type="button" class="wa send-wa-row" data-url="' + encodeURIComponent(waUrl) + '">Send Rank &amp; Wishes to ' + p.name + ' (WhatsApp)</button>' +
       '</div>';
   }
   listDiv.innerHTML = html;
@@ -674,10 +1072,11 @@ function openAdminPanel() {
   }
   hide("adminLoginBox");
   show("adminBox");
-  if (g("adminCode") && g("code")) {
-    g("adminCode").value = (g("code").value.trim() || "G4_REV01").toUpperCase();
-  }
+  var activeCode = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
+  if (g("adminCode")) g("adminCode").value = activeCode;
+  hydrateSavedKeyForProvider();
   refreshSubjectBatchQuestions();
+  populateOldBatchesUI(activeCode);
 }
 
 function getTodayDateKey() {
@@ -978,7 +1377,7 @@ var G4_REVISED_TEMPLATES = {
 function buildDailyQuestionsForSubject(subject, batchCode, totalQuestions) {
   var qLimit = Number(totalQuestions) || 10;
   var cleanSubj = G4_REVISED_TEMPLATES[subject] ? subject : "Part-A: Tamil Eligibility & Literature";
-  var cleanBatch = String(batchCode || "G4_REV01").trim().toUpperCase();
+  var cleanBatch = normalizeBatchCode(batchCode);
   var dayKey = getTodayDateKey();
   var state = { seed: createSeedNumber(dayKey + "|" + cleanSubj + "|" + cleanBatch) };
   var templates = G4_REVISED_TEMPLATES[cleanSubj];
@@ -1033,9 +1432,10 @@ function getSB() {
 
 function refreshSubjectBatchQuestions() {
   var subj = g("subj") ? g("subj").value : "Part-A: Tamil Eligibility & Literature";
-  var batch = g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01";
+  var batch = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
   var countVal = g("qCount") ? Number(g("qCount").value) || 10 : 10;
   qs = buildDailyQuestionsForSubject(subj, batch, countVal);
+  saveBatchMeta(batch, subj, countVal);
   if (g("aiMsg")) {
     g("aiMsg").className = "ok";
     g("aiMsg").textContent = getTodayDateKey() + " | " + subj + " | Batch: " + batch + " (" + qs.length + " Q&A • " + qs.length + " நிமிடம்)";
@@ -1044,18 +1444,19 @@ function refreshSubjectBatchQuestions() {
 
 function onProviderChange() {
   var prov = g("aiProvider").value;
-  var cfgModel = (window.QUIZ_CONFIG && window.QUIZ_CONFIG.GEMINI_MODEL) || "gemini-3.8-flash";
+  var cfg = window.QUIZ_CONFIG || {};
   if (prov === "openai") {
     g("keyLabel").textContent = "ChatGPT / OpenAI API Key (sk-...)";
     g("gkey").placeholder = "sk-... (OpenAI API Key உள்ளிடவும்)";
     if (!g("aiModel").value.trim() || g("aiModel").value.indexOf("gemini") === 0) {
-      g("aiModel").value = "gpt-4o-mini";
+      g("aiModel").value = cfg.OPENAI_MODEL || "gpt-4o-mini";
     }
   } else {
     g("keyLabel").textContent = "Gemini API Key (AIza...)";
     g("gkey").placeholder = "AIza... (Gemini API Key உள்ளிடவும்)";
-    g("aiModel").value = cfgModel;
+    g("aiModel").value = cfg.GEMINI_MODEL || "gemini-3.8-flash";
   }
+  hydrateSavedKeyForProvider();
 }
 
 function extractJsonArray(rawText) {
@@ -1110,16 +1511,21 @@ async function genAI(newCode) {
     g("code").value = "G4_" + Math.floor(100 + Math.random() * 900);
     if (g("adminCode")) g("adminCode").value = g("code").value;
     refreshSubjectBatchQuestions();
+    populateOldBatchesUI(g("code").value);
   }
-  var key = g("gkey").value.trim();
+  var prov = g("aiProvider").value;
+  var typedKey = g("gkey").value.trim();
+  if (typedKey) {
+    saveApiKeyToStorage(prov, typedKey);
+  }
+  var key = typedKey || getSavedApiKey(prov);
   if (!key) {
     g("aiMsg").className = "ok";
     g("aiMsg").textContent = "API Key இல்லாமலேயே " + g("code").value + " க்கு தினசரி Group 4 Bilingual Q&A தயார்!";
     return;
   }
-  var code = g("code").value.trim().toUpperCase();
+  var code = normalizeBatchCode(g("code").value);
   var s = g("subj").value;
-  var prov = g("aiProvider").value;
   var model = g("aiModel").value.trim();
   var qLimit = g("qCount") ? Number(g("qCount").value) || 10 : 10;
 
@@ -1159,7 +1565,7 @@ async function joinQuiz() {
   refreshSubjectBatchQuestions();
   if (g("joinMsg")) g("joinMsg").textContent = "";
   var name = g("name") ? g("name").value.trim() : "";
-  var code = g("code") ? g("code").value.trim().toUpperCase() : "G4_REV01";
+  var code = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
   if (g("code")) g("code").value = code;
 
   if (!name || code.length < 3) {
@@ -1313,6 +1719,7 @@ async function finalizeSubmission(isAutoSubmit) {
   var candidateName = g("name") ? g("name").value.trim() : "Participant";
   var candidatePhone = g("userPhone") ? g("userPhone").value.trim() : "";
   var candidateEmail = g("userEmail") ? g("userEmail").value.trim() : "";
+  var activeCode = normalizeBatchCode(g("code") ? g("code").value : "G4_REV01");
 
   saveBatchSubmission({
     name: candidateName,
@@ -1323,7 +1730,7 @@ async function finalizeSubmission(isAutoSubmit) {
     submittedAt: Date.now()
   });
 
-  var ranked = computeRankedParticipants();
+  var ranked = computeRankedParticipantsForCode(activeCode);
   var rankVal = 1;
   var totalVal = ranked.length || 1;
   for (var rIdx = 0; rIdx < ranked.length; rIdx++) {
@@ -1337,7 +1744,7 @@ async function finalizeSubmission(isAutoSubmit) {
   if (client && me && me.participant_id) {
     try {
       await client.rpc("quiz_submit", {
-        p_test_code: g("code").value.trim().toUpperCase(),
+        p_test_code: activeCode,
         p_participant_id: me.participant_id,
         p_token: me.token,
         p_answers: arr
@@ -1446,7 +1853,7 @@ function backToHome() {
 }
 
 function inviteText() {
-  var c = g("code").value.trim().toUpperCase();
+  var c = normalizeBatchCode(g("code").value);
   var u = location.href.split("?")[0] + "?code=" + encodeURIComponent(c);
   return "TNPSC Group 4 Live Quiz!\nBatch / Code: " + c + "\nJoin: " + u;
 }
@@ -1482,17 +1889,36 @@ if (g("waBtn")) g("waBtn").addEventListener("click", shareWA);
 if (g("shareBtn")) g("shareBtn").addEventListener("click", shareSocial);
 if (g("homeBtn")) g("homeBtn").addEventListener("click", backToHome);
 
+if (g("oldBatchSelect")) g("oldBatchSelect").addEventListener("change", function() {
+  renderAdminBatchDashboard(g("oldBatchSelect").value);
+});
+if (g("refreshBatchesBtn")) g("refreshBatchesBtn").addEventListener("click", function() {
+  populateOldBatchesUI(g("oldBatchSelect") ? g("oldBatchSelect").value : "G4_REV01");
+});
+if (g("adminSearchInput")) g("adminSearchInput").addEventListener("input", function() {
+  renderAdminBatchDashboard(g("oldBatchSelect") ? g("oldBatchSelect").value : "G4_REV01");
+});
+if (g("exportCsvBtn")) g("exportCsvBtn").addEventListener("click", exportSelectedBatchCsv);
+if (g("copyBoardBtn")) g("copyBoardBtn").addEventListener("click", copySelectedBatchSummary);
+if (g("deleteBatchBtn")) g("deleteBatchBtn").addEventListener("click", deleteSelectedBatch);
+
 if (g("code")) g("code").addEventListener("input", refreshSubjectBatchQuestions);
 if (g("adminCode")) g("adminCode").addEventListener("input", function() {
-  if (g("code")) g("code").value = (g("adminCode").value.trim() || "G4_REV01").toUpperCase();
+  var c = normalizeBatchCode(g("adminCode").value);
+  if (g("code")) g("code").value = c;
   refreshSubjectBatchQuestions();
+  populateOldBatchesUI(c);
 });
 if (g("subj")) g("subj").addEventListener("change", refreshSubjectBatchQuestions);
 if (g("qCount")) g("qCount").addEventListener("change", refreshSubjectBatchQuestions);
 if (g("aiProvider")) g("aiProvider").addEventListener("change", onProviderChange);
+if (g("gkey")) g("gkey").addEventListener("change", function() {
+  saveApiKeyToStorage(g("aiProvider").value, g("gkey").value);
+});
 if (g("aiBtn1")) g("aiBtn1").addEventListener("click", function() { genAI(false); });
 if (g("aiBtn2")) g("aiBtn2").addEventListener("click", function() { genAI(true); });
 
+hydrateSavedKeyForProvider();
 refreshSubjectBatchQuestions();
 </script>
 </body>
