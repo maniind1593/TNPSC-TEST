@@ -2718,7 +2718,7 @@
         ". Every question must differ from each other and from these existing ones: " + JSON.stringify(existing) +
         ". Variation seed: " + Math.random().toString(36).slice(2) +
         ". Return ONLY a JSON array of {\"questionTa\":\"\",\"questionEn\":\"\",\"options\":[{\"ta\":\"\",\"en\":\"\"} x4],\"correctIndex\":0-3,\"explanationTa\":\"\",\"explanationEn\":\"\"}. Exactly 4 options; vary the correct position.";
-      got += addDrafts(parseJsonLoose(await callGemini(prompt)), batch, subject, true).added;
+      got += addDrafts(parseJsonLoose(await callAi(prompt)), batch, subject, true).added;
     }
     return got;
   }
@@ -2726,8 +2726,8 @@
   async function handleAiGen(all) {
     var batch = getBatchById(g("aiBatchSelect").value);
     if (!batch) return setGenStatus("Mudhalla Test Batch select pannunga.", "err");
-    if (!memoryRuntimeConfig.geminiKey) {
-      return setGenStatus("AI API Key illa. Keezha 'Gemini API Key' field-la podunga — illana JSON paste / Manual-ah questions add pannunga.", "err");
+    if (!aiCurrentKey()) {
+      return setGenStatus("AI API Key illa. Keezha 'AI API Key' field-la podunga — illana JSON paste / Manual-ah questions add pannunga.", "err");
     }
     var diff = g("aiDifficultySelect").value, topic = g("aiTopicInput").value.trim(), jobs = [];
     if (all) {
@@ -2887,7 +2887,8 @@
     var p = document.createElement("div");
     p.className = "soft-card p-4 sm:p-5 space-y-3";
     p.innerHTML = "<h3 class='font-extrabold text-base'>Add Questions: AI Key / JSON Paste / Manual (+ Images)</h3>" +
-      "<p class='text-xs opacity-80'>AI-ku Gemini key podunga (browser memory-la mattum — refresh panna clear aagum). Illana JSON paste panni Run pannunga, allathu manual-ah type panni image upload pannunga. Ellaame mudhalla keezha Preview Queue-la varum; angae Approve / Edit / Reject pannalaam. Answer: <code>correctIndex</code> 0-3 allathu <code>answer</code> A-D.</p>" +
+      "<p class='text-xs opacity-80'>AI-ku Provider select panni API key podunga (browser memory-la mattum — refresh panna clear aagum). Illana JSON paste panni Run pannunga, allathu manual-ah type panni image upload pannunga. Ellaame mudhalla keezha Preview Queue-la varum; angae Approve / Edit / Reject pannalaam. Answer: <code>correctIndex</code> 0-3 allathu <code>answer</code> A-D.</p>" +
+      "<select id='inlineAiProvider' class='w-full p-2.5 text-xs'><option value='gemini'>Gemini (Google)</option><option value='claude'>Claude (Anthropic)</option></select>" +
       "<input id='inlineGeminiKey' type='password' autocomplete='off' placeholder='Gemini API Key (AIza...)' class='w-full p-2.5 text-xs'>" +
       "<input id='inlineGeminiModel' type='text' autocomplete='off' value='" + esc(GEMINI_MODEL) + "' title='Gemini model name' class='w-full p-2.5 text-xs'>" +
       "<textarea id='jsonQInput' rows='7' class='w-full p-2.5 text-xs font-mono' placeholder='" + esc(JSON_SAMPLE) + "'></textarea>" +
@@ -2899,8 +2900,8 @@
 
     var keyIn = g("inlineGeminiKey");
     keyIn.value = memoryRuntimeConfig.geminiKey || "";
-    keyIn.addEventListener("input", function() { memoryRuntimeConfig.geminiKey = keyIn.value.trim(); });
-    g("inlineGeminiModel").addEventListener("input", function(e) { GEMINI_MODEL = e.target.value.trim() || "gemini-3.8-flash"; });
+    aiBindInputs();
+    
 
     function status(msg, ok) { var s = g("jsonImportStatus"); s.className = "text-xs font-bold " + (ok ? "text-emerald-700" : "text-red-700"); s.textContent = msg; }
     function toQueue() {
@@ -3098,7 +3099,7 @@
         ". Every question must differ from each other and from these existing ones: " + JSON.stringify(existing) +
         ". Variation seed: " + Math.random().toString(36).slice(2) +
         ". Return ONLY a JSON array of {\"questionTa\":\"\",\"questionEn\":\"\",\"options\":[{\"ta\":\"\",\"en\":\"\"} x4],\"correctIndex\":0-3,\"explanationTa\":\"\",\"explanationEn\":\"\"}. Exactly 4 options; vary the correct position.";
-      var list = parseJsonLoose(await callGemini(prompt)).slice(0, need);
+      var list = parseJsonLoose(await callAi(prompt)).slice(0, need);
       got += addDrafts(list, batch, subject, true).added;
       updateAiBatchBannerAndQueue();
     }
@@ -3122,8 +3123,8 @@
     if (aiRun) return;
     var batch = getBatchById(g("aiBatchSelect").value);
     if (!batch) return setGenStatus("Mudhalla Test Batch select pannunga.", "err");
-    if (!memoryRuntimeConfig.geminiKey) {
-      return setGenStatus("AI API Key illa. Keezha 'Gemini API Key' field-la podunga — illana JSON paste / Manual-ah questions add pannunga.", "err");
+    if (!aiCurrentKey()) {
+      return setGenStatus("AI API Key illa. Keezha 'AI API Key' field-la podunga — illana JSON paste / Manual-ah questions add pannunga.", "err");
     }
     var diff = g("aiDifficultySelect").value, topic = g("aiTopicInput").value.trim(), jobs = [];
     if (all) {
@@ -3139,7 +3140,7 @@
     var ids = ["runAiGenerateAllBatchBtn", "runAiGenerateBtn"], total = 0;
     aiRun = { stopped: false, ctl: null, msg: "", t0: Date.now() };
     var run = aiRun, stop = aiStopBtn();
-    function show() { setGenStatus("⏳ " + GEMINI_MODEL + " • " + run.msg + " • " + Math.round((Date.now() - run.t0) / 1000) + "s"); }
+    function show() { setGenStatus("⏳ " + aiProvider + "/" + aiModelName() + " • " + run.msg + " • " + Math.round((Date.now() - run.t0) / 1000) + "s"); }
     var tick = setInterval(show, 1000);
     ids.forEach(function(id) { g(id).disabled = true; });
     stop.classList.remove("hidden");
@@ -3162,6 +3163,68 @@
     }
   }
   /* ===== END ADDED 4 ===== */
+
+  /* ===== ADDED 5: AI provider dropdown (Gemini / Claude) ===== */
+  var aiProvider = "gemini", aiKeyClaude = "";
+  var AI_DEFAULT_MODEL = { gemini: "gemini-3.8-flash", claude: "claude-haiku-5-5" };
+  var aiModels = { gemini: GEMINI_MODEL, claude: "claude-haiku-5-5" };
+
+  function aiCurrentKey() { return aiProvider === "claude" ? aiKeyClaude : (memoryRuntimeConfig.geminiKey || ""); }
+  function aiModelName() { return aiModels[aiProvider]; }
+  function callAi(prompt) { return aiProvider === "claude" ? callClaude(prompt) : callGemini(prompt); }
+
+  async function callClaude(prompt) {
+    if (!aiKeyClaude) throw new Error("AI API Key illa.");
+    var ctl = new AbortController(), timedOut = false;
+    if (aiRun) aiRun.ctl = ctl;
+    var timer = setTimeout(function() { timedOut = true; ctl.abort(); }, AI_TIMEOUT_MS);
+    try {
+      var res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json", "x-api-key": aiKeyClaude,
+          "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({ model: aiModels.claude, max_tokens: 8000, messages: [{ role: "user", content: prompt }] }),
+        signal: ctl.signal
+      });
+      var data = await res.json().catch(function() { return {}; });
+      if (!res.ok) {
+        if (res.status === 401) throw new Error("Claude API Key thappu (HTTP 401). Console-la key-ah check pannunga.");
+        throw new Error((data.error && data.error.message) || ("Claude HTTP " + res.status));
+      }
+      var txt = (data.content || []).map(function(b) { return b.type === "text" ? b.text : ""; }).join("");
+      if (data.stop_reason === "max_tokens") throw new Error("Response cut aachu (max_tokens) — Question Count kuraichu try pannunga.");
+      if (!txt) throw new Error("Claude empty response" + (data.stop_reason ? " (" + data.stop_reason + ")" : ""));
+      return txt;
+    } catch (e) {
+      if (e && e.name === "AbortError") {
+        throw new Error(timedOut ? "Claude " + (AI_TIMEOUT_MS / 1000) + " sec-la respond pannala (timeout). Marubadi try pannunga." : "Stopped.");
+      }
+      throw e;
+    } finally { clearTimeout(timer); }
+  }
+
+  function aiBindInputs() {
+    var sel = g("inlineAiProvider"), key = g("inlineGeminiKey"), mod = g("inlineGeminiModel");
+    function sync() {
+      aiProvider = sel.value;
+      key.value = aiCurrentKey();
+      key.placeholder = aiProvider === "claude" ? "Claude API Key (sk-ant-...)" : "Gemini API Key (AIza...)";
+      mod.value = aiModels[aiProvider];
+    }
+    sel.addEventListener("change", sync);
+    key.addEventListener("input", function() {
+      var v = key.value.trim();
+      if (aiProvider === "claude") aiKeyClaude = v; else memoryRuntimeConfig.geminiKey = v;
+    });
+    mod.addEventListener("input", function() {
+      aiModels[aiProvider] = mod.value.trim() || AI_DEFAULT_MODEL[aiProvider];
+      if (aiProvider === "gemini") GEMINI_MODEL = aiModels.gemini;
+    });
+    sync();
+  }
+  /* ===== END ADDED 5 ===== */
 
   loadAppState();
   loadAccPrefs();
