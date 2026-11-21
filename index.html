@@ -584,22 +584,17 @@
   <section id="adminLoginScreen" class="glass-card p-6 max-w-lg mx-auto hidden">
     <h2 class="text-xl font-extrabold mb-1">Admin V2 Secure Access</h2>
     <p class="text-xs opacity-80 mb-4">
-      உங்கள் <strong>Supabase Admin Email &amp; Password</strong> மூலம் உள்நுழையவும். (Supabase config இல்லாத Local Preview-ல் PIN / Demo Login பயன்படுத்தலாம்).
+      Supabase Backend-ல் பதிவு செய்யப்பட்ட <strong>Admin Email &amp; Password</strong> மூலம் மட்டுமே உள்நுழைய முடியும். (<code>config.js</code>-ல் Supabase விவரங்கள் இருந்தால் தானாக இணைக்கப்படும்).
     </p>
 
     <div class="space-y-3">
       <div>
         <label for="adminEmailInput" class="block text-xs font-bold mb-1">Supabase Admin Email *</label>
-        <input id="adminEmailInput" type="email" placeholder="admin@youracademy.com" class="w-full p-3">
+        <input id="adminEmailInput" type="email" autocomplete="username" placeholder="admin@youracademy.com" class="w-full p-3">
       </div>
       <div>
         <label for="adminPasswordInput" class="block text-xs font-bold mb-1">Supabase Password *</label>
-        <input id="adminPasswordInput" type="password" placeholder="••••••••" class="w-full p-3">
-      </div>
-
-      <div class="pt-1 border-t border-slate-300/70">
-        <label for="adminPinInput" class="block text-xs font-bold mb-1 opacity-75">Local / Preview PIN (Optional Fallback)</label>
-        <input id="adminPinInput" type="password" value="admin123" placeholder="admin123" class="w-full p-2.5 text-sm">
+        <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••" class="w-full p-3">
       </div>
 
       <div class="flex flex-wrap gap-2.5 pt-2">
@@ -2952,14 +2947,125 @@
 
   function getRuntimeConfig() {
     var winCfg = window.TNPSC_CONFIG || {};
+    var globalObj = (typeof globalThis !== "undefined" ? globalThis : window);
+    var extCfg =
+      globalObj.CONFIG ||
+      globalObj.APP_CONFIG ||
+      globalObj.SUPABASE_CONFIG ||
+      globalObj.ENV_CONFIG ||
+      globalObj.config ||
+      {};
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}"); } catch (e) {}
+
+    var resolvedSupaUrl =
+      saved.supabaseUrl ||
+      extCfg.SUPABASE_URL ||
+      extCfg.supabaseUrl ||
+      extCfg.supabase_url ||
+      (extCfg.supabase && (extCfg.supabase.url || extCfg.supabaseUrl)) ||
+      globalObj.SUPABASE_URL ||
+      winCfg.SUPABASE_URL ||
+      "";
+
+    var resolvedSupaKey =
+      saved.supabaseKey ||
+      extCfg.SUPABASE_ANON_KEY ||
+      extCfg.SUPABASE_KEY ||
+      extCfg.supabaseAnonKey ||
+      extCfg.supabaseKey ||
+      extCfg.supabase_anon_key ||
+      (extCfg.supabase && (extCfg.supabase.anonKey || extCfg.supabase.key)) ||
+      globalObj.SUPABASE_ANON_KEY ||
+      globalObj.SUPABASE_KEY ||
+      winCfg.SUPABASE_ANON_KEY ||
+      "";
+
+    var resolvedGeminiKey =
+      saved.geminiKey ||
+      extCfg.GEMINI_API_KEY ||
+      extCfg.geminiApiKey ||
+      extCfg.geminiKey ||
+      globalObj.GEMINI_API_KEY ||
+      winCfg.GEMINI_API_KEY ||
+      "";
+
+    var resolvedAdminPin =
+      saved.adminPin ||
+      extCfg.ADMIN_PIN ||
+      extCfg.adminPin ||
+      winCfg.ADMIN_PIN ||
+      ADMIN_PIN_DEFAULT;
+
     return {
-      geminiKey: saved.geminiKey || winCfg.GEMINI_API_KEY || "",
-      supabaseUrl: saved.supabaseUrl || winCfg.SUPABASE_URL || "",
-      supabaseKey: saved.supabaseKey || winCfg.SUPABASE_ANON_KEY || "",
-      adminPin: saved.adminPin || winCfg.ADMIN_PIN || ADMIN_PIN_DEFAULT
+      geminiKey: resolvedGeminiKey,
+      supabaseUrl: resolvedSupaUrl,
+      supabaseKey: resolvedSupaKey,
+      adminPin: resolvedAdminPin
     };
+  }
+
+  function loadExternalConfigJs() {
+    return new Promise(function(resolve) {
+      function finalize() {
+        resolve(getRuntimeConfig());
+      }
+
+      // If config values are already present on window/globalThis, no need to wait
+      var current = getRuntimeConfig();
+      if (current.supabaseUrl && current.supabaseKey) {
+        resolve(current);
+        return;
+      }
+
+      var existingScript = document.querySelector('script[data-tnpsc-config="true"]');
+      if (existingScript) {
+        if (existingScript.dataset.loaded === "true") {
+          finalize();
+        } else {
+          existingScript.addEventListener("load", finalize, { once: true });
+          existingScript.addEventListener("error", finalize, { once: true });
+        }
+        return;
+      }
+
+      fetch("config.js", { cache: "no-store" })
+        .then(function(res) {
+          if (!res.ok) throw new Error("config.js not found");
+          return res.text();
+        })
+        .then(function(codeText) {
+          var normalizedCode = codeText
+            .replace(/^\s*export\s+default\s+/gm, "window.CONFIG = ")
+            .replace(/^\s*export\s+(?:const|let|var)\s+CONFIG\s*=/gm, "window.CONFIG = ")
+            .replace(/^\s*export\s+(?:const|let|var)\s+SUPABASE_URL\s*=/gm, "window.SUPABASE_URL = ")
+            .replace(/^\s*export\s+(?:const|let|var)\s+SUPABASE_ANON_KEY\s*=/gm, "window.SUPABASE_ANON_KEY = ")
+            .replace(/^\s*export\s+(?:const|let|var)\s+GEMINI_API_KEY\s*=/gm, "window.GEMINI_API_KEY = ")
+            .replace(/^\s*export\s+\{[^}]*\}\s*;?\s*$/gm, "");
+
+          var scriptEl = document.createElement("script");
+          scriptEl.setAttribute("data-tnpsc-config", "true");
+          scriptEl.textContent = normalizedCode;
+          document.head.appendChild(scriptEl);
+          scriptEl.dataset.loaded = "true";
+          finalize();
+        })
+        .catch(function() {
+          // Fallback to script tag loading in case of file:// or special environments
+          var tag = document.createElement("script");
+          tag.src = "config.js";
+          tag.async = false;
+          tag.setAttribute("data-tnpsc-config", "true");
+          tag.onload = function() {
+            tag.dataset.loaded = "true";
+            finalize();
+          };
+          tag.onerror = function() {
+            finalize();
+          };
+          document.head.appendChild(tag);
+        });
+    });
   }
 
   var activeSupabaseSession = null;
@@ -2989,31 +3095,33 @@
     var token = sessionData.access_token;
     var userEmail = ((sessionData.user && sessionData.user.email) || "").trim().toLowerCase();
 
-    // Check admin_users table if present
-    try {
-      var r = await fetch(cleanUrl + "/rest/v1/admin_users?select=email", {
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": "Bearer " + token
-        }
-      });
-      if (r.ok) {
-        var rows = await r.json();
-        if (Array.isArray(rows) && rows.length > 0) {
-          var allowed = rows.some(function(row) {
-            return String(row.email || "").trim().toLowerCase() === userEmail;
-          });
-          if (!allowed) {
-            throw new Error("'" + userEmail + "' is not listed in public.admin_users.");
-          }
-        }
-      }
-    } catch (err) {
-      if (String(err && err.message || "").indexOf("not listed in public.admin_users") !== -1) {
-        throw err;
-      }
-      // If admin_users table isn't created yet in local/new project, allow authenticated user
+    if (!userEmail) {
+      throw new Error("Supabase account email could not be verified.");
     }
+
+    var r = await fetch(cleanUrl + "/rest/v1/admin_users?select=email", {
+      headers: {
+        "apikey": supabaseKey,
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if (!r.ok) {
+      throw new Error("Admin authorization check failed (HTTP " + r.status + "). Ensure public.admin_users is configured.");
+    }
+
+    var rows = await r.json();
+    if (!Array.isArray(rows) || rows.length === 0) {
+      throw new Error("No admin accounts found in public.admin_users.");
+    }
+
+    var allowed = rows.some(function(row) {
+      return String(row.email || "").trim().toLowerCase() === userEmail;
+    });
+    if (!allowed) {
+      throw new Error("'" + userEmail + "' is not authorized in public.admin_users.");
+    }
+
     return true;
   }
 
@@ -3193,65 +3301,44 @@
     // Admin Login & Controls
     g("adminSignInBtn").addEventListener("click", async function() {
       var errEl = g("adminLoginErr");
+      errEl.className = "text-xs font-bold text-red-700";
       errEl.textContent = "";
 
       var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
       var password = (g("adminPasswordInput") ? g("adminPasswordInput").value : "").trim();
-      var pin = (g("adminPinInput") ? g("adminPinInput").value : "").trim();
-      var cfg = getRuntimeConfig();
+      var cfg = await loadExternalConfigJs();
 
-      // Path 1: Supabase Email + Password login when Supabase URL & Key are configured or Email/Password entered
-      if ((cfg.supabaseUrl && cfg.supabaseKey) || email || password) {
-        if (!email || !password) {
-          errEl.textContent = "தயவுசெய்து Supabase Admin Email மற்றும் Password உள்ளிடவும்.";
-          return;
-        }
-        if (!cfg.supabaseUrl || !cfg.supabaseKey) {
-          // If email/password entered without Supabase URL/Key configured, allow opening Optional API Config or fallback PIN check
-          var expectedPinOnly = String(cfg.adminPin || ADMIN_PIN_DEFAULT).trim().toLowerCase();
-          if (pin && pin.toLowerCase() === expectedPinOnly) {
-            activeSupabaseSession = { email: email, mode: "local_email_session" };
-            switchScreen("adminDashboardScreen");
-            switchAdminTab(1);
-            showToast("Signed in as " + email + " (Local Mode — add Supabase URL/Key in Optional API Config for cloud sync)");
-            return;
-          }
-          errEl.textContent = "Supabase URL & Anon Key அமைக்கப்படவில்லை. 'Optional API Config'-ல் URL & Key சேர்க்கவும் அல்லது Local PIN (admin123) பயன்படுத்தவும்.";
-          return;
-        }
-
-        var btn = g("adminSignInBtn");
-        btn.disabled = true;
-        errEl.className = "text-xs font-bold text-blue-700";
-        errEl.textContent = "Signing in to Supabase Admin...";
-        try {
-          var sessionData = await signInWithSupabaseEmail(cfg.supabaseUrl, cfg.supabaseKey, email, password);
-          await verifyAdminInSupabase(cfg.supabaseUrl, cfg.supabaseKey, sessionData);
-          activeSupabaseSession = sessionData;
-          errEl.className = "text-xs font-bold text-emerald-700";
-          errEl.textContent = "";
-          switchScreen("adminDashboardScreen");
-          switchAdminTab(1);
-          showToast("Supabase Admin login successful (" + email + ")!");
-        } catch (err) {
-          errEl.className = "text-xs font-bold text-red-700";
-          errEl.textContent = err && err.message ? err.message : "Supabase Admin Login failed.";
-        } finally {
-          btn.disabled = false;
-        }
+      if (!email || !password) {
+        errEl.textContent = "சரியான Supabase Admin Email மற்றும் Password அவசியம் உள்ளிடவும்.";
         return;
       }
 
-      // Path 2: Local/Preview PIN fallback
-      var expectedPin = String(cfg.adminPin || ADMIN_PIN_DEFAULT).trim().toLowerCase();
-      if (!pin || pin.toLowerCase() !== expectedPin) {
+      if (!cfg.supabaseUrl || !cfg.supabaseKey) {
+        errEl.textContent = "config.js அல்லது Optional API Config-ல் Supabase URL மற்றும் Anon Key கிடைக்கவில்லை.";
+        return;
+      }
+
+      var btn = g("adminSignInBtn");
+      btn.disabled = true;
+      errEl.className = "text-xs font-bold text-blue-700";
+      errEl.textContent = "Verifying Email & Password with Supabase backend...";
+      try {
+        var sessionData = await signInWithSupabaseEmail(cfg.supabaseUrl, cfg.supabaseKey, email, password);
+        await verifyAdminInSupabase(cfg.supabaseUrl, cfg.supabaseKey, sessionData);
+        activeSupabaseSession = sessionData;
+        if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
+        errEl.className = "text-xs font-bold text-emerald-700";
+        errEl.textContent = "";
+        switchScreen("adminDashboardScreen");
+        switchAdminTab(1);
+        showToast("Supabase Admin authenticated (" + email + ").");
+      } catch (err) {
+        activeSupabaseSession = null;
         errEl.className = "text-xs font-bold text-red-700";
-        errEl.textContent = "Supabase Admin Email/Password உள்ளிடவும் அல்லது Local PIN (" + ADMIN_PIN_DEFAULT + ") பயன்படுத்தவும்.";
-        return;
+        errEl.textContent = err && err.message ? err.message : "Invalid Supabase Admin Email or Password.";
+      } finally {
+        btn.disabled = false;
       }
-      errEl.textContent = "";
-      switchScreen("adminDashboardScreen");
-      switchAdminTab(1);
     });
 
     g("adminLogoutBtn").addEventListener("click", function() {
@@ -3427,6 +3514,7 @@
   // Initialize Application
   loadAppState();
   loadAccPrefs();
+  loadExternalConfigJs();
   populateSubjectDropdowns();
   g("batchReleaseDateInput").value = todayIsoDate();
   renderActiveBatchPills();
