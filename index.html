@@ -584,17 +584,27 @@
   <section id="adminLoginScreen" class="glass-card p-6 max-w-lg mx-auto hidden">
     <h2 class="text-xl font-extrabold mb-1">Admin V2 Secure Access</h2>
     <p class="text-xs opacity-80 mb-4">
-      Preview/Local Admin PIN (<code class="font-bold">admin123</code>) அல்லது One-Click Demo Admin Login பயன்படுத்தி உடனடியாக உள்நுழையலாம்.
+      உங்கள் <strong>Supabase Admin Email &amp; Password</strong> மூலம் உள்நுழையவும். (Supabase config இல்லாத Local Preview-ல் PIN / Demo Login பயன்படுத்தலாம்).
     </p>
 
     <div class="space-y-3">
       <div>
-        <label for="adminPinInput" class="block text-xs font-bold mb-1">Admin Access PIN</label>
-        <input id="adminPinInput" type="password" value="admin123" placeholder="admin123" class="w-full p-3">
+        <label for="adminEmailInput" class="block text-xs font-bold mb-1">Supabase Admin Email *</label>
+        <input id="adminEmailInput" type="email" placeholder="admin@youracademy.com" class="w-full p-3">
       </div>
+      <div>
+        <label for="adminPasswordInput" class="block text-xs font-bold mb-1">Supabase Password *</label>
+        <input id="adminPasswordInput" type="password" placeholder="••••••••" class="w-full p-3">
+      </div>
+
+      <div class="pt-1 border-t border-slate-300/70">
+        <label for="adminPinInput" class="block text-xs font-bold mb-1 opacity-75">Local / Preview PIN (Optional Fallback)</label>
+        <input id="adminPinInput" type="password" value="admin123" placeholder="admin123" class="w-full p-2.5 text-sm">
+      </div>
+
       <div class="flex flex-wrap gap-2.5 pt-2">
         <button type="button" id="adminSignInBtn" class="btn-primary flex-1 py-3 px-4 text-sm">
-          Unlock Admin V2 Dashboard
+          Sign In to Admin V2
         </button>
         <button type="button" id="adminDemoQuickBtn" class="btn-sec py-3 px-4 text-sm">
           Demo Admin Login
@@ -1378,6 +1388,15 @@
 
   function g(id) { return document.getElementById(id); }
 
+  function escapeHtml(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   function showToast(msg) {
     var el = g("toastBanner");
     if (!el) return;
@@ -1610,9 +1629,17 @@
   }
 
   function renderBilingualText(ta, en, isOption) {
+    var safeTa = escapeHtml(ta || en || "");
+    var safeEn = escapeHtml(en || "");
     if (currentLang === "ta") {
-      return '<span class="font-bold">' + (ta || en || "") + "</span>";
+      return '<span class="font-bold">' + safeTa + "</span>";
     }
+    if (currentLang === "en") {
+      return '<span class="font-bold">' + (escapeHtml(en || ta || "")) + "</span>";
+    }
+    return '<span class="font-bold block">' + escapeHtml(ta || "") + "</span>" +
+      (safeEn ? '<span class="block text-xs sm:text-sm opacity-80 mt-0.5">' + safeEn + "</span>" : "");
+  }
     if (currentLang === "en") {
       return '<span class="font-bold">' + (en || ta || "") + "</span>";
     }
@@ -2092,19 +2119,19 @@
       var isCorrect = Number(picked) === Number(q.a);
       var pickedOpt = typeof picked === "number" ? q.opts[picked] : null;
       var corrOpt = q.opts[q.a];
-      var pickedLabel = pickedOpt ? (pickedOpt.ta + (pickedOpt.en && pickedOpt.en !== pickedOpt.ta ? " (" + pickedOpt.en + ")" : "")) : "Not Answered";
-      var corrLabel = corrOpt ? (corrOpt.ta + (corrOpt.en && corrOpt.en !== corrOpt.ta ? " (" + corrOpt.en + ")" : "")) : "-";
+      var pickedLabel = pickedOpt ? escapeHtml(pickedOpt.ta + (pickedOpt.en && pickedOpt.en !== pickedOpt.ta ? " (" + pickedOpt.en + ")" : "")) : "Not Answered";
+      var corrLabel = corrOpt ? escapeHtml(corrOpt.ta + (corrOpt.en && corrOpt.en !== corrOpt.ta ? " (" + corrOpt.en + ")" : "")) : "-";
 
       return '<div class="soft-card p-4 border-l-4 ' + (isCorrect ? "border-emerald-600" : "border-rose-600") + '">' +
         '<div class="flex items-center justify-between text-xs font-bold mb-1">' +
-        '<span>Q' + (idx + 1) + " • " + q.subject + "</span>" +
+        '<span>Q' + (idx + 1) + " • " + escapeHtml(q.subject) + "</span>" +
         '<span class="' + (isCorrect ? "text-emerald-700" : "text-rose-700") + '">' + (isCorrect ? "✔ Correct" : "✘ Incorrect / Skipped") + "</span>" +
         "</div>" +
         '<div class="mb-2">' + renderBilingualText(q.ta, q.en, false) + "</div>" +
         '<div class="text-xs space-y-1">' +
         '<div><b>Your Answer:</b> ' + pickedLabel + "</div>" +
         '<div class="text-emerald-800"><b>Correct Answer:</b> ' + corrLabel + "</div>" +
-        '<div class="opacity-85 pt-1"><b>Explanation:</b> ' + (q.whyTa || "") + (q.whyEn ? " | " + q.whyEn : "") + "</div>" +
+        '<div class="opacity-85 pt-1"><b>Explanation:</b> ' + escapeHtml(q.whyTa || "") + (q.whyEn ? " | " + escapeHtml(q.whyEn) : "") + "</div>" +
         "</div></div>";
     }).join("");
   }
@@ -2765,33 +2792,33 @@
     }
 
     box.innerHTML = items.map(function(q, idx) {
-      var corr = (q.opts && q.opts[q.a]) ? q.opts[q.a].ta : "-";
+      var corr = (q.opts && q.opts[q.a]) ? escapeHtml(q.opts[q.a].ta) : "-";
       return '<div class="p-4 rounded-xl bg-white/85 border border-slate-300 space-y-2">' +
         '<div class="flex flex-wrap items-center justify-between gap-2">' +
-        '<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-teal-100 text-teal-800">' + (idx + 1) + ". " + q.subject + "</span>" +
+        '<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-teal-100 text-teal-800">' + (idx + 1) + ". " + escapeHtml(q.subject) + "</span>" +
         '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold ' + (q.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' +
-        q.status.toUpperCase() + (batch ? " • " + batch.code : "") +
+        escapeHtml(q.status.toUpperCase()) + (batch ? " • " + escapeHtml(batch.code) : "") +
         "</span></div>" +
-        '<div class="font-bold text-sm">' + q.ta + "</div>" +
-        '<div class="text-xs opacity-80">' + (q.en || "") + "</div>" +
+        '<div class="font-bold text-sm">' + escapeHtml(q.ta) + "</div>" +
+        '<div class="text-xs opacity-80">' + escapeHtml(q.en || "") + "</div>" +
         '<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs pt-1">' +
         (q.opts || []).map(function(o, oi) {
           var isC = oi === Number(q.a);
           return '<div class="p-2 rounded-lg border ' + (isC ? "bg-emerald-50 border-emerald-400 font-bold text-emerald-900" : "bg-slate-50 border-slate-200") + '">' +
-            String.fromCharCode(65 + oi) + ". " + o.ta + (o.en && o.en !== o.ta ? " (" + o.en + ")" : "") +
+            String.fromCharCode(65 + oi) + ". " + escapeHtml(o.ta) + (o.en && o.en !== o.ta ? " (" + escapeHtml(o.en) + ")" : "") +
             "</div>";
         }).join("") +
         "</div>" +
-        '<div class="text-xs opacity-80"><b>Explanation:</b> ' + (q.whyTa || "-") + "</div>" +
+        '<div class="text-xs opacity-80"><b>Explanation:</b> ' + escapeHtml(q.whyTa || "-") + " (Ans: " + corr + ")</div>" +
         '<div class="flex flex-wrap gap-2 pt-2">' +
-        (q.status !== "approved" ? '<button type="button" data-qid="' + q.id + '" class="q-approve-btn btn-wa px-3.5 py-1.5 text-xs">✓ Approve &amp; Attach to Batch</button>' : "") +
-        '<button type="button" data-qid="' + q.id + '" class="q-edit-toggle-btn btn-ghost px-3 py-1.5 text-xs">✎ Edit</button>' +
-        (q.status !== "rejected" ? '<button type="button" data-qid="' + q.id + '" class="q-reject-btn btn-danger px-3 py-1.5 text-xs">✘ Reject</button>' : "") +
+        (q.status !== "approved" ? '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-approve-btn btn-wa px-3.5 py-1.5 text-xs">✓ Approve &amp; Attach to Batch</button>' : "") +
+        '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-edit-toggle-btn btn-ghost px-3 py-1.5 text-xs">✎ Edit</button>' +
+        (q.status !== "rejected" ? '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-reject-btn btn-danger px-3 py-1.5 text-xs">✘ Reject</button>' : "") +
         "</div>" +
-        '<div id="editForm_' + q.id + '" class="hidden pt-3 border-t border-slate-200 space-y-2">' +
-        '<input type="text" class="ed-ta w-full p-2 text-xs" value="' + q.ta.replace(/"/g, "&quot;") + '" placeholder="Tamil Question">' +
-        '<input type="text" class="ed-en w-full p-2 text-xs" value="' + (q.en || "").replace(/"/g, "&quot;") + '" placeholder="English Question">' +
-        '<button type="button" data-qid="' + q.id + '" class="q-save-edit-btn btn-primary px-3 py-1.5 text-xs">Save Edit</button>' +
+        '<div id="editForm_' + escapeHtml(q.id) + '" class="hidden pt-3 border-t border-slate-200 space-y-2">' +
+        '<input type="text" class="ed-ta w-full p-2 text-xs" value="' + escapeHtml(q.ta) + '" placeholder="Tamil Question">' +
+        '<input type="text" class="ed-en w-full p-2 text-xs" value="' + escapeHtml(q.en || "") + '" placeholder="English Question">' +
+        '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-save-edit-btn btn-primary px-3 py-1.5 text-xs">Save Edit</button>' +
         "</div></div>";
     }).join("");
 
@@ -2939,8 +2966,64 @@
     return {
       geminiKey: saved.geminiKey || winCfg.GEMINI_API_KEY || "",
       supabaseUrl: saved.supabaseUrl || winCfg.SUPABASE_URL || "",
-      supabaseKey: saved.supabaseKey || winCfg.SUPABASE_ANON_KEY || ""
+      supabaseKey: saved.supabaseKey || winCfg.SUPABASE_ANON_KEY || "",
+      adminPin: saved.adminPin || winCfg.ADMIN_PIN || ADMIN_PIN_DEFAULT
     };
+  }
+
+  var activeSupabaseSession = null;
+
+  async function signInWithSupabaseEmail(supabaseUrl, supabaseKey, email, password) {
+    var cleanUrl = String(supabaseUrl || "").replace(/\/+$/, "");
+    var endpoint = cleanUrl + "/auth/v1/token?grant_type=password";
+    var res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supabaseKey,
+        "Authorization": "Bearer " + supabaseKey
+      },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = {};
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok || !data.access_token) {
+      throw new Error(data.error_description || data.msg || data.message || ("Supabase login failed (" + res.status + ")"));
+    }
+    return data;
+  }
+
+  async function verifyAdminInSupabase(supabaseUrl, supabaseKey, sessionData) {
+    var cleanUrl = String(supabaseUrl || "").replace(/\/+$/, "");
+    var token = sessionData.access_token;
+    var userEmail = ((sessionData.user && sessionData.user.email) || "").trim().toLowerCase();
+
+    // Check admin_users table if present
+    try {
+      var r = await fetch(cleanUrl + "/rest/v1/admin_users?select=email", {
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": "Bearer " + token
+        }
+      });
+      if (r.ok) {
+        var rows = await r.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          var allowed = rows.some(function(row) {
+            return String(row.email || "").trim().toLowerCase() === userEmail;
+          });
+          if (!allowed) {
+            throw new Error("'" + userEmail + "' is not listed in public.admin_users.");
+          }
+        }
+      }
+    } catch (err) {
+      if (String(err && err.message || "").indexOf("not listed in public.admin_users") !== -1) {
+        throw err;
+      }
+      // If admin_users table isn't created yet in local/new project, allow authenticated user
+    }
+    return true;
   }
 
   // Bind All Event Listeners
@@ -3117,13 +3200,65 @@
     });
 
     // Admin Login & Controls
-    g("adminSignInBtn").addEventListener("click", function() {
-      var pin = g("adminPinInput").value.trim();
-      if (pin !== ADMIN_PIN_DEFAULT) {
-        g("adminLoginErr").textContent = "Invalid Admin PIN (Use default: admin123).";
+    g("adminSignInBtn").addEventListener("click", async function() {
+      var errEl = g("adminLoginErr");
+      errEl.textContent = "";
+
+      var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
+      var password = (g("adminPasswordInput") ? g("adminPasswordInput").value : "").trim();
+      var pin = (g("adminPinInput") ? g("adminPinInput").value : "").trim();
+      var cfg = getRuntimeConfig();
+
+      // Path 1: Supabase Email + Password login when Supabase URL & Key are configured or Email/Password entered
+      if ((cfg.supabaseUrl && cfg.supabaseKey) || email || password) {
+        if (!email || !password) {
+          errEl.textContent = "தயவுசெய்து Supabase Admin Email மற்றும் Password உள்ளிடவும்.";
+          return;
+        }
+        if (!cfg.supabaseUrl || !cfg.supabaseKey) {
+          // If email/password entered without Supabase URL/Key configured, allow opening Optional API Config or fallback PIN check
+          var expectedPinOnly = String(cfg.adminPin || ADMIN_PIN_DEFAULT).trim().toLowerCase();
+          if (pin && pin.toLowerCase() === expectedPinOnly) {
+            activeSupabaseSession = { email: email, mode: "local_email_session" };
+            switchScreen("adminDashboardScreen");
+            switchAdminTab(1);
+            showToast("Signed in as " + email + " (Local Mode — add Supabase URL/Key in Optional API Config for cloud sync)");
+            return;
+          }
+          errEl.textContent = "Supabase URL & Anon Key அமைக்கப்படவில்லை. 'Optional API Config'-ல் URL & Key சேர்க்கவும் அல்லது Local PIN (admin123) பயன்படுத்தவும்.";
+          return;
+        }
+
+        var btn = g("adminSignInBtn");
+        btn.disabled = true;
+        errEl.className = "text-xs font-bold text-blue-700";
+        errEl.textContent = "Signing in to Supabase Admin...";
+        try {
+          var sessionData = await signInWithSupabaseEmail(cfg.supabaseUrl, cfg.supabaseKey, email, password);
+          await verifyAdminInSupabase(cfg.supabaseUrl, cfg.supabaseKey, sessionData);
+          activeSupabaseSession = sessionData;
+          errEl.className = "text-xs font-bold text-emerald-700";
+          errEl.textContent = "";
+          switchScreen("adminDashboardScreen");
+          switchAdminTab(1);
+          showToast("Supabase Admin login successful (" + email + ")!");
+        } catch (err) {
+          errEl.className = "text-xs font-bold text-red-700";
+          errEl.textContent = err && err.message ? err.message : "Supabase Admin Login failed.";
+        } finally {
+          btn.disabled = false;
+        }
         return;
       }
-      g("adminLoginErr").textContent = "";
+
+      // Path 2: Local/Preview PIN fallback
+      var expectedPin = String(cfg.adminPin || ADMIN_PIN_DEFAULT).trim().toLowerCase();
+      if (!pin || pin.toLowerCase() !== expectedPin) {
+        errEl.className = "text-xs font-bold text-red-700";
+        errEl.textContent = "Supabase Admin Email/Password உள்ளிடவும் அல்லது Local PIN (" + ADMIN_PIN_DEFAULT + ") பயன்படுத்தவும்.";
+        return;
+      }
+      errEl.textContent = "";
       switchScreen("adminDashboardScreen");
       switchAdminTab(1);
     });
@@ -3135,6 +3270,7 @@
     });
 
     g("adminLogoutBtn").addEventListener("click", function() {
+      activeSupabaseSession = null;
       switchScreen("studentJoinScreen");
     });
 
@@ -3249,6 +3385,10 @@
       saveAppState();
       populateResultsTabBatches(batch.id);
       renderAdminBatchesList();
+      var activeAtt = getAttemptById(activeAttemptId);
+      if (activeAtt && activeAtt.batchId === batch.id && !g("studentResultsScreen").classList.contains("hidden")) {
+        openWaitingOrResultsScreen(activeAtt);
+      }
       showToast(batch.resultsReleased ? "Release time passed — Results auto-released!" : "Release timer updated!");
     });
 
@@ -3260,6 +3400,10 @@
       saveAppState();
       populateResultsTabBatches(batch.id);
       renderAdminBatchesList();
+      var activeAtt = getAttemptById(activeAttemptId);
+      if (activeAtt && activeAtt.batchId === batch.id && !g("studentResultsScreen").classList.contains("hidden")) {
+        openWaitingOrResultsScreen(activeAtt);
+      }
       showToast("Results released immediately for " + batch.code + "!");
     });
 
