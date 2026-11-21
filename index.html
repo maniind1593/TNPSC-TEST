@@ -162,6 +162,7 @@
   button:active:not(:disabled) { transform: translateY(0); }
   button:disabled { opacity: 0.55; cursor: not-allowed; }
 
+  /* Splash Screen Overlay & Smooth Fade-Out */
   #splashOverlay {
     position: fixed;
     inset: 0;
@@ -703,31 +704,6 @@
       </div>
     </div>
 
-    <!-- Optional API Configuration Drawer (localStorage only, zero hardcoded secrets) -->
-    <div id="adminApiConfigDrawer" class="soft-card p-4 hidden">
-      <div class="text-xs font-extrabold uppercase tracking-wider mb-2">
-        Optional Cloud &amp; Gemini API Settings (Stored in Browser localStorage Only)
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label for="cfgGeminiKey" class="block text-xs font-bold mb-1">Gemini API Key (Optional)</label>
-          <input id="cfgGeminiKey" type="password" placeholder="AIza... (Leave blank for Built-in TNPSC AI)" class="w-full p-2.5">
-        </div>
-        <div>
-          <label for="cfgSupabaseUrl" class="block text-xs font-bold mb-1">Supabase URL (Optional)</label>
-          <input id="cfgSupabaseUrl" type="text" placeholder="https://xyz.supabase.co" class="w-full p-2.5">
-        </div>
-        <div>
-          <label for="cfgSupabaseKey" class="block text-xs font-bold mb-1">Supabase Anon Key (Optional)</label>
-          <input id="cfgSupabaseKey" type="password" placeholder="eyJ..." class="w-full p-2.5">
-        </div>
-      </div>
-      <div class="mt-3 flex gap-2">
-        <button type="button" id="saveApiConfigBtn" class="btn-sec px-4 py-2 text-xs">Save Config</button>
-        <button type="button" id="clearApiConfigBtn" class="btn-ghost px-4 py-2 text-xs">Reset to Local Mode</button>
-      </div>
-    </div>
-
     <!-- ADMIN TABS -->
     <div class="flex flex-wrap gap-2">
       <button type="button" id="admTabBtn1" class="btn-primary flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm">
@@ -981,6 +957,7 @@
   var ACC_PREFS_KEY = "tnpsc_v2_acc_prefs_v1";
   var ACTIVE_SESSION_KEY = "tnpsc_v2_active_session_v1";
   var CONFIG_KEY = "tnpsc_v2_config_v1";
+  var SPLASH_ENABLED_KEY = "tnpsc_v2_splash_after_setup_v1";
   var ADMIN_PIN_DEFAULT = "admin123";
   var DEFAULT_SUBJECTS = [
     "General Tamil",
@@ -1188,6 +1165,46 @@
     } catch (e) {
       btn.classList.add("hidden");
     }
+  }
+
+  function markSplashEnabledAfterAdminSetup() {
+    try {
+      localStorage.setItem(SPLASH_ENABLED_KEY, "1");
+    } catch (e) {}
+  }
+
+  function shouldShowSplashOnOpen(loadedConfig) {
+    try {
+      if (localStorage.getItem(SPLASH_ENABLED_KEY) === "1") return true;
+    } catch (e) {}
+    return Boolean(loadedConfig && loadedConfig.supabaseUrl && loadedConfig.supabaseKey);
+  }
+
+  function initSplashScreen(shouldShow) {
+    var sp = g("splashOverlay");
+    var bar = g("splashProgress");
+    if (!sp) return;
+
+    if (!shouldShow) {
+      sp.classList.add("is-closing");
+      sp.classList.add("hidden");
+      return;
+    }
+
+    sp.classList.remove("hidden");
+    sp.classList.remove("is-closing");
+    if (bar) bar.style.width = "100%";
+
+    setTimeout(function() {
+      if (bar) bar.style.width = "0%";
+    }, 50);
+
+    setTimeout(function() {
+      if (sp && !sp.classList.contains("hidden")) {
+        sp.classList.add("is-closing");
+        setTimeout(function() { sp.classList.add("hidden"); }, 320);
+      }
+    }, 1500);
   }
 
   function loadSubModuleScripts() {}
@@ -1686,14 +1703,15 @@
   }
 
   function bindAllEvents() {
+    function closeSplashNow() {
+      var sp = g("splashOverlay");
+      if (!sp) return;
+      sp.classList.add("is-closing");
+      setTimeout(function() { sp.classList.add("hidden"); }, 320);
+    }
+
     if (g("skipSplashBtn")) {
-      g("skipSplashBtn").addEventListener("click", function() {
-        var sp = g("splashOverlay");
-        if (sp) {
-          sp.classList.add("is-closing");
-          setTimeout(function() { sp.classList.add("hidden"); }, 320);
-        }
-      });
+      g("skipSplashBtn").addEventListener("click", closeSplashNow);
     }
 
     if (g("navStudentBtn")) {
@@ -1770,149 +1788,286 @@
 
     if (g("adminSignInBtn")) {
       g("adminSignInBtn").addEventListener("click", async function() {
-      g("cfgSupabaseUrl").value = "";
-      g("cfgSupabaseKey").value = "";
-      showToast("Reset to built-in Local Mode.");
-    });
-
-    g("admTabBtn1").addEventListener("click", function() { switchAdminTab(1); });
-    g("admTabBtn2").addEventListener("click", function() { switchAdminTab(2); });
-    g("admTabBtn3").addEventListener("click", function() { switchAdminTab(3); });
-
-    g("genBatchCodeBtn").addEventListener("click", function() {
-      var prefix = g("batchCategoryInput").value === "Group II / IIA" ? "G2_" :
-        (g("batchCategoryInput").value === "Group I" ? "G1_" : "G4_");
-      g("batchCodeInput").value = prefix + String(Date.now()).slice(-4);
-    });
-
-    g("addSubjectRowBtn").addEventListener("click", handleAddSubjectToBatchDraft);
-    g("saveNewBatchBtn").addEventListener("click", handleSaveNewTestBatch);
-
-    g("aiBatchSelect").addEventListener("change", function() {
-      syncAiSubjectDropdownForSelectedBatch();
-      updateAiBatchBannerAndQueue();
-    });
-
-    g("aiSubjectDropdown").addEventListener("change", updateAiBatchBannerAndQueue);
-
-    g("aiAddNewSubjBtn").addEventListener("click", function() {
-      var batch = getBatchById(g("aiBatchSelect").value);
-      var newName = g("aiQuickNewSubjInput").value.trim();
-      if (!batch || !newName) return;
-      if (!batch.subjects.some(function(s) { return s.name.toLowerCase() === newName.toLowerCase(); })) {
-        batch.subjects.push({ name: newName, target: 3 });
-        saveAppState();
-      }
-      g("aiQuickNewSubjInput").value = "";
-      syncAiSubjectDropdownForSelectedBatch();
-      g("aiSubjectDropdown").value = newName;
-      updateAiBatchBannerAndQueue();
-      showToast("Added '" + newName + "' to " + batch.code);
-    });
-
-    g("setRemainingCountBtn").addEventListener("click", function() {
-      var batch = getBatchById(g("aiBatchSelect").value);
-      var subj = g("aiSubjectDropdown").value;
-      if (!batch) return;
-      var attached = getApprovedQuestionsForBatch(batch);
-      var plan = (batch.subjects || []).find(function(s) { return s.name === subj; });
-      var target = plan ? Number(plan.target) : 3;
-      var done = attached.filter(function(q) { return q.subject === subj; }).length;
-      var rem = Math.max(1, target - done);
-      g("aiNumQuestionsInput").value = String(rem);
-      showToast("Set count to " + rem + " remaining questions");
-    });
-
-    g("runAiGenerateBtn").addEventListener("click", handleGenerateAiQuestions);
-    g("runAiGenerateAllBatchBtn").addEventListener("click", handleGenerateAllBatchSubjects);
-    g("queueStatusFilter").addEventListener("change", renderApprovalQueueList);
-
-    g("approveAllQueueBtn").addEventListener("click", function() {
-      var batch = getBatchById(g("aiBatchSelect").value);
-      if (!batch) return;
-      var drafts = appState.questions.filter(function(q) {
-        return q.status === "draft" && (!q.batchId || q.batchId === batch.id);
+        var errEl = g("adminLoginErr");
+        if (errEl) errEl.textContent = "";
+        var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
+        var password = g("adminPasswordInput") ? g("adminPasswordInput").value : "";
+        if (!email || !password) {
+          if (errEl) errEl.textContent = "சரியான Supabase Admin Email மற்றும் Password அவசியம் உள்ளிடவும்.";
+          return;
+        }
+        var cfg = await loadExternalConfigJs();
+        var inputUrl = (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim();
+        var inputKey = (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim();
+        var supaUrl = inputUrl || cfg.supabaseUrl;
+        var supaKey = inputKey || cfg.supabaseKey;
+        if (!supaUrl || !supaKey) {
+          if (errEl) errEl.textContent = "Supabase URL மற்றும் Anon Key உள்ளிடவும் அல்லது config.js அமைக்கவும்.";
+          return;
+        }
+        memoryRuntimeConfig.supabaseUrl = supaUrl;
+        memoryRuntimeConfig.supabaseKey = supaKey;
+        try {
+          var sessionData = await signInWithSupabaseEmail(supaUrl, supaKey, email, password);
+          await verifyAdminInSupabase(supaUrl, supaKey, sessionData);
+          activeSupabaseSession = sessionData;
+          markSplashEnabledAfterAdminSetup();
+          if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
+          switchScreen("adminDashboardScreen");
+          switchAdminTab(1);
+          showToast("Signed in as Admin!");
+        } catch (err) {
+          if (errEl) errEl.textContent = err && err.message ? err.message : "Admin login failed.";
+        }
       });
-      if (!drafts.length) {
-        showToast("No pending drafts to approve.");
-        return;
-      }
-      drafts.forEach(function(q) { approveQuestionAndAttachToBatch(q.id, batch.id); });
-      populateAiTabSelectors(batch.id);
-      renderAdminBatchesList();
-      renderActiveBatchPills();
-      showToast("Approved & attached all " + drafts.length + " questions to " + batch.code + "!");
-    });
+    }
 
-    g("resTabBatchSelect").addEventListener("change", renderAdminResultsTable);
-
-    g("saveResScheduleBtn").addEventListener("click", function() {
-      var batch = getBatchById(g("resTabBatchSelect").value);
-      if (!batch) return;
-      var d = g("resUpdateDateInput").value || todayIsoDate();
-      var t = g("resUpdateTimeInput").value || "20:00";
-      batch.releaseDate = d;
-      batch.releaseTime = t;
-      batch.releaseAt = buildReleaseIso(d, t);
-      batch.resultsReleased = new Date(batch.releaseAt).getTime() <= Date.now();
-      saveAppState();
-      populateResultsTabBatches(batch.id);
-      renderAdminBatchesList();
-      var activeAtt = getAttemptById(activeAttemptId);
-      if (activeAtt && activeAtt.batchId === batch.id && !g("studentResultsScreen").classList.contains("hidden")) {
-        openWaitingOrResultsScreen(activeAtt);
-      }
-      showToast(batch.resultsReleased ? "Release time passed — Results auto-released!" : "Release timer updated!");
-    });
-
-    g("releaseNowBtn").addEventListener("click", function() {
-      var batch = getBatchById(g("resTabBatchSelect").value);
-      if (!batch) return;
-      batch.resultsReleased = true;
-      batch.releaseAt = new Date().toISOString();
-      saveAppState();
-      populateResultsTabBatches(batch.id);
-      renderAdminBatchesList();
-      var activeAtt = getAttemptById(activeAttemptId);
-      if (activeAtt && activeAtt.batchId === batch.id && !g("studentResultsScreen").classList.contains("hidden")) {
-        openWaitingOrResultsScreen(activeAtt);
-      }
-      showToast("Results released immediately for " + batch.code + "!");
-    });
-
-    g("exportBatchCsvBtn").addEventListener("click", function() {
-      var batch = getBatchById(g("resTabBatchSelect").value);
-      if (!batch) return;
-      var attempts = appState.attempts.filter(function(a) { return a.batchId === batch.id; });
-      if (!attempts.length) {
-        showToast("No student records to export.");
-        return;
-      }
-      var lines = ["Rank,BatchCode,StudentName,Mobile,Status,Score,Total,Wrong,Skipped"];
-      attempts.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
-      attempts.forEach(function(a, idx) {
-        lines.push([
-          idx + 1,
-          batch.code,
-          '"' + a.studentName.replace(/"/g, '""') + '"',
-          a.phone,
-          a.status,
-          a.score,
-          a.totalQuestions,
-          a.wrongCount,
-          a.skippedCount
-        ].join(","));
+    if (g("adminLogoutBtn")) {
+      g("adminLogoutBtn").addEventListener("click", function() {
+        activeSupabaseSession = null;
+        switchScreen("adminLoginScreen");
+        showToast("Admin locked.");
       });
-      var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
-      var link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = batch.code + "_results.csv";
-      link.click();
-      showToast("CSV downloaded!");
-    });
+    }
+
+    if (g("adminApiSettingsBtn")) {
+      g("adminApiSettingsBtn").addEventListener("click", function() {
+        var dr = g("adminApiConfigDrawer");
+        if (dr) dr.classList.toggle("hidden");
+      });
+    }
+
+    if (g("clearApiConfigBtn")) {
+      g("clearApiConfigBtn").addEventListener("click", function() {
+        memoryRuntimeConfig.supabaseUrl = "";
+        memoryRuntimeConfig.supabaseKey = "";
+        memoryRuntimeConfig.geminiKey = "";
+        if (g("cfgSupabaseUrl")) g("cfgSupabaseUrl").value = "";
+        if (g("cfgSupabaseKey")) g("cfgSupabaseKey").value = "";
+        if (g("cfgGeminiKey")) g("cfgGeminiKey").value = "";
+        showToast("Reset to built-in Local Mode.");
+      });
+    }
+
+    if (g("saveSupabaseToGithubConfigBtn")) {
+      g("saveSupabaseToGithubConfigBtn").addEventListener("click", async function() {
+        var stEl = g("ghConfigSaveStatus");
+        var supaUrl = (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim();
+        var supaKey = (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim();
+        var repo = (g("ghRepoInput") ? g("ghRepoInput").value : "").trim();
+        var branch = (g("ghBranchInput") ? g("ghBranchInput").value : "main").trim() || "main";
+        var path = (g("ghFilePathInput") ? g("ghFilePathInput").value : "config.js").trim() || "config.js";
+        var token = (g("ghTokenInput") ? g("ghTokenInput").value : "").trim();
+
+        if (!supaUrl || !supaKey || !repo || !token) {
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-red-700";
+            stEl.textContent = "Supabase URL, Anon Key, GitHub Repo (owner/repo) மற்றும் Token அவசியம்.";
+          }
+          return;
+        }
+
+        memoryRuntimeConfig.supabaseUrl = supaUrl;
+        memoryRuntimeConfig.supabaseKey = supaKey;
+        refreshAdminConfigStatusUi();
+
+        var fileContent =
+          "window.CONFIG = {\n" +
+          "  SUPABASE_URL: " + JSON.stringify(supaUrl) + ",\n" +
+          "  SUPABASE_ANON_KEY: " + JSON.stringify(supaKey) + "\n" +
+          "};\n" +
+          "window.SUPABASE_URL = window.CONFIG.SUPABASE_URL;\n" +
+          "window.SUPABASE_ANON_KEY = window.CONFIG.SUPABASE_ANON_KEY;\n";
+
+        try {
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-blue-700";
+            stEl.textContent = "Saving config.js to GitHub...";
+          }
+          var apiBase = "https://api.github.com/repos/" + repo + "/contents/" + encodeURIComponent(path).replace(/%2F/g, "/");
+          var sha = "";
+          var getRes = await fetch(apiBase + "?ref=" + encodeURIComponent(branch), {
+            headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" }
+          });
+          if (getRes.ok) {
+            var existingFile = await getRes.json();
+            if (existingFile && existingFile.sha) sha = existingFile.sha;
+          }
+
+          var b64 = btoa(unescape(encodeURIComponent(fileContent)));
+          var putPayload = {
+            message: "chore: update config.js via Admin V2",
+            content: b64,
+            branch: branch
+          };
+          if (sha) putPayload.sha = sha;
+
+          var putRes = await fetch(apiBase, {
+            method: "PUT",
+            headers: {
+              "Authorization": "Bearer " + token,
+              "Accept": "application/vnd.github+json",
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(putPayload)
+          });
+          if (!putRes.ok) {
+            var errJson = await putRes.json().catch(function() { return {}; });
+            throw new Error(errJson.message || ("GitHub save failed (HTTP " + putRes.status + ")"));
+          }
+
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-emerald-700";
+            stEl.textContent = "✓ Saved to GitHub (" + repo + "/" + path + ")! Now enter Admin Email & Password.";
+          }
+          showToast("config.js saved to GitHub!");
+        } catch (err) {
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-red-700";
+            stEl.textContent = err && err.message ? err.message : "Failed to save config.js to GitHub.";
+          }
+        }
+      });
+    }
+
+    if (g("adminLogoutBtn")) {
+      g("adminLogoutBtn").addEventListener("click", function() {
+        activeSupabaseSession = null;
+        switchScreen("adminLoginScreen");
+        refreshAdminConfigStatusUi();
+        showToast("Admin locked.");
+      });
+    }
+
+    if (g("adminApiSettingsBtn")) {
+      g("adminApiSettingsBtn").addEventListener("click", function() {
+        if (g("adminApiConfigDrawer")) g("adminApiConfigDrawer").classList.toggle("hidden");
+      });
+    }
+
+    if (g("saveApiConfigBtn")) {
+      g("saveApiConfigBtn").addEventListener("click", function() {
+        if (g("cfgGeminiKey")) memoryRuntimeConfig.geminiKey = g("cfgGeminiKey").value.trim();
+        if (g("cfgSupabaseUrl")) memoryRuntimeConfig.supabaseUrl = g("cfgSupabaseUrl").value.trim();
+        if (g("cfgSupabaseKey")) memoryRuntimeConfig.supabaseKey = g("cfgSupabaseKey").value.trim();
+        refreshAdminConfigStatusUi();
+        showToast("Updated runtime config in memory.");
+      });
+    }
+
+    if (g("clearApiConfigBtn")) {
+      g("clearApiConfigBtn").addEventListener("click", function() {
+        memoryRuntimeConfig.supabaseUrl = "";
+        memoryRuntimeConfig.supabaseKey = "";
+        memoryRuntimeConfig.geminiKey = "";
+        if (g("cfgSupabaseUrl")) g("cfgSupabaseUrl").value = "";
+        if (g("cfgSupabaseKey")) g("cfgSupabaseKey").value = "";
+        if (g("cfgGeminiKey")) g("cfgGeminiKey").value = "";
+        refreshAdminConfigStatusUi();
+        showToast("Cleared memory config.");
+      });
+    }
+
+    if (g("admTabBtn1")) g("admTabBtn1").addEventListener("click", function() { switchAdminTab(1); });
+    if (g("admTabBtn2")) g("admTabBtn2").addEventListener("click", function() { switchAdminTab(2); });
+    if (g("admTabBtn3")) g("admTabBtn3").addEventListener("click", function() { switchAdminTab(3); });
+
+    if (g("saveApiConfigBtn")) {
+      g("saveApiConfigBtn").addEventListener("click", async function() {
+        var gemKey = g("cfgGeminiKey") ? g("cfgGeminiKey").value.trim() : "";
+        var supaUrl = g("cfgSupabaseUrl") ? g("cfgSupabaseUrl").value.trim() : "";
+        var supaKey = g("cfgSupabaseKey") ? g("cfgSupabaseKey").value.trim() : "";
+        var repo = g("cfgGhRepo") ? g("cfgGhRepo").value.trim() : "";
+        var branch = (g("cfgGhBranch") ? g("cfgGhBranch").value.trim() : "main") || "main";
+        var filePath = (g("cfgGhPath") ? g("cfgGhPath").value.trim() : "config.js") || "config.js";
+        var token = g("cfgGhToken") ? g("cfgGhToken").value.trim() : "";
+
+        memoryRuntimeConfig.geminiKey = gemKey;
+        memoryRuntimeConfig.supabaseUrl = supaUrl;
+        memoryRuntimeConfig.supabaseKey = supaKey;
+        memoryRuntimeConfig.ghRepo = repo;
+        memoryRuntimeConfig.ghBranch = branch;
+        memoryRuntimeConfig.ghPath = filePath;
+        if (token) memoryRuntimeConfig.ghToken = token;
+
+        if (repo && token && supaUrl && supaKey) {
+          var jsContent = "window.CONFIG = {\n" +
+            "  SUPABASE_URL: " + JSON.stringify(supaUrl) + ",\n" +
+            "  SUPABASE_ANON_KEY: " + JSON.stringify(supaKey) + (gemKey ? (",\n  GEMINI_API_KEY: " + JSON.stringify(gemKey)) : "") + "\n" +
+            "};\n";
+          try {
+            var apiBase = "https://api.github.com/repos/" + repo + "/contents/" + encodeURIComponent(filePath).replace(/%2F/g, "/");
+            var sha = "";
+            var getResp = await fetch(apiBase + "?ref=" + encodeURIComponent(branch), {
+              headers: {
+                "Authorization": "Bearer " + token,
+                "Accept": "application/vnd.github+json"
+              }
+            });
+            if (getResp.ok) {
+              var existingFile = await getResp.json();
+              if (existingFile && existingFile.sha) sha = existingFile.sha;
+            }
+            var b64 = btoa(unescape(encodeURIComponent(jsContent)));
+            var putPayload = {
+              message: "Update config.js via Admin V2",
+              content: b64,
+              branch: branch
+            };
+            if (sha) putPayload.sha = sha;
+            var putResp = await fetch(apiBase, {
+              method: "PUT",
+              headers: {
+                "Authorization": "Bearer " + token,
+                "Accept": "application/vnd.github+json",
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify(putPayload)
+            });
+            if (!putResp.ok) {
+              var errJson = await putResp.json().catch(function() { return {}; });
+              throw new Error(errJson.message || ("GitHub save failed (HTTP " + putResp.status + ")"));
+            }
+
+            markSplashEnabledAfterAdminSetup();
+            showToast("config.js saved to GitHub!");
+          } catch (err) {
+            showToast((err && err.message) ? err.message : "GitHub save failed.");
+          }
+        } else {
+          showToast("Updated runtime memory config.");
+        }
+        refreshAdminConfigStatusUi();
+      });
+    }
+
+    if (g("clearApiConfigBtn")) {
+      g("clearApiConfigBtn").addEventListener("click", function() {
+        memoryRuntimeConfig.supabaseUrl = "";
+        memoryRuntimeConfig.supabaseKey = "";
+        memoryRuntimeConfig.geminiKey = "";
+        memoryRuntimeConfig.ghRepo = "";
+        memoryRuntimeConfig.ghToken = "";
+        if (g("cfgGeminiKey")) g("cfgGeminiKey").value = "";
+        if (g("cfgSupabaseUrl")) g("cfgSupabaseUrl").value = "";
+        if (g("cfgSupabaseKey")) g("cfgSupabaseKey").value = "";
+        if (g("cfgGhToken")) g("cfgGhToken").value = "";
+        refreshAdminConfigStatusUi();
+        showToast("Cleared memory config.");
+      });
+    }
+
+    if (g("adminLogoutBtn")) {
+      g("adminLogoutBtn").addEventListener("click", function() {
+        activeSupabaseSession = null;
+        if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
+        switchScreen("adminLoginScreen");
+        refreshAdminConfigStatusUi();
+        showToast("Admin locked.");
+      });
+    }
   }
 
-  // Initialize Application
   loadAppState();
   loadAccPrefs();
   populateSubjectDropdowns();
@@ -1932,18 +2087,13 @@
     else if (appState.batches[0]) g("stuBatchCodeInput").value = appState.batches[0].code;
   } catch (e) {}
 
-  setTimeout(function() {
-    var bar = g("splashProgress");
-    if (bar) bar.style.width = "0%";
-  }, 50);
-
-  setTimeout(function() {
-    var sp = g("splashOverlay");
-    if (sp && !sp.classList.contains("hidden")) {
-      sp.classList.add("is-closing");
-      setTimeout(function() { sp.classList.add("hidden"); }, 320);
+  initSplashScreen(false);
+  loadExternalConfigJs().then(function(cfg) {
+    refreshAdminConfigStatusUi();
+    if (shouldShowSplashOnOpen(cfg)) {
+      initSplashScreen(true);
     }
-  }, 1200);
+  });
 })();
 </script>
 </body>
