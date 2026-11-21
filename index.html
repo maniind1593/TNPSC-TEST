@@ -606,9 +606,6 @@
         <button type="button" id="adminSignInBtn" class="btn-primary flex-1 py-3 px-4 text-sm">
           Sign In to Admin V2
         </button>
-        <button type="button" id="adminDemoQuickBtn" class="btn-sec py-3 px-4 text-sm">
-          Demo Admin Login
-        </button>
       </div>
       <div id="adminLoginErr" class="text-xs font-bold text-red-700"></div>
     </div>
@@ -1639,12 +1636,6 @@
     }
     return '<span class="font-bold block">' + escapeHtml(ta || "") + "</span>" +
       (safeEn ? '<span class="block text-xs sm:text-sm opacity-80 mt-0.5">' + safeEn + "</span>" : "");
-  }
-    if (currentLang === "en") {
-      return '<span class="font-bold">' + (en || ta || "") + "</span>";
-    }
-    return '<span class="font-bold block">' + (ta || "") + "</span>" +
-      (en ? '<span class="block text-xs sm:text-sm opacity-80 mt-0.5">' + en + "</span>" : "");
   }
 
   // Screen Switcher
@@ -3259,12 +3250,6 @@
         return;
       }
       errEl.textContent = "";
-      switchScreen("adminDashboardScreen");
-      switchAdminTab(1);
-    });
-
-    g("adminDemoQuickBtn").addEventListener("click", function() {
-      g("adminLoginErr").textContent = "";
       switchScreen("adminDashboardScreen");
       switchAdminTab(1);
     });
