@@ -1059,7 +1059,7 @@
   function saveAppState() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(appState));
-    } catch (e) {}
+    } catch (e) { showToast("⚠ Storage full — image size kuraichu upload pannunga."); }
   }
 
   function loadAppState() {
@@ -1766,7 +1766,7 @@
       "window.CONFIG = {\n" +
       "  SUPABASE_URL: " + JSON.stringify(cfg.supabaseUrl) + ",\n" +
       "  SUPABASE_ANON_KEY: " + JSON.stringify(cfg.supabaseKey) +
-      (cfg.geminiKey ? (",\n  GEMINI_API_KEY: " + JSON.stringify(cfg.geminiKey)) : "") + "\n" +
+      "" + "\n" +
       "};\n" +
       "window.SUPABASE_URL = window.CONFIG.SUPABASE_URL;\n" +
       "window.SUPABASE_ANON_KEY = window.CONFIG.SUPABASE_ANON_KEY;\n";
@@ -2137,8 +2137,8 @@
 
     if (g("addSubjectRowBtn")) g("addSubjectRowBtn").addEventListener("click", handleAddSubjectToBatchDraft);
     if (g("saveNewBatchBtn")) g("saveNewBatchBtn").addEventListener("click", handleSaveNewTestBatch);
-    if (g("runAiGenerateAllBatchBtn")) g("runAiGenerateAllBatchBtn").addEventListener("click", handleGenerateAllBatchSubjects);
-    if (g("runAiGenerateBtn")) g("runAiGenerateBtn").addEventListener("click", handleGenerateAiQuestions);
+    if (g("runAiGenerateAllBatchBtn")) g("runAiGenerateAllBatchBtn").addEventListener("click", function() { handleAiGen(true); });
+    if (g("runAiGenerateBtn")) g("runAiGenerateBtn").addEventListener("click", function() { handleAiGen(false); });
     if (g("aiBatchSelect")) {
       g("aiBatchSelect").addEventListener("change", function() {
         syncAiSubjectDropdownForSelectedBatch();
@@ -2272,6 +2272,7 @@
     qt.innerHTML = (lang !== "en" ? "<div>" + esc(q.questionTa) + "</div>" : "") +
       (lang !== "ta" ? "<div class='text-sm opacity-80 mt-1'>" + esc(q.questionEn) + "</div>" : "");
     area.appendChild(qt);
+    if (safeImg(q.image)) { var qi = document.createElement("img"); qi.src = q.image; qi.alt = "Question image"; qi.className = "max-h-64 rounded-lg border mb-4"; area.appendChild(qi); }
     q.options.forEach(function(o, i) {
       var b = document.createElement("button");
       b.type = "button";
@@ -2282,6 +2283,7 @@
         persistAttempt();
         renderQuestion();
       });
+      if (safeImg(o.img)) { var oi = document.createElement("img"); oi.src = o.img; oi.className = "mt-2 max-h-40 rounded"; b.appendChild(oi); }
       area.appendChild(b);
     });
     g("markReviewBtn").textContent = att.marked[q.id] ? "★ Marked" : "★ Mark Review";
@@ -2389,6 +2391,7 @@
       var a = att.answers[q.id], ok = a === q.correctIndex;
       return "<div class='soft-card p-3 text-sm'><div class='font-bold'>" + (i + 1) + ". " + esc(q.questionTa) + "</div>" +
         "<div class='opacity-80 text-xs mb-1'>" + esc(q.questionEn) + "</div>" +
+        (safeImg(q.image) ? "<img src='" + esc(q.image) + "' class='max-h-40 rounded my-1'>" : "") +
         "<div class='font-bold " + (ok ? "text-emerald-700" : "text-red-700") + "'>உங்கள் விடை: " +
         (a === undefined ? "— (Skipped)" : String.fromCharCode(65 + a)) + " | சரியான விடை: " + String.fromCharCode(65 + q.correctIndex) + "</div>" +
         "<div class='text-xs mt-1'>" + esc(q.explanationTa) + " " + esc(q.explanationEn) + "</div></div>";
@@ -2573,6 +2576,353 @@
   }
   /* ===== END ADDED ===== */
 
+  /* ===== ADDED 2: Gemini generation, JSON import, preview/edit/reject, image upload ===== */
+  var GEMINI_MODEL = "gemini-2.5-flash";
+  var LETTERS = ["A", "B", "C", "D"];
+  var editingQid = null;
+  var JSON_SAMPLE = '[{"subject":"General Tamil","questionTa":"திருக்குறளின் ஆசிரியர் யார்?","questionEn":"Who wrote Thirukkural?","options":[{"ta":"இளங்கோவடிகள்","en":"Ilango Adigal"},{"ta":"திருவள்ளுவர்","en":"Thiruvalluvar"},{"ta":"கம்பர்","en":"Kambar"},{"ta":"பாரதியார்","en":"Bharathiyar"}],"correctIndex":1,"explanationTa":"","explanationEn":"","image":"https://... (optional)"}]';
+
+  function safeImg(u) { return (typeof u === "string" && /^(data:image\/(png|jpe?g|webp|gif);base64,|https:\/\/)/i.test(u)) ? u : ""; }
+  function qKey(q) { return String(q.questionEn || q.questionTa || "").toLowerCase().replace(/[^a-z0-9\u0B80-\u0BFF]/g, ""); }
+  function setGenStatus(msg, kind) {
+    var st = g("aiGenerateStatusMsg");
+    if (!st) return;
+    st.className = "mt-2.5 text-xs font-bold " + (kind === "err" ? "text-red-700" : kind === "ok" ? "text-emerald-700" : "text-blue-700");
+    st.textContent = msg;
+  }
+
+  function imageToDataUrl(file, cb) {
+    if (!file) return;
+    if (!/^image\//.test(file.type)) return showToast("Image file mattum podunga.");
+    if (file.size > 8 * 1024 * 1024) return showToast("Image 8MB-ku keezha irukkanum.");
+    var fr = new FileReader();
+    fr.onload = function() {
+      var im = new Image();
+      im.onload = function() {
+        var sc = Math.min(1, 900 / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * sc);
+        c.height = Math.round(im.height * sc);
+        var cx = c.getContext("2d");
+        cx.fillStyle = "#fff";
+        cx.fillRect(0, 0, c.width, c.height);
+        cx.drawImage(im, 0, 0, c.width, c.height);
+        cb(c.toDataURL("image/jpeg", 0.78));
+      };
+      im.onerror = function() { showToast("Image padikka mudiyala."); };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+
+  function pickCorrect(r) {
+    if (r.correctIndex !== undefined && r.correctIndex !== null && r.correctIndex !== "") return Number(r.correctIndex);
+    var a = r.answer !== undefined ? r.answer : r.correct;
+    if (a === undefined) return -1;
+    var s = String(a).trim().toUpperCase();
+    if (/^[A-D]$/.test(s)) return s.charCodeAt(0) - 65;
+    if (/^[1-4]$/.test(s)) return Number(s) - 1;
+    return -1;
+  }
+
+  function normalizeQuestion(r, defSubject) {
+    if (!r || typeof r !== "object") return { err: "valid question object illa" };
+    var qTa = String(r.questionTa || r.question_ta || r.ta || r.questionEn || r.question || "").trim();
+    var qEn = String(r.questionEn || r.question_en || r.en || r.question || r.questionTa || "").trim();
+    var img = safeImg(r.image || r.img);
+    if (!qTa && !qEn && !img) return { err: "question text / image illa" };
+    var opts = Array.isArray(r.options) ? r.options.map(function(o) {
+      if (typeof o === "string") return { ta: o, en: o, img: "" };
+      o = o || {};
+      return { ta: String(o.ta || o.text || o.en || ""), en: String(o.en || o.text || o.ta || ""), img: safeImg(o.img || o.image) };
+    }) : [];
+    if (opts.length !== 4) return { err: "exactly 4 options venum" };
+    if (opts.some(function(o) { return !o.ta && !o.en && !o.img; })) return { err: "oru option kaali-ya irukku" };
+    var ci = pickCorrect(r);
+    if (!(ci >= 0 && ci < 4)) return { err: "correct answer sariyilla (correctIndex 0-3 / answer A-D)" };
+    return { q: {
+      subject: String(r.subject || defSubject || "General").trim(), difficulty: r.difficulty || "TNPSC Standard",
+      questionTa: qTa, questionEn: qEn, image: img, options: opts, correctIndex: ci,
+      explanationTa: String(r.explanationTa || r.explanation_ta || r.explanation || ""),
+      explanationEn: String(r.explanationEn || r.explanation_en || r.explanation || "")
+    } };
+  }
+
+  function parseJsonLoose(t) {
+    t = String(t || "").replace(/```json|```/gi, "").trim();
+    var s = t.search(/[\[{]/);
+    if (s < 0) throw new Error("JSON kidaikkala.");
+    var data = JSON.parse(t.slice(s, Math.max(t.lastIndexOf("]"), t.lastIndexOf("}")) + 1));
+    return Array.isArray(data) ? data : (data && Array.isArray(data.questions) ? data.questions : [data]);
+  }
+
+  function addDrafts(list, batch, subject, dedupe) {
+    var seen = {}, out = [], dup = 0, bad = [];
+    appState.questions.forEach(function(q) { if (batch && q.batchId === batch.id && q.status !== "rejected") seen[qKey(q)] = 1; });
+    list.forEach(function(raw, i) {
+      var n = normalizeQuestion(raw, subject);
+      if (n.err) { bad.push("#" + (i + 1) + " " + n.err); return; }
+      var q = n.q, k = qKey(q);
+      if (dedupe && k && seen[k]) { dup++; return; }
+      seen[k] = 1;
+      q.id = "q_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
+      q.batchId = batch ? batch.id : "";
+      q.batchCode = batch ? batch.code : "";
+      q.status = "draft";
+      appState.usedQuestionIds.push(q.id);
+      out.push(q);
+    });
+    appState.questions = out.concat(appState.questions);
+    saveAppState();
+    return { added: out.length, dup: dup, bad: bad };
+  }
+
+  async function callGemini(prompt) {
+    var key = memoryRuntimeConfig.geminiKey;
+    if (!key) throw new Error("AI API Key illa.");
+    var res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 1 } })
+    });
+    var data = await res.json().catch(function() { return {}; });
+    if (!res.ok) throw new Error((data.error && data.error.message) || ("Gemini HTTP " + res.status));
+    var c = data.candidates && data.candidates[0];
+    return (c && c.content && c.content.parts && c.content.parts[0] && c.content.parts[0].text) || "";
+  }
+
+  async function aiGenerateForSubject(batch, subject, count, diff, topic) {
+    var got = 0, tries = 0;
+    while (got < count && tries < 3) {
+      tries++;
+      var existing = appState.questions.filter(function(q) {
+        return q.batchId === batch.id && q.subject === subject && q.status !== "rejected";
+      }).slice(0, 40).map(function(q) { return q.questionEn || q.questionTa; });
+      var prompt = "You are a TNPSC exam question setter. Create " + (count - got) + " NEW, factually correct multiple-choice questions for " +
+        batch.category + ", subject \"" + subject + "\"" + (topic ? ", topic \"" + topic + "\"" : "") + ", difficulty " + diff +
+        ". Every question must differ from each other and from these existing ones: " + JSON.stringify(existing) +
+        ". Variation seed: " + Math.random().toString(36).slice(2) +
+        ". Return ONLY a JSON array of {\"questionTa\":\"\",\"questionEn\":\"\",\"options\":[{\"ta\":\"\",\"en\":\"\"} x4],\"correctIndex\":0-3,\"explanationTa\":\"\",\"explanationEn\":\"\"}. Exactly 4 options; vary the correct position.";
+      got += addDrafts(parseJsonLoose(await callGemini(prompt)), batch, subject, true).added;
+    }
+    return got;
+  }
+
+  async function handleAiGen(all) {
+    var batch = getBatchById(g("aiBatchSelect").value);
+    if (!batch) return setGenStatus("Mudhalla Test Batch select pannunga.", "err");
+    if (!memoryRuntimeConfig.geminiKey) {
+      return setGenStatus("AI API Key illa. Keezha 'Gemini API Key' field-la podunga — illana JSON paste / Manual-ah questions add pannunga.", "err");
+    }
+    var diff = g("aiDifficultySelect").value, topic = g("aiTopicInput").value.trim(), jobs = [];
+    if (all) {
+      (batch.subjects || []).forEach(function(s) {
+        var have = appState.questions.filter(function(q) { return q.batchId === batch.id && q.subject === s.name && q.status !== "rejected"; }).length;
+        var n = Math.min(20, Number(s.target) - have);
+        if (n > 0) jobs.push([s.name, n]);
+      });
+    } else {
+      jobs.push([g("aiSubjectDropdown").value, Math.max(1, Math.min(20, parseInt(g("aiNumQuestionsInput").value, 10) || 3))]);
+    }
+    if (!jobs.length) return setGenStatus("Ellaa subjects-kum target questions already irukku.", "ok");
+    var ids = ["runAiGenerateAllBatchBtn", "runAiGenerateBtn"], total = 0;
+    ids.forEach(function(id) { g(id).disabled = true; });
+    try {
+      for (var i = 0; i < jobs.length; i++) {
+        setGenStatus("AI generate aagudhu: " + jobs[i][0] + " (" + (i + 1) + "/" + jobs.length + ")...");
+        total += await aiGenerateForSubject(batch, jobs[i][0], jobs[i][1], diff, topic);
+      }
+      setGenStatus(total ? "✓ " + total + " questions Preview Queue-la ready. Approve / Edit / Reject pannunga." : "Pudhu unique questions kidaikkala — marubadi try pannunga.", total ? "ok" : "err");
+    } catch (e) {
+      setGenStatus("AI error: " + (e && e.message ? e.message : e) + (total ? " (" + total + " questions already add aayiduchu)" : ""), "err");
+    } finally {
+      ids.forEach(function(id) { g(id).disabled = false; });
+      g("queueStatusFilter").value = "draft";
+      updateAiBatchBannerAndQueue();
+    }
+  }
+
+  function setQStatus(id, status) {
+    appState.questions.forEach(function(q) { if (q.id === id) q.status = status; });
+    saveAppState();
+    updateAiBatchBannerAndQueue();
+  }
+
+  function buildQuestionEditor(q, batch, onSave, onCancel) {
+    var box = document.createElement("div");
+    box.className = "p-3 rounded-xl bg-white border-2 border-blue-500 space-y-2 text-xs";
+    var imgs = { q: safeImg(q.image), o: [0, 1, 2, 3].map(function(i) { return safeImg(q.options[i] && q.options[i].img); }) };
+    var names = batch && batch.subjects ? batch.subjects.map(function(s) { return s.name; }) : [];
+    if (q.subject && names.indexOf(q.subject) < 0) names.push(q.subject);
+    var rn = "cor_" + Math.random().toString(36).slice(2);
+    var rows = [0, 1, 2, 3].map(function(i) {
+      var o = q.options[i] || { ta: "", en: "" };
+      return "<div class='flex flex-wrap items-center gap-1.5'><label class='font-bold whitespace-nowrap'><input type='radio' name='" + rn + "' value='" + i + "'" + (q.correctIndex === i ? " checked" : "") + "> " + LETTERS[i] + "</label>" +
+        "<input data-f='ota" + i + "' value='" + esc(o.ta) + "' placeholder='Option " + LETTERS[i] + " தமிழ்' class='p-2 flex-1 min-w-[120px]'>" +
+        "<input data-f='oen" + i + "' value='" + esc(o.en) + "' placeholder='Option " + LETTERS[i] + " English' class='p-2 flex-1 min-w-[120px]'>" +
+        "<input type='file' accept='image/*' data-file='" + i + "' class='max-w-[150px]'><span data-prev='" + i + "'></span></div>";
+    }).join("");
+    box.innerHTML = "<div class='font-extrabold text-blue-800'>✎ Question Editor</div>" +
+      "<select data-f='subject' class='p-2 w-full'>" + names.map(function(n) { return "<option" + (n === q.subject ? " selected" : "") + ">" + esc(n) + "</option>"; }).join("") + "</select>" +
+      "<textarea data-f='qta' rows='2' placeholder='கேள்வி (Tamil)' class='p-2 w-full'>" + esc(q.questionTa) + "</textarea>" +
+      "<textarea data-f='qen' rows='2' placeholder='Question (English)' class='p-2 w-full'>" + esc(q.questionEn) + "</textarea>" +
+      "<div class='flex items-center gap-2'><span class='font-bold'>Question Image:</span><input type='file' accept='image/*' data-file='q'><span data-prev='q'></span></div>" +
+      rows + "<div class='text-[11px] opacity-75'>◉ radio = correct answer</div>" +
+      "<textarea data-f='eta' rows='2' placeholder='விளக்கம் (Tamil)' class='p-2 w-full'>" + esc(q.explanationTa) + "</textarea>" +
+      "<textarea data-f='een' rows='2' placeholder='Explanation (English)' class='p-2 w-full'>" + esc(q.explanationEn) + "</textarea>" +
+      "<div data-err class='font-bold text-red-700'></div>" +
+      "<div class='flex gap-2'><button type='button' data-save class='btn-wa px-4 py-2'>✓ Save</button><button type='button' data-cancel class='btn-ghost px-4 py-2'>Cancel</button></div>";
+    function F(n) { return box.querySelector("[data-f='" + n + "']"); }
+    function prev(k) {
+      var sp = box.querySelector("[data-prev='" + k + "']"), u = k === "q" ? imgs.q : imgs.o[k];
+      sp.innerHTML = u ? "<img src='" + esc(u) + "' class='h-12 rounded inline'> <button type='button' class='underline text-red-700'>remove</button>" : "";
+      var rb = sp.querySelector("button");
+      if (rb) rb.addEventListener("click", function() { if (k === "q") imgs.q = ""; else imgs.o[k] = ""; prev(k); });
+    }
+    ["q", 0, 1, 2, 3].forEach(function(k) {
+      prev(k);
+      box.querySelector("[data-file='" + k + "']").addEventListener("change", function(e) {
+        imageToDataUrl(e.target.files[0], function(u) { if (k === "q") imgs.q = u; else imgs.o[k] = u; prev(k); });
+      });
+    });
+    box.querySelector("[data-save]").addEventListener("click", function() {
+      var chk = box.querySelector("input[type=radio]:checked");
+      var raw = {
+        subject: F("subject").value, difficulty: q.difficulty, image: imgs.q,
+        questionTa: F("qta").value.trim(), questionEn: F("qen").value.trim(),
+        options: [0, 1, 2, 3].map(function(i) { return { ta: F("ota" + i).value.trim(), en: F("oen" + i).value.trim(), img: imgs.o[i] }; }),
+        correctIndex: chk ? Number(chk.value) : -1,
+        explanationTa: F("eta").value.trim(), explanationEn: F("een").value.trim()
+      };
+      var n = normalizeQuestion(raw, raw.subject);
+      if (n.err) { box.querySelector("[data-err]").textContent = "⚠ " + n.err; return; }
+      onSave(n.q);
+    });
+    box.querySelector("[data-cancel]").addEventListener("click", onCancel);
+    return box;
+  }
+
+  function buildPreviewCard(q, batchId) {
+    var card = document.createElement("div");
+    card.className = "p-3 rounded-xl bg-white/85 border border-slate-200 space-y-2 text-sm";
+    card.innerHTML = "<div class='text-xs font-extrabold text-teal-800'>" + esc(q.subject) + " • " + esc(q.difficulty || "") + " • " + esc(q.status) + "</div>" +
+      "<div class='font-bold'>" + esc(q.questionTa) + "</div><div class='text-xs opacity-80'>" + esc(q.questionEn) + "</div>" +
+      (safeImg(q.image) ? "<img src='" + esc(q.image) + "' class='max-h-48 rounded border'>" : "") +
+      "<div class='grid sm:grid-cols-2 gap-1.5'>" + q.options.map(function(o, i) {
+        var ok = i === q.correctIndex;
+        return "<div class='p-2 rounded-lg border text-xs " + (ok ? "bg-emerald-100 border-emerald-500 font-bold" : "bg-slate-50 border-slate-200") + "'>" +
+          LETTERS[i] + ". " + esc(o.ta) + (o.en && o.en !== o.ta ? " / " + esc(o.en) : "") + (ok ? " ✓" : "") +
+          (safeImg(o.img) ? "<br><img src='" + esc(o.img) + "' class='max-h-24 mt-1 rounded'>" : "") + "</div>";
+      }).join("") + "</div>" +
+      ((q.explanationTa || q.explanationEn) ? "<div class='text-xs opacity-80'>💡 " + esc(q.explanationTa) + " " + esc(q.explanationEn) + "</div>" : "");
+    var bar = document.createElement("div");
+    bar.className = "flex flex-wrap gap-2";
+    function btn(label, cls, fn) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = cls + " px-3 py-1.5 text-xs";
+      b.textContent = label;
+      b.addEventListener("click", fn);
+      bar.appendChild(b);
+    }
+    if (q.status !== "approved") btn("✓ Approve & Attach", "btn-wa", function() {
+      approveQuestionAndAttachToBatch(q.id, batchId);
+      updateAiBatchBannerAndQueue();
+      showToast("Approved & attached!");
+    });
+    btn("✎ Edit", "btn-primary", function() { editingQid = q.id; renderApprovalQueueList(); });
+    if (q.status !== "rejected") btn("✕ Reject", "btn-danger", function() { setQStatus(q.id, "rejected"); });
+    else {
+      btn("↺ Restore", "btn-ghost", function() { setQStatus(q.id, "draft"); });
+      btn("🗑 Delete", "btn-danger", function() {
+        appState.questions = appState.questions.filter(function(x) { return x.id !== q.id; });
+        saveAppState();
+        updateAiBatchBannerAndQueue();
+      });
+    }
+    card.appendChild(bar);
+    return card;
+  }
+
+  function renderApprovalQueueList() {
+    var wrap = g("approvalQueueList");
+    if (!wrap) return;
+    var filter = g("queueStatusFilter") ? g("queueStatusFilter").value : "draft";
+    var batchId = g("aiBatchSelect") ? g("aiBatchSelect").value : "", batch = getBatchById(batchId);
+    var items = appState.questions.filter(function(q) {
+      return q.status === filter && (!batchId || !q.batchId || q.batchId === batchId);
+    });
+    wrap.innerHTML = "";
+    if (!items.length) { wrap.innerHTML = "<div class='text-xs opacity-75 p-3'>No questions in " + esc(filter) + " queue.</div>"; return; }
+    items.forEach(function(q) {
+      if (editingQid !== q.id) return wrap.appendChild(buildPreviewCard(q, batchId));
+      wrap.appendChild(buildQuestionEditor(q, batch, function(upd) {
+        ["subject", "questionTa", "questionEn", "image", "options", "correctIndex", "explanationTa", "explanationEn"].forEach(function(k) { q[k] = upd[k]; });
+        editingQid = null;
+        saveAppState();
+        updateAiBatchBannerAndQueue();
+        showToast("Question updated.");
+      }, function() { editingQid = null; renderApprovalQueueList(); }));
+    });
+  }
+
+  function initQuestionTools() {
+    var qc = g("approvalQueueList") && g("approvalQueueList").parentElement;
+    if (!qc) return;
+    var p = document.createElement("div");
+    p.className = "soft-card p-4 sm:p-5 space-y-3";
+    p.innerHTML = "<h3 class='font-extrabold text-base'>Add Questions: AI Key / JSON Paste / Manual (+ Images)</h3>" +
+      "<p class='text-xs opacity-80'>AI-ku Gemini key podunga (browser memory-la mattum — refresh panna clear aagum). Illana JSON paste panni Run pannunga, allathu manual-ah type panni image upload pannunga. Ellaame mudhalla keezha Preview Queue-la varum; angae Approve / Edit / Reject pannalaam. Answer: <code>correctIndex</code> 0-3 allathu <code>answer</code> A-D.</p>" +
+      "<input id='inlineGeminiKey' type='password' autocomplete='off' placeholder='Gemini API Key (AIza...)' class='w-full p-2.5 text-xs'>" +
+      "<textarea id='jsonQInput' rows='7' class='w-full p-2.5 text-xs font-mono' placeholder='" + esc(JSON_SAMPLE) + "'></textarea>" +
+      "<div class='flex flex-wrap gap-2'><button type='button' id='runJsonBtn' class='btn-primary px-4 py-2 text-xs'>▶ Run JSON → Preview</button>" +
+      "<label class='btn-ghost px-4 py-2 text-xs cursor-pointer font-bold'>📂 JSON file<input type='file' id='jsonFileInput' accept='.json,.txt,application/json' class='hidden'></label>" +
+      "<button type='button' id='addManualQBtn' class='btn-sec px-4 py-2 text-xs'>＋ Add Question Manually</button></div>" +
+      "<div id='manualQEditorBox'></div><div id='jsonImportStatus' class='text-xs font-bold'></div>";
+    qc.parentNode.insertBefore(p, qc);
+
+    var keyIn = g("inlineGeminiKey");
+    keyIn.value = memoryRuntimeConfig.geminiKey || "";
+    keyIn.addEventListener("input", function() { memoryRuntimeConfig.geminiKey = keyIn.value.trim(); });
+
+    function status(msg, ok) { var s = g("jsonImportStatus"); s.className = "text-xs font-bold " + (ok ? "text-emerald-700" : "text-red-700"); s.textContent = msg; }
+    function toQueue() {
+      g("queueStatusFilter").value = "draft";
+      updateAiBatchBannerAndQueue();
+      g("approvalQueueList").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    g("runJsonBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("aiBatchSelect").value);
+      if (!batch) return status("Mudhalla Target Test Batch select pannunga.", false);
+      try {
+        var r = addDrafts(parseJsonLoose(g("jsonQInput").value), batch, g("aiSubjectDropdown").value, true);
+        status((r.added ? "✓ " : "⚠ ") + r.added + " questions Preview Queue-la add aachu" + (r.dup ? " • " + r.dup + " duplicate skip" : "") +
+          (r.bad.length ? " • Errors: " + r.bad.join("; ") : ""), r.added > 0);
+        if (r.added) toQueue();
+      } catch (e) { status("JSON error: " + (e && e.message ? e.message : e), false); }
+    });
+    g("jsonFileInput").addEventListener("change", function(e) {
+      var f = e.target.files[0];
+      if (!f) return;
+      var fr = new FileReader();
+      fr.onload = function() { g("jsonQInput").value = String(fr.result || ""); };
+      fr.readAsText(f);
+    });
+    g("addManualQBtn").addEventListener("click", function() {
+      var box = g("manualQEditorBox"), batch = getBatchById(g("aiBatchSelect").value);
+      if (!batch) return status("Mudhalla Target Test Batch select pannunga.", false);
+      if (box.firstChild) { box.innerHTML = ""; return; }
+      var blank = { subject: g("aiSubjectDropdown").value, difficulty: g("aiDifficultySelect").value, questionTa: "", questionEn: "", image: "", correctIndex: 0, explanationTa: "", explanationEn: "",
+        options: [0, 1, 2, 3].map(function() { return { ta: "", en: "", img: "" }; }) };
+      box.appendChild(buildQuestionEditor(blank, batch, function(q) {
+        var r = addDrafts([q], batch, q.subject, false);
+        box.innerHTML = "";
+        status("✓ " + r.added + " question Preview Queue-la add aachu.", true);
+        toQueue();
+      }, function() { box.innerHTML = ""; }));
+    });
+  }
+  /* ===== END ADDED 2 ===== */
+
   loadAppState();
   loadAccPrefs();
   populateSubjectDropdowns();
@@ -2584,6 +2934,7 @@
   checkExistingSavedSession();
   bindAllEvents();
   bindExtraEvents();
+  initQuestionTools();
 
   try {
     var params = new URLSearchParams(window.location.search);
