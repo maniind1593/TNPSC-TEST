@@ -1279,7 +1279,7 @@
     var cfg = getRuntimeConfig();
     if (cfg.supabaseUrl && cfg.supabaseKey) {
       badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-100 border border-emerald-300 text-emerald-900";
-      badge.textContent = "Live config.js verified (" + cfg.supabaseUrl + "). Enter Admin Email & Password.";
+      badge.innerHTML = "🚥 <strong>LIVE</strong> — config.js verified (" + esc(cfg.supabaseUrl) + "). Enter Admin Email &amp; Password.";
     } else {
       badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900";
       badge.textContent = "One-time setup required: Save Supabase details to GitHub config.js.";
