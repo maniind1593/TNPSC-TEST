@@ -584,21 +584,46 @@
   <section id="adminLoginScreen" class="glass-card p-6 max-w-lg mx-auto hidden">
     <h2 class="text-xl font-extrabold mb-1">Admin V2 Secure Access</h2>
     <p class="text-xs opacity-80 mb-3">
-      Supabase Backend-ல் பதிவு செய்யப்பட்ட <strong>Admin Email &amp; Password</strong> மூலம் மட்டுமே உள்நுழைய முடியும். (<code>config.js</code> இருந்தால் தானாக இணைக்கப்படும்; இல்லையெனில் கீழே Supabase URL &amp; Anon Key உள்ளிடவும்).
+      Live <code>config.js</code> மூலம் Supabase சரிபார்க்கப்பட்டு <strong>Admin Email &amp; Password</strong> மூலம் உள்நுழையவும். (Supabase details <code>localStorage</code>-ல் சேமிக்கப்படாது; GitHub <code>config.js</code>-ல் save செய்யப்படும்).
     </p>
     <div id="adminConfigStatusBadge" class="mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900">
-      Checking config.js &amp; Supabase configuration...
+      Fetching live config.js...
     </div>
 
     <div class="space-y-3">
-      <div>
-        <label for="adminLoginSupaUrlInput" class="block text-xs font-bold mb-1">Supabase Project URL (if not in config.js)</label>
-        <input id="adminLoginSupaUrlInput" type="text" placeholder="https://your-project.supabase.co" class="w-full p-2.5">
+      <div id="oneTimeSupabaseSetupFields" class="space-y-3 p-3.5 rounded-xl bg-slate-50/90 border border-slate-300">
+        <div class="text-xs font-extrabold text-blue-800">One-Time Supabase &amp; GitHub config.js Setup</div>
+        <div>
+          <label for="adminLoginSupaUrlInput" class="block text-xs font-bold mb-1">Supabase Project URL *</label>
+          <input id="adminLoginSupaUrlInput" type="text" autocomplete="off" placeholder="https://your-project.supabase.co" class="w-full p-2.5">
+        </div>
+        <div>
+          <label for="adminLoginSupaKeyInput" class="block text-xs font-bold mb-1">Supabase Anon Key *</label>
+          <input id="adminLoginSupaKeyInput" type="password" autocomplete="off" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full p-2.5">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label for="ghRepoInput" class="block text-xs font-bold mb-1">GitHub Repo (owner/repo) *</label>
+            <input id="ghRepoInput" type="text" autocomplete="off" placeholder="username/tnpsc-portal" class="w-full p-2 text-xs">
+          </div>
+          <div>
+            <label for="ghBranchInput" class="block text-xs font-bold mb-1">Branch &amp; File Path</label>
+            <div class="flex gap-1.5">
+              <input id="ghBranchInput" type="text" autocomplete="off" value="main" placeholder="main" class="w-full p-2 text-xs">
+              <input id="ghFilePathInput" type="text" autocomplete="off" value="config.js" placeholder="config.js" class="w-full p-2 text-xs">
+            </div>
+          </div>
+        </div>
+        <div>
+          <label for="ghTokenInput" class="block text-xs font-bold mb-1">GitHub Personal Access Token (Contents: Read &amp; Write) *</label>
+          <input id="ghTokenInput" type="password" autocomplete="off" placeholder="ghp_... (Used only to write config.js once, never stored in browser)" class="w-full p-2.5 text-xs">
+        </div>
+        <button type="button" id="saveSupabaseToGithubConfigBtn" class="btn-sec w-full py-2.5 px-4 text-xs">
+          ☁ Save Supabase Details to GitHub config.js (One-Time)
+        </button>
+        <div id="ghConfigSaveStatus" class="text-xs font-bold"></div>
       </div>
-      <div>
-        <label for="adminLoginSupaKeyInput" class="block text-xs font-bold mb-1">Supabase Anon Key (if not in config.js)</label>
-        <input id="adminLoginSupaKeyInput" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full p-2.5">
-      </div>
+
       <div>
         <label for="adminEmailInput" class="block text-xs font-bold mb-1">Supabase Admin Email *</label>
         <input id="adminEmailInput" type="email" autocomplete="username" placeholder="admin@youracademy.com" class="w-full p-3">
@@ -628,11 +653,53 @@
       </div>
       <div class="flex items-center gap-2">
         <button type="button" id="adminApiSettingsBtn" class="btn-ghost px-3 py-2 text-xs">
-          🔑 Optional API Config
+          🔑 GitHub config.js &amp; AI Key
         </button>
         <button type="button" id="adminLogoutBtn" class="btn-danger px-3 py-2 text-xs">
           Lock Admin
         </button>
+      </div>
+    </div>
+
+    <!-- Optional API Configuration Drawer (Writes to GitHub config.js; never persists keys in localStorage) -->
+    <div id="adminApiConfigDrawer" class="soft-card p-4 hidden space-y-3">
+      <div class="text-xs font-extrabold uppercase tracking-wider">
+        GitHub config.js Sync &amp; Optional Gemini API Key (No localStorage Key Persistence)
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="cfgGeminiKey" class="block text-xs font-bold mb-1">Gemini API Key (Optional)</label>
+          <input id="cfgGeminiKey" type="password" autocomplete="off" placeholder="AIza... (Leave blank for Built-in TNPSC AI)" class="w-full p-2.5">
+        </div>
+        <div>
+          <label for="cfgSupabaseUrl" class="block text-xs font-bold mb-1">Supabase URL</label>
+          <input id="cfgSupabaseUrl" type="text" autocomplete="off" placeholder="https://xyz.supabase.co" class="w-full p-2.5">
+        </div>
+        <div>
+          <label for="cfgSupabaseKey" class="block text-xs font-bold mb-1">Supabase Anon Key</label>
+          <input id="cfgSupabaseKey" type="password" autocomplete="off" placeholder="eyJ..." class="w-full p-2.5">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="cfgGhRepo" class="block text-xs font-bold mb-1">GitHub Repo (owner/repo)</label>
+          <input id="cfgGhRepo" type="text" autocomplete="off" placeholder="username/tnpsc-portal" class="w-full p-2.5">
+        </div>
+        <div>
+          <label for="cfgGhBranch" class="block text-xs font-bold mb-1">Branch &amp; Path</label>
+          <div class="flex gap-1.5">
+            <input id="cfgGhBranch" type="text" autocomplete="off" value="main" class="w-full p-2.5">
+            <input id="cfgGhPath" type="text" autocomplete="off" value="config.js" class="w-full p-2.5">
+          </div>
+        </div>
+        <div>
+          <label for="cfgGhToken" class="block text-xs font-bold mb-1">GitHub Token (One-Time Write)</label>
+          <input id="cfgGhToken" type="password" autocomplete="off" placeholder="ghp_..." class="w-full p-2.5">
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" id="saveApiConfigBtn" class="btn-sec px-4 py-2 text-xs">Save to GitHub config.js</button>
+        <button type="button" id="clearApiConfigBtn" class="btn-ghost px-4 py-2 text-xs">Clear Memory Config</button>
       </div>
     </div>
 
@@ -804,7 +871,7 @@
           Select a batch to view subject-wise approved question status.
         </div>
 
-        <!-- Visual Batch Subject Plan Breakdown (Shows exact subjects & counts selected during Batch creation) -->
+        <!-- Visual Batch Subject Plan Breakdown -->
         <div id="aiBatchSubjectsPlanBox" class="p-3.5 rounded-xl bg-white/85 border border-slate-300 mb-4">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
             <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
@@ -913,7 +980,7 @@
   var STORE_KEY = "tnpsc_v2_state_v1";
   var ACC_PREFS_KEY = "tnpsc_v2_acc_prefs_v1";
   var ACTIVE_SESSION_KEY = "tnpsc_v2_active_session_v1";
-  var CONFIG_KEY = "tnpsc_v2_runtime_cfg_v1";
+  var CONFIG_KEY = "tnpsc_v2_config_v1";
   var ADMIN_PIN_DEFAULT = "admin123";
   var DEFAULT_SUBJECTS = [
     "General Tamil",
@@ -927,653 +994,50 @@
     "Current Affairs"
   ];
 
-  // Rich Bilingual TNPSC Question Bank & Non-Repeating Procedural Generator
-  var TNPSC_QUESTION_BANK = {
-    "General Tamil": [
-      {
-        ta: "திருக்குறளில் உள்ள மொத்த அதிகாரங்களின் எண்ணிக்கை எத்தனை?",
-        en: "How many chapters (Adhikarams) are there in Thirukkural?",
-        opts: [{ ta: "133", en: "133" }, { ta: "108", en: "108" }, { ta: "120", en: "120" }, { ta: "150", en: "150" }],
-        a: 0,
-        whyTa: "திருக்குறள் அறத்துப்பால் (38), பொருட்பால் (70), இன்பத்துப்பால் (25) என மொத்தம் 133 அதிகாரங்களைக் கொண்டுள்ளது.",
-        whyEn: "Thirukkural consists of 133 chapters across three sections (38 + 70 + 25)."
-      },
-      {
-        ta: "'யாதும் ஊரே யாவரும் கேளிர்' என்ற புகழ்பெற்ற வரி இடம்பெற்றுள்ள சங்க நூல் எது?",
-        en: "In which Sangam literary work does 'Yadhum Oore Yaavarum Kelir' appear?",
-        opts: [{ ta: "புறநானூறு", en: "Purananuru" }, { ta: "அகநானூறு", en: "Agananuru" }, { ta: "நற்றிணை", en: "Natrinai" }, { ta: "குறுந்தொகை", en: "Kurunthogai" }],
-        a: 0,
-        whyTa: "கணியன் பூங்குன்றனார் இயற்றிய இப்பாடல் புறநானூற்றின் 192-வது பாடலாகும்.",
-        whyEn: "Composed by Kaniyan Poongundranar, it appears as poem 192 in Purananuru."
-      },
-      {
-        ta: "சிலப்பதிகாரத்தை இயற்றியவர் யார்?",
-        en: "Who authored the Tamil epic Silappathikaram?",
-        opts: [{ ta: "இளங்கோவடிகள்", en: "Ilango Adigal" }, { ta: "சீத்தலைச் சாத்தனார்", en: "Seethalai Saathanar" }, { ta: "திருத்தக்கதேவர்", en: "Thiruthakkadevar" }, { ta: "கம்பர்", en: "Kambar" }],
-        a: 0,
-        whyTa: "சேர மரபைச் சேர்ந்த இளங்கோவடிகள் சிலப்பதிகாரத்தை இயற்றினார்.",
-        whyEn: "Ilango Adigal, a Chera prince, authored Silappathikaram."
-      },
-      {
-        ta: "'தமிழ் தாத்தா' என்று போற்றப்படுபவர் யார்?",
-        en: "Who is revered as 'Tamil Thaatha' (Grandfather of Tamil)?",
-        opts: [{ ta: "உ.வே. சாமிநாதையர்", en: "U.V. Swaminatha Iyer" }, { ta: "மறைமலை அடிகள்", en: "Maraimalai Adigal" }, { ta: "பரிதிமாற் கலைஞர்", en: "Parithimar Kalaignar" }, { ta: "திரு.வி.க", en: "Thiru. V. Kalyanasundaram" }],
-        a: 0,
-        whyTa: "பழந்தமிழ் ஓலைச்சுவடிகளைத் தேடிப் பதிப்பித்த உ.வே. சாமிநாதையர் 'தமிழ் தாத்தா' என அழைக்கப்படுகிறார்.",
-        whyEn: "U.V. Swaminatha Iyer is honored as Tamil Thaatha for reviving classical Sangam manuscripts."
-      },
-      {
-        ta: "தொல்காப்பியத்தில் உள்ள மொத்த இயல்களின் எண்ணிக்கை எத்தனை?",
-        en: "How many chapters (Iyals) are there in Tolkappiyam?",
-        opts: [{ ta: "27 இயல்கள்", en: "27 Iyals" }, { ta: "18 இயல்கள்", en: "18 Iyals" }, { ta: "30 இயல்கள்", en: "30 Iyals" }, { ta: "24 இயல்கள்", en: "24 Iyals" }],
-        a: 0,
-        whyTa: "எழுத்து, சொல், பொருள் ஆகிய மூன்று அதிகாரங்களிலும் தலா 9 இயல்கள் வீதம் 27 இயல்கள் உள்ளன.",
-        whyEn: "Tolkappiyam has 3 Adhikarams with 9 Iyals each, totaling 27 Iyals."
-      },
-      {
-        ta: "மணிமேகலை காப்பியத்தின் ஆசிரியர் யார்?",
-        en: "Who is the author of the epic Manimekalai?",
-        opts: [{ ta: "சீத்தலைச் சாத்தனார்", en: "Seethalai Saathanar" }, { ta: "இளங்கோவடிகள்", en: "Ilango Adigal" }, { ta: "நாதகுத்தனார்", en: "Nathakuthanar" }, { ta: "தோலாமொழித்தேவர்", en: "Tholamozhithevar" }],
-        a: 0,
-        whyTa: "மதுரைக் கூலவாணிகன் சீத்தலைச் சாத்தனார் மணிமேகலையை இயற்றினார்.",
-        whyEn: "Seethalai Saathanar composed Manimekalai as a sequel to Silappathikaram."
-      },
-      {
-        ta: "பாரதியார் நடத்திய இதழ்களில் ஒன்று எது?",
-        en: "Which of the following journals was edited by Subramania Bharati?",
-        opts: [{ ta: "இந்தியா", en: "India" }, { ta: "குடியரசு", en: "Kudi Arasu" }, { ta: "நவசக்தி", en: "Navasakthi" }, { ta: "தேசபக்தன்", en: "Desabakthan" }],
-        a: 0,
-        whyTa: "மகாகவி பாரதியார் 'இந்தியா', 'விஜயா' ஆகிய இதழ்களை நடத்தினார்.",
-        whyEn: "Subramania Bharati edited the nationalist weekly 'India'."
-      },
-      {
-        ta: "'புரட்சிக்கவி' என்று அழைக்கப்படுபவர் யார்?",
-        en: "Who is hailed as 'Puratchikavi' (Revolutionary Poet) in Tamil literature?",
-        opts: [{ ta: "பாரதிதாசன்", en: "Bharathidasan" }, { ta: "நாமக்கல் கவிஞர்", en: "Namakkal Kavignar" }, { ta: "கண்ணதாசன்", en: "Kannadasan" }, { ta: "வாணிதாசன்", en: "Vanidasan" }],
-        a: 0,
-        whyTa: "கனகசுப்புரத்தினம் எனும் பாரதிதாசன் 'புரட்சிக்கவி' மற்றும் 'பாவேந்தர்' எனப் போற்றப்படுகிறார்.",
-        whyEn: "Bharathidasan is celebrated as Puratchikavi and Pavendhar."
-      },
-      {
-        ta: "பத்துப்பாட்டு நூல்களுள் மிகப் பெரிய நூல் எது?",
-        en: "Which is the longest poem among the Pathuppattu (Ten Idylls)?",
-        opts: [{ ta: "மதுரைக்காஞ்சி", en: "Maduraikkanchi" }, { ta: "முல்லைப்பாட்டு", en: "Mullaippattu" }, { ta: "குறிஞ்சிப்பாட்டு", en: "Kurinjippattu" }, { ta: "நெடுநல்வாடை", en: "Nedunalvadai" }],
-        a: 0,
-        whyTa: "மாங்குடி மருதனார் இயற்றிய மதுரைக்காஞ்சி 782 அடிகளைக் கொண்ட மிகப் பெரிய நூலாகும்.",
-        whyEn: "Maduraikkanchi by Mangudi Maruthanar has 782 lines, the longest in Pathuppattu."
-      },
-      {
-        ta: "தமிழ்நாட்டின் மாநில மரம் எது?",
-        en: "Which is the official State Tree of Tamil Nadu?",
-        opts: [{ ta: "பனை மரம்", en: "Palmyra Palm" }, { ta: "ஆலமரம்", en: "Banyan Tree" }, { ta: "வேப்ப மரம்", en: "Neem Tree" }, { ta: "தென்னை மரம்", en: "Coconut Tree" }],
-        a: 0,
-        whyTa: "பனை மரம் (Borassus flabellifer) தமிழ்நாட்டின் மாநில மரமாகும்.",
-        whyEn: "Palmyra Palm is the official state tree of Tamil Nadu."
-      }
-    ],
-    "General English": [
-      {
-        ta: "Choose the correct synonym for the word 'BENEVOLENT':",
-        en: "Choose the correct synonym for the word 'BENEVOLENT':",
-        opts: [{ ta: "Kind and generous", en: "Kind and generous" }, { ta: "Hostile", en: "Hostile" }, { ta: "Arrogant", en: "Arrogant" }, { ta: "Careless", en: "Careless" }],
-        a: 0,
-        whyTa: "'Benevolent' என்பதன் பொருள் கருணையும் தாராள மனமும் கொண்டவர் என்பதாகும்.",
-        whyEn: "'Benevolent' means well-meaning, kind, and generous."
-      },
-      {
-        ta: "Identify the figure of speech: 'The wind whispered through the trees.'",
-        en: "Identify the figure of speech: 'The wind whispered through the trees.'",
-        opts: [{ ta: "Personification", en: "Personification" }, { ta: "Simile", en: "Simile" }, { ta: "Oxymoron", en: "Oxymoron" }, { ta: "Hyperbole", en: "Hyperbole" }],
-        a: 0,
-        whyTa: "உயிரற்ற காற்றுக்கு மனிதப் பண்பான 'கிசுகிசுத்தல்' ஏற்றிக் கூறப்பட்டுள்ளதால் இது Personification ஆகும்.",
-        whyEn: "Giving human traits ('whispered') to non-human wind is Personification."
-      },
-      {
-        ta: "Select the correct antonym for 'TRANSPARENT':",
-        en: "Select the correct antonym for 'TRANSPARENT':",
-        opts: [{ ta: "Opaque", en: "Opaque" }, { ta: "Lucid", en: "Lucid" }, { ta: "Clear", en: "Clear" }, { ta: "Visible", en: "Visible" }],
-        a: 0,
-        whyTa: "'Transparent' (ஒளி ஊடுருவும்) என்பதன் எதிர்ச்சொல் 'Opaque' (ஒளி ஊடுருவாத) ஆகும்.",
-        whyEn: "'Opaque' means not able to be seen through, the direct antonym of transparent."
-      },
-      {
-        ta: "Fill in the blank with the right preposition: 'He has been living in Chennai _____ 2018.'",
-        en: "Fill in the blank with the right preposition: 'He has been living in Chennai _____ 2018.'",
-        opts: [{ ta: "since", en: "since" }, { ta: "for", en: "for" }, { ta: "from", en: "from" }, { ta: "by", en: "by" }],
-        a: 0,
-        whyTa: "குறிப்பிட்ட தொடக்க ஆண்டைக் குறிக்க 'since' பயன்படுத்தப்படுகிறது.",
-        whyEn: "'Since' is used with a specific starting point in time (2018)."
-      },
-      {
-        ta: "Choose the correct passive voice: 'The committee approved the proposal.'",
-        en: "Choose the correct passive voice: 'The committee approved the proposal.'",
-        opts: [{ ta: "The proposal was approved by the committee.", en: "The proposal was approved by the committee." }, { ta: "The proposal is approved by the committee.", en: "The proposal is approved by the committee." }, { ta: "The proposal had approved by the committee.", en: "The proposal had approved by the committee." }, { ta: "The proposal were approved by the committee.", en: "The proposal were approved by the committee." }],
-        a: 0,
-        whyTa: "Simple Past Active வாக்கியம் 'was/were + V3' என Passive-ஆக மாறும்.",
-        whyEn: "Simple past active converts to 'was approved' in passive voice."
-      },
-      {
-        ta: "What is the plural form of 'CRITERION'?",
-        en: "What is the plural form of 'CRITERION'?",
-        opts: [{ ta: "Criteria", en: "Criteria" }, { ta: "Criterions", en: "Criterions" }, { ta: "Criterias", en: "Criterias" }, { ta: "Criterion", en: "Criterion" }],
-        a: 0,
-        whyTa: "கிரேக்க வேர்ச்சொல்லான 'Criterion' என்பதன் பன்மை 'Criteria' ஆகும்.",
-        whyEn: "'Criteria' is the standard plural form of 'criterion'."
-      }
-    ],
-    "Indian Polity": [
-      {
-        ta: "இந்திய அரசியலமைப்பின் எந்தப் பகுதியில் அடிப்படை உரிமைகள் (Fundamental Rights) இடம்பெற்றுள்ளன?",
-        en: "Fundamental Rights are enshrined in which Part of the Indian Constitution?",
-        opts: [{ ta: "பகுதி III (Part III)", en: "Part III" }, { ta: "பகுதி II (Part II)", en: "Part II" }, { ta: "பகுதி IV (Part IV)", en: "Part IV" }, { ta: "பகுதி IVA (Part IVA)", en: "Part IVA" }],
-        a: 0,
-        whyTa: "அரசியலமைப்பின் பகுதி III (சரத்துகள் 12 முதல் 35 வரை) அடிப்படை உரிமைகளை வழங்குகிறது.",
-        whyEn: "Part III (Articles 12 to 35) of the Constitution guarantees Fundamental Rights."
-      },
-      {
-        ta: "மாநில அரசுப் பணியாளர் தேர்வாணையத் (TNPSC) தலைவர் மற்றும் உறுப்பினர்களை நியமிப்பவர் யார்?",
-        en: "Who appoints the Chairman and Members of a State Public Service Commission (TNPSC)?",
-        opts: [{ ta: "மாநில ஆளுநர்", en: "Governor of the State" }, { ta: "முதலமைச்சர்", en: "Chief Minister" }, { ta: "குடியரசுத் தலைவர்", en: "President of India" }, { ta: "உயர்நீதிமன்ற தலைமை நீதிபதி", en: "Chief Justice of High Court" }],
-        a: 0,
-        whyTa: "இந்திய அரசியலமைப்பு சரத்து 316-ன் கீழ் மாநில ஆளுநர் நியமிக்கிறார்.",
-        whyEn: "Under Article 316, the Governor of the State appoints the Chairman and Members."
-      },
-      {
-        ta: "இந்திய அரசியலமைப்பின் 73-வது திருத்தச் சட்டம் எதனுடன் தொடர்புடையது?",
-        en: "The 73rd Constitutional Amendment Act of 1992 is related to:",
-        opts: [{ ta: "பஞ்சாயத்து ராஜ் அமைப்புகள்", en: "Panchayati Raj Institutions" }, { ta: "நகராட்சிகள்", en: "Municipalities" }, { ta: "பொருட்கள் மற்றும் சேவை வரி", en: "Goods and Services Tax" }, { ta: "கல்வி உரிமை", en: "Right to Education" }],
-        a: 0,
-        whyTa: "73-வது திருத்தச் சட்டம் 11-வது அட்டவணையைச் சேர்த்து பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கியது.",
-        whyEn: "The 73rd Amendment added the 11th Schedule and constitutional status to Panchayati Raj."
-      },
-      {
-        ta: "இந்திய அரசியலமைப்பின் எந்தச் சரத்து தீண்டாமையை ஒழிக்கிறது?",
-        en: "Which Article of the Indian Constitution abolishes Untouchability?",
-        opts: [{ ta: "சரத்து 17 (Article 17)", en: "Article 17" }, { ta: "சரத்து 14 (Article 14)", en: "Article 14" }, { ta: "சரத்து 19 (Article 19)", en: "Article 19" }, { ta: "சரத்து 21 (Article 21)", en: "Article 21" }],
-        a: 0,
-        whyTa: "சரத்து 17 தீண்டாமையை எந்த வடிவத்திலும் கடைப்பிடிப்பதைத் தடை செய்கிறது.",
-        whyEn: "Article 17 abolishes untouchability and forbids its practice in any form."
-      },
-      {
-        ta: "அரசியலமைப்பு வரைவுக் குழுவின் (Drafting Committee) தலைவர் யார்?",
-        en: "Who was the Chairman of the Drafting Committee of the Indian Constitution?",
-        opts: [{ ta: "டாக்டர் பி.ஆர். அம்பேத்கர்", en: "Dr. B.R. Ambedkar" }, { ta: "டாக்டர் ராஜேந்திர பிரசாத்", en: "Dr. Rajendra Prasad" }, { ta: "ஜவஹர்லால் நேரு", en: "Jawaharlal Nehru" }, { ta: "சர்தார் வல்லபாய் படேல்", en: "Sardar Vallabhbhai Patel" }],
-        a: 0,
-        whyTa: "1947 ஆகஸ்ட் 29 அன்று அமைக்கப்பட்ட 7 பேர் கொண்ட வரைவுக் குழுவின் தலைவராக டாக்டர் பி.ஆர். அம்பேத்கர் செயல்பட்டார்.",
-        whyEn: "Dr. B.R. Ambedkar chaired the 7-member Drafting Committee formed on August 29, 1947."
-      },
-      {
-        ta: "மாநிலங்களவை (Rajya Sabha) உறுப்பினர்களின் பதவிக்காலம் எத்தனை ஆண்டுகள்?",
-        en: "What is the term of office of a member of the Rajya Sabha?",
-        opts: [{ ta: "6 ஆண்டுகள்", en: "6 Years" }, { ta: "5 ஆண்டுகள்", en: "5 Years" }, { ta: "4 ஆண்டுகள்", en: "4 Years" }, { ta: "2 ஆண்டுகள்", en: "2 Years" }],
-        a: 0,
-        whyTa: "மாநிலங்களவை ஒரு நிரந்தர அவை; அதன் உறுப்பினர்களின் பதவிக்காலம் 6 ஆண்டுகள் ஆகும்.",
-        whyEn: "Rajya Sabha is a permanent house and each member serves a 6-year term."
-      },
-      {
-        ta: "இந்திய அரசியலமைப்பின் 42-வது திருத்தச் சட்டம் (1976) எவ்வாறு அழைக்கப்படுகிறது?",
-        en: "The 42nd Constitutional Amendment Act (1976) is popularly known as:",
-        opts: [{ ta: "குறு அரசியலமைப்பு (Mini Constitution)", en: "Mini Constitution" }, { ta: "அடிப்படை உரிமை மசோதா", en: "Bill of Rights" }, { ta: "பஞ்சாயத்து சட்டம்", en: "Panchayat Act" }, { ta: "கூட்டாட்சி சாசனம்", en: "Federal Charter" }],
-        a: 0,
-        whyTa: "முகவுரையில் சமதர்மம், மதச்சார்பின்மை, ஒருமைப்பாடு ஆகிய சொற்களைச் சேர்த்ததால் இது குறு அரசியலமைப்பு எனப்படுகிறது.",
-        whyEn: "Due to sweeping changes including Preamble amendments, it is called the Mini Constitution."
-      },
-      {
-        ta: "நிதி மசோதா (Money Bill) குறித்து இறுதி முடிவு எடுக்கும் அதிகாரம் யாருக்கு உள்ளது?",
-        en: "Who has the final authority to decide whether a bill is a Money Bill or not?",
-        opts: [{ ta: "மக்களவை சபாநாயகர்", en: "Speaker of Lok Sabha" }, { ta: "குடியரசுத் தலைவர்", en: "President of India" }, { ta: "நிதி அமைச்சர்", en: "Finance Minister" }, { ta: "துணைக் குடியரசுத் தலைவர்", en: "Vice-President" }],
-        a: 0,
-        whyTa: "சரத்து 110(3)-ன் கீழ் மக்களவை சபாநாயகரின் முடிவே இறுதியானது.",
-        whyEn: "Under Article 110(3), the decision of the Speaker of the Lok Sabha is final."
-      }
-    ],
-    "History & INM": [
-      {
-        ta: "இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",
-        en: "In which year was the Indian National Congress founded?",
-        opts: [{ ta: "1885", en: "1885" }, { ta: "1905", en: "1905" }, { ta: "1906", en: "1906" }, { ta: "1919", en: "1919" }],
-        a: 0,
-        whyTa: "1885 டிசம்பரில் பம்பாயில் A.O. ஹியூம் முயற்சியால் W.C. பானர்ஜி தலைமையில் தொடங்கப்பட்டது.",
-        whyEn: "Founded in December 1885 in Bombay with W.C. Bonnerjee as its first president."
-      },
-      {
-        ta: "வேலூர் சிப்பாய் கலகம் நடைபெற்ற ஆண்டு எது?",
-        en: "In which year did the Vellore Mutiny take place?",
-        opts: [{ ta: "1806", en: "1806" }, { ta: "1857", en: "1857" }, { ta: "1799", en: "1799" }, { ta: "1801", en: "1801" }],
-        a: 0,
-        whyTa: "1806 ஜூலை 10 அன்று வேலூர் கோட்டையில் இந்திய சிப்பாய்கள் ஆங்கிலேயர்களுக்கு எதிராகப் புரட்சி செய்தனர்.",
-        whyEn: "The Vellore Mutiny erupted on July 10, 1806, predating the 1857 revolt."
-      },
-      {
-        ta: "வேதாரண்யம் உப்பு சத்தியாகிரகத்தைத் தலைமையேற்று நடத்தியவர் யார்?",
-        en: "Who led the Vedaranyam Salt Satyagraha in Tamil Nadu in 1930?",
-        opts: [{ ta: "சி. ராஜகோபாலாச்சாரி", en: "C. Rajagopalachari" }, { ta: "கே. காமராஜர்", en: "K. Kamaraj" }, { ta: "வ.உ. சிதம்பரனார்", en: "V.O. Chidambaram Pillai" }, { ta: "சத்தியமூர்த்தி", en: "S. Satyamurti" }],
-        a: 0,
-        whyTa: "1930 ஏப்ரல் மாதம் திருச்சியிலிருந்து வேதாரண்யம் வரை ராஜாஜி உப்பு சத்தியாகிரக யாத்திரை நடத்தினார்.",
-        whyEn: "C. Rajagopalachari led the historic salt march from Trichy to Vedaranyam in April 1930."
-      },
-      {
-        ta: "'சுதேசி நீராவிக் கப்பல் நிறுவனத்தை' (Swadeshi Steam Navigation Company) நிறுவியவர் யார்?",
-        en: "Who founded the Swadeshi Steam Navigation Company in Tuticorin?",
-        opts: [{ ta: "வ.உ. சிதம்பரனார்", en: "V.O. Chidambaram Pillai" }, { ta: "சுப்பிரமணிய சிவா", en: "Subramania Siva" }, { ta: "திருப்பூர் குமரன்", en: "Tiruppur Kumaran" }, { ta: "வாஞ்சிநாதன்", en: "Vanchinathan" }],
-        a: 0,
-        whyTa: "1906-ல் தூத்துக்குடியில் வ.உ.சி. சுதேசி கப்பல் நிறுவனத்தைத் தொடங்கி 'காலியா', 'லாவோ' கப்பல்களை இயக்கினார்.",
-        whyEn: "V.O. Chidambaram Pillai launched the Swadeshi Steam Navigation Company in 1906."
-      },
-      {
-        ta: "சிந்துவெளி நாகரிகத்தின் முக்கியத் துறைமுக நகரம் எது?",
-        en: "Which was the major dockyard/port city of the Indus Valley Civilization?",
-        opts: [{ ta: "லோத்தல் (Lothal)", en: "Lothal" }, { ta: "ஹரப்பா (Harappa)", en: "Harappa" }, { ta: "காளிபங்கன் (Kalibangan)", en: "Kalibangan" }, { ta: "பனவாலி (Banawali)", en: "Banawali" }],
-        a: 0,
-        whyTa: "குஜராத்தில் உள்ள லோத்தல் சிந்துவெளி நாகரிகத்தின் புகழ்பெற்ற கப்பல் கட்டும் தளமாகும்.",
-        whyEn: "Lothal in Gujarat featured the famous tidal dockyard of the Indus Valley Civilization."
-      },
-      {
-        ta: "நீதிக்கட்சி (Justice Party) எந்த ஆண்டு தொடங்கப்பட்டது?",
-        en: "In which year was the South Indian Liberal Federation (Justice Party) founded?",
-        opts: [{ ta: "1916", en: "1916" }, { ta: "1920", en: "1920" }, { ta: "1925", en: "1925" }, { ta: "1937", en: "1937" }],
-        a: 0,
-        whyTa: "1916 நவம்பரில் டாக்டர் சி. நடேசனார், தியாகராய செட்டியார், டி.எம். நாயர் ஆகியோரால் தொடங்கப்பட்டது.",
-        whyEn: "Founded in November 1916 by Dr. C. Natesanar, Sir Pitti Theagarayar, and Dr. T.M. Nair."
-      }
-    ],
-    "Geography": [
-      {
-        ta: "தமிழ்நாட்டின் மிக நீளமான ஆறு எது?",
-        en: "Which is the longest river in Tamil Nadu?",
-        opts: [{ ta: "காவிரி", en: "Cauvery" }, { ta: "வைகை", en: "Vaigai" }, { ta: "தாமிரபரணி", en: "Tamiraparani" }, { ta: "பாலாறு", en: "Palar" }],
-        a: 0,
-        whyTa: "காவிரி ஆறு தமிழ்நாட்டில் சுமார் 416 கி.மீ தூரம் பாயும் மிக நீளமான ஆறாகும்.",
-        whyEn: "Cauvery is the longest river in Tamil Nadu, flowing about 416 km within the state."
-      },
-      {
-        ta: "நீலகிரி மலையின் மிக உயரமான சிகரம் எது?",
-        en: "Which is the highest peak in the Nilgiri Hills?",
-        opts: [{ ta: "தொட்டபெட்டா", en: "Doddabetta" }, { ta: "ஆனைமுடி", en: "Anamudi" }, { ta: "மகேந்திரகிரி", en: "Mahendragiri" }, { ta: "சேர்வராயன்", en: "Shevaroy" }],
-        a: 0,
-        whyTa: "தொட்டபெட்டா (2,637 மீ) நீலகிரி மலைத்தொடரின் மிக உயரமான சிகரமாகும்.",
-        whyEn: "Doddabetta (2,637 m) is the highest peak in the Nilgiri Hills."
-      },
-      {
-        ta: "தமிழ்நாட்டில் அதிக மழைப்பொழிவைத் தரும் பருவக்காற்று எது?",
-        en: "Which monsoon brings the maximum rainfall to Tamil Nadu?",
-        opts: [{ ta: "வடகிழக்குப் பருவக்காற்று", en: "Northeast Monsoon" }, { ta: "தென்மேற்குப் பருவக்காற்று", en: "Southwest Monsoon" }, { ta: "கோடைக்கால வெப்பச்சலன மழை", en: "Summer Convectional Rain" }, { ta: "மேற்கத்திய இடையூறுகள்", en: "Western Disturbances" }],
-        a: 0,
-        whyTa: "அக்டோபர் முதல் டிசம்பர் வரை வீசும் வடகிழக்குப் பருவக்காற்று தமிழ்நாட்டின் ஆண்டு மழையில் சுமார் 48% தருகிறது.",
-        whyEn: "The Northeast Monsoon (Oct–Dec) accounts for nearly 48% of Tamil Nadu's annual rainfall."
-      },
-      {
-        ta: "இந்தியாவின் மிகப் பழமையான மடிப்பு மலைத்தொடர் எது?",
-        en: "Which is the oldest fold mountain range in India?",
-        opts: [{ ta: "ஆரவல்லி மலைத்தொடர்", en: "Aravalli Range" }, { ta: "இமயமலை", en: "Himalayas" }, { ta: "மேற்குத் தொடர்ச்சி மலை", en: "Western Ghats" }, { ta: "சாத்பூரா மலை", en: "Satpura Range" }],
-        a: 0,
-        whyTa: "ராஜஸ்தான் வழியாகச் செல்லும் ஆரவல்லி மலைத்தொடர் இந்தியாவின் மிகப் பழமையான மடிப்பு மலையாகும்.",
-        whyEn: "The Aravalli Range is the oldest fold mountain system in India."
-      },
-      {
-        ta: "பிச்சாவரம் சதுப்புநிலக் காடுகள் எந்த மாவட்டத்தில் அமைந்துள்ளன?",
-        en: "In which district of Tamil Nadu is the Pichavaram Mangrove Forest located?",
-        opts: [{ ta: "கடலூர்", en: "Cuddalore" }, { ta: "நாகப்பட்டினம்", en: "Nagapattinam" }, { ta: "ராமநாதபுரம்", en: "Ramanathapuram" }, { ta: "தஞ்சாவூர்", en: "Thanjavur" }],
-        a: 0,
-        whyTa: "சிதம்பரத்திற்கு அருகே கடலூர் மாவட்டத்தில் பிச்சாவரம் சதுப்புநிலக் காடுகள் அமைந்துள்ளன.",
-        whyEn: "Pichavaram Mangrove Forest is located near Chidambaram in Cuddalore district."
-      },
-      {
-        ta: "பருத்தி விளைய மிகவும் ஏற்ற மண் வகை எது?",
-        en: "Which soil type is best suited for cotton cultivation?",
-        opts: [{ ta: "கரிசல் மண் (Black Soil)", en: "Black Soil (Regur)" }, { ta: "செம்மண் (Red Soil)", en: "Red Soil" }, { ta: "வண்டல் மண் (Alluvial Soil)", en: "Alluvial Soil" }, { ta: "சரளை மண் (Laterite Soil)", en: "Laterite Soil" }],
-        a: 0,
-        whyTa: "ஈரப்பதத்தை நீண்ட நேரம் தக்கவைக்கும் கரிசல் மண் பருத்தி சாகுபடிக்கு மிகவும் ஏற்றது.",
-        whyEn: "Black cotton soil (Regur) retains moisture well and is ideal for cotton."
-      }
-    ],
-    "Indian Economy": [
-      {
-        ta: "நிதி ஆயோக் (NITI Aayog) எப்போது நடைமுறைக்கு வந்தது?",
-        en: "When did NITI Aayog come into existence?",
-        opts: [{ ta: "ஜனவரி 1, 2015", en: "January 1, 2015" }, { ta: "ஏப்ரல் 1, 2014", en: "April 1, 2014" }, { ta: "ஜனவரி 26, 2015", en: "January 26, 2015" }, { ta: "ஜூலை 1, 2017", en: "July 1, 2017" }],
-        a: 0,
-        whyTa: "திட்டக் குழுவிற்கு மாற்றாக ஜனவரி 1, 2015 அன்று நிதி ஆயோக் நிறுவப்பட்டது.",
-        whyEn: "NITI Aayog replaced the Planning Commission on January 1, 2015."
-      },
-      {
-        ta: "இந்திய ரிசர்வ் வங்கி (RBI) எந்த ஆண்டு தேசியமயமாக்கப்பட்டது?",
-        en: "In which year was the Reserve Bank of India (RBI) nationalized?",
-        opts: [{ ta: "1949", en: "1949" }, { ta: "1935", en: "1935" }, { ta: "1955", en: "1955" }, { ta: "1969", en: "1969" }],
-        a: 0,
-        whyTa: "1935-ல் தொடங்கப்பட்ட RBI, 1949 ஜனவரி 1 அன்று தேசியமயமாக்கப்பட்டது.",
-        whyEn: "Established in 1935, the RBI was nationalized on January 1, 1949."
-      },
-      {
-        ta: "இந்தியாவில் சரக்கு மற்றும் சேவை வரி (GST) எப்போது அறிமுகப்படுத்தப்பட்டது?",
-        en: "When was the Goods and Services Tax (GST) implemented in India?",
-        opts: [{ ta: "ஜூலை 1, 2017", en: "July 1, 2017" }, { ta: "ஏப்ரல் 1, 2017", en: "April 1, 2017" }, { ta: "நவம்பர் 8, 2016", en: "November 8, 2016" }, { ta: "ஜனவரி 1, 2018", en: "January 1, 2018" }],
-        a: 0,
-        whyTa: "101-வது அரசியலமைப்புத் திருத்தத்தின் மூலம் 2017 ஜூலை 1 அன்று GST அமல்படுத்தப்பட்டது.",
-        whyEn: "GST was rolled out nationwide on July 1, 2017 via the 101st Amendment."
-      },
-      {
-        ta: "இந்திய பசுமைப் புரட்சியின் தந்தை என அழைக்கப்படுபவர் யார்?",
-        en: "Who is known as the Father of the Green Revolution in India?",
-        opts: [{ ta: "டாக்டர் எம்.எஸ். சுவாமிநாதன்", en: "Dr. M.S. Swaminathan" }, { ta: "டாக்டர் வர்கீஸ் குரியன்", en: "Dr. Verghese Kurien" }, { ta: "நார்மன் போர்லாக்", en: "Norman Borlaug" }, { ta: "சி. சுப்பிரமணியம்", en: "C. Subramaniam" }],
-        a: 0,
-        whyTa: "அதிக மகசூல் தரும் கோதுமை மற்றும் நெல் ரகங்களை அறிமுகப்படுத்திய எம்.எஸ். சுவாமிநாதன் இந்திய பசுமைப் புரட்சியின் தந்தை ஆவார்.",
-        whyEn: "Dr. M.S. Swaminathan spearheaded the introduction of high-yielding varieties in India."
-      },
-      {
-        ta: "மனித மேம்பாட்டுக் குறியீட்டை (HDI) வெளியிடும் சர்வதேச அமைப்பு எது?",
-        en: "Which international organization publishes the Human Development Index (HDI)?",
-        opts: [{ ta: "UNDP", en: "UNDP" }, { ta: "IMF", en: "IMF" }, { ta: "World Bank", en: "World Bank" }, { ta: "WTO", en: "WTO" }],
-        a: 0,
-        whyTa: "ஐக்கிய நாடுகள் வளர்ச்சித் திட்டம் (UNDP) ஆண்டுதோறும் மனித மேம்பாட்டு அறிக்கையை வெளியிடுகிறது.",
-        whyEn: "The United Nations Development Programme (UNDP) publishes the annual HDI report."
-      }
-    ],
-    "General Science": [
-      {
-        ta: "ஒளியின் திசைவேகம் மிக அதிகமாக உள்ள ஊடகம் எது?",
-        en: "In which medium is the speed of light maximum?",
-        opts: [{ ta: "வெற்றிடம் (Vacuum)", en: "Vacuum" }, { ta: "நீர் (Water)", en: "Water" }, { ta: "கண்ணாடி (Glass)", en: "Glass" }, { ta: "வைரம் (Diamond)", en: "Diamond" }],
-        a: 0,
-        whyTa: "வெற்றிடத்தில் ஒளியின் வேகம் 3 × 10^8 மீ/வி ஆகும்.",
-        whyEn: "Light travels fastest in a vacuum at approximately 3 × 10^8 m/s."
-      },
-      {
-        ta: "மனித இரத்தத்தின் சராசரி pH மதிப்பு என்ன?",
-        en: "What is the normal pH range of human blood?",
-        opts: [{ ta: "7.35 – 7.45", en: "7.35 – 7.45" }, { ta: "6.0 – 6.5", en: "6.0 – 6.5" }, { ta: "5.5 – 6.0", en: "5.5 – 6.0" }, { ta: "8.2 – 8.6", en: "8.2 – 8.6" }],
-        a: 0,
-        whyTa: "மனித இரத்தம் சற்று காரத்தன்மை கொண்டது; இதன் pH 7.35 முதல் 7.45 வரை இருக்கும்.",
-        whyEn: "Human blood is slightly alkaline with a tightly regulated pH of 7.35–7.45."
-      },
-      {
-        ta: "சூரிய ஒளியிலிருந்து நமக்குக் கிடைக்கும் வைட்டமின் எது?",
-        en: "Which vitamin is synthesized in human skin upon exposure to sunlight?",
-        opts: [{ ta: "வைட்டமின் D", en: "Vitamin D" }, { ta: "வைட்டமின் C", en: "Vitamin C" }, { ta: "வைட்டமின் A", en: "Vitamin A" }, { ta: "வைட்டமின் B12", en: "Vitamin B12" }],
-        a: 0,
-        whyTa: "சூரியனின் புற ஊதாக் கதிர்கள் தோலில் வைட்டமின் D உற்பத்திக்கு உதவுகின்றன.",
-        whyEn: "UV-B rays from sunlight trigger Vitamin D synthesis in the skin."
-      },
-      {
-        ta: "மின்னோட்டத்தை (Electric Current) அளவிடப் பயன்படும் கருவி எது?",
-        en: "Which instrument is used to measure electric current in a circuit?",
-        opts: [{ ta: "அம்மீட்டர் (Ammeter)", en: "Ammeter" }, { ta: "வோல்ட்மீட்டர் (Voltmeter)", en: "Voltmeter" }, { ta: "பாரோமீட்டர் (Barometer)", en: "Barometer" }, { ta: "ஹைக்ரோமீட்டர் (Hygrometer)", en: "Hygrometer" }],
-        a: 0,
-        whyTa: "மின்னோட்டத்தை ஆம்பியர் அலகில் அளவிட அம்மீட்டர் தொடரிணைப்பில் இணைக்கப்படுகிறது.",
-        whyEn: "An ammeter is connected in series to measure electric current in amperes."
-      },
-      {
-        ta: "செல்லின் 'ஆற்றல் மையம்' (Powerhouse of the Cell) என அழைக்கப்படுவது எது?",
-        en: "Which cell organelle is known as the 'Powerhouse of the Cell'?",
-        opts: [{ ta: "மைட்டோகாண்ட்ரியா", en: "Mitochondria" }, { ta: "ரைபோசோம்", en: "Ribosome" }, { ta: "கோல்கை உறுப்புகள்", en: "Golgi Apparatus" }, { ta: "லைசோசோம்", en: "Lysosome" }],
-        a: 0,
-        whyTa: "மைட்டோகாண்ட்ரியா ATP வடிவில் ஆற்றலை உற்பத்தி செய்வதால் செல்லின் ஆற்றல் மையம் எனப்படுகிறது.",
-        whyEn: "Mitochondria generate ATP energy molecules and are called the powerhouse of the cell."
-      }
-    ],
-    "Aptitude & Mental Ability": [
-      {
-        ta: "2, 6, 12, 20, 30, ? என்ற தொடரில் அடுத்து வரும் எண் எது?",
-        en: "Find the next number in the series: 2, 6, 12, 20, 30, ?",
-        opts: [{ ta: "42", en: "42" }, { ta: "38", en: "38" }, { ta: "40", en: "40" }, { ta: "44", en: "44" }],
-        a: 0,
-        whyTa: "வித்தியாசம் +4, +6, +8, +10, +12 என அதிகரிப்பதால் 30 + 12 = 42.",
-        whyEn: "Differences increase by 2 each step (+4, +6, +8, +10, +12), so 30 + 12 = 42."
-      },
-      {
-        ta: "ஒரு பொருளின் அடக்க விலை ₹800 மற்றும் விற்பனை விலை ₹920 எனில் இலாப சதவீதம் என்ன?",
-        en: "If the Cost Price of an article is ₹800 and Selling Price is ₹920, what is the profit percentage?",
-        opts: [{ ta: "15%", en: "15%" }, { ta: "12%", en: "12%" }, { ta: "18%", en: "18%" }, { ta: "20%", en: "20%" }],
-        a: 0,
-        whyTa: "இலாபம் = 920 - 800 = ₹120; இலாப % = (120 / 800) × 100 = 15%.",
-        whyEn: "Profit = ₹120; Profit % = (120 / 800) × 100 = 15%."
-      },
-      {
-        ta: "A ஒரு வேலையை 10 நாட்களிலும், B அதே வேலையை 15 நாட்களிலும் முடிப்பார் எனில் இருவரும் சேர்ந்து எத்தனை நாட்களில் முடிப்பார்கள்?",
-        en: "A can finish a work in 10 days and B in 15 days. In how many days can they finish it together?",
-        opts: [{ ta: "6 நாட்கள்", en: "6 Days" }, { ta: "5 நாட்கள்", en: "5 Days" }, { ta: "8 நாட்கள்", en: "8 Days" }, { ta: "12 நாட்கள்", en: "12 Days" }],
-        a: 0,
-        whyTa: "(10 × 15) / (10 + 15) = 150 / 25 = 6 நாட்கள்.",
-        whyEn: "Combined time = (10 × 15) / (10 + 15) = 150 / 25 = 6 days."
-      },
-      {
-        ta: "₹5,000-க்கு ஆண்டுக்கு 8% தனிவட்டி வீதம் 3 ஆண்டுகளுக்குக் கிடைக்கும் வட்டி எவ்வளவு?",
-        en: "Find the Simple Interest on ₹5,000 at 8% per annum for 3 years.",
-        opts: [{ ta: "₹1,200", en: "₹1,200" }, { ta: "₹1,000", en: "₹1,000" }, { ta: "₹1,500", en: "₹1,500" }, { ta: "₹800", en: "₹800" }],
-        a: 0,
-        whyTa: "SI = (P × N × R) / 100 = (5000 × 3 × 8) / 100 = ₹1,200.",
-        whyEn: "SI = (5000 × 3 × 8) / 100 = ₹1,200."
-      },
-      {
-        ta: "12, 18, 24 ஆகிய எண்களின் மீச்சிறு பொது மடங்கு (LCM) என்ன?",
-        en: "What is the LCM of 12, 18, and 24?",
-        opts: [{ ta: "72", en: "72" }, { ta: "36", en: "36" }, { ta: "48", en: "48" }, { ta: "144", en: "144" }],
-        a: 0,
-        whyTa: "12, 18, 24 ஆகியவற்றால் வகுபடும் மிகச்சிறிய எண் 72 ஆகும்.",
-        whyEn: "72 is the smallest common multiple divisible by 12, 18, and 24."
-      }
-    ],
-    "Current Affairs": [
-      {
-        ta: "இந்தியாவின் முதல் சூரிய ஆய்வு விண்கலம் எது?",
-        en: "Which is India's first space-based solar observatory mission?",
-        opts: [{ ta: "ஆதித்யா-L1 (Aditya-L1)", en: "Aditya-L1" }, { ta: "சந்திரயான்-3", en: "Chandrayaan-3" }, { ta: "ககன்யான்", en: "Gaganyaan" }, { ta: "மங்கள்யான்", en: "Mangalyaan" }],
-        a: 0,
-        whyTa: "இஸ்ரோவின் ஆதித்யா-L1 சூரியனை ஆய்வு செய்யும் முதல் இந்திய விண்கலமாகும்.",
-        whyEn: "ISRO's Aditya-L1 is India's first dedicated solar mission."
-      },
-      {
-        ta: "தமிழ்நாடு அரசின் 'புதுமைப் பெண்' திட்டம் எதற்காகச் செயல்படுத்தப்படுகிறது?",
-        en: "What is the primary objective of the Tamil Nadu Government's 'Pudhumai Penn' scheme?",
-        opts: [{ ta: "அரசுப் பள்ளி மாணவிகளின் உயர்கல்விக்கு மாதம் ₹1,000 உதவித்தொகை", en: "₹1,000 monthly assistance for government school girls pursuing higher education" }, { ta: "மகளிர் சுயஉதவிக் குழு கடன் தள்ளுபடி", en: "SHG loan waiver" }, { ta: "இலவச மடிக்கணினி திட்டம்", en: "Free laptop scheme" }, { ta: "விவசாய மானியத் திட்டம்", en: "Agricultural subsidy" }],
-        a: 0,
-        whyTa: "6 முதல் 12-ம் வகுப்பு வரை அரசுப் பள்ளிகளில் படித்த மாணவிகள் உயர்கல்வி பயில மாதம் ₹1,000 வழங்கப்படுகிறது.",
-        whyEn: "Provides ₹1,000/month to female students who studied in govt schools (Classes 6–12) entering higher education."
-      },
-      {
-        ta: "கீழடி அகழாய்வு தளம் தமிழ்நாட்டின் எந்த மாவட்டத்தில் அமைந்துள்ளது?",
-        en: "In which district of Tamil Nadu is the Keeladi archaeological site located?",
-        opts: [{ ta: "சிவகங்கை", en: "Sivaganga" }, { ta: "மதுரை", en: "Madurai" }, { ta: "தூத்துக்குடி", en: "Thoothukudi" }, { ta: "திருநெல்வேலி", en: "Tirunelveli" }],
-        a: 0,
-        whyTa: "வைகை ஆற்றங்கரையில் சிவகங்கை மாவட்டத்தில் கீழடி அகழாய்வு நடைபெறுகிறது.",
-        whyEn: "Keeladi excavation site is situated along the Vaigai River in Sivaganga district."
-      },
-      {
-        ta: "இந்திய அரசியலமைப்பின் 106-வது திருத்தச் சட்டம் (நாரி சக்தி வந்தன் அதிநியம்) எதனுடன் தொடர்புடையது?",
-        en: "The 106th Constitutional Amendment Act (Nari Shakti Vandan Adhiniyam) provides:",
-        opts: [{ ta: "மக்களவை மற்றும் சட்டமன்றங்களில் மகளிருக்கு 33% இடஒதுக்கீடு", en: "33% reservation for women in Lok Sabha and State Assemblies" }, { ta: "பொருளாதாரத்தில் பின்தங்கியோருக்கு 10% இடஒதுக்கீடு", en: "10% EWS reservation" }, { ta: "டிஜிட்டல் தனிநபர் தரவு பாதுகாப்பு", en: "Digital Personal Data Protection" }, { ta: "ஒரே நாடு ஒரே தேர்தல்", en: "One Nation One Election" }],
-        a: 0,
-        whyTa: "மக்களவை மற்றும் மாநில சட்டமன்றங்களில் பெண்களுக்கு 33% இடஒதுக்கீடு வழங்கும் வரலாற்றுச் சட்டமாகும்.",
-        whyEn: "Reserves one-third of all seats for women in Lok Sabha and State Legislative Assemblies."
-      }
-    ]
+  var appState = {
+    batches: [],
+    questions: [],
+    attempts: [],
+    usedQuestionIds: []
   };
 
-  function g(id) { return document.getElementById(id); }
+  var activeAttemptId = null;
+  var activeQuestionIndex = 0;
+  var examIntervalId = null;
+  var releaseIntervalId = null;
+  var toastTimeoutId = null;
 
-  function escapeHtml(str) {
-    return String(str == null ? "" : str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+  function g(id) {
+    return document.getElementById(id);
   }
 
   function showToast(msg) {
     var el = g("toastBanner");
     if (!el) return;
-    el.textContent = msg;
+    el.textContent = String(msg || "");
     el.classList.remove("hidden");
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer = setTimeout(function() { el.classList.add("hidden"); }, 3200);
-  }
-
-  function normalizePhone10(raw) {
-    var digits = String(raw || "").replace(/\D/g, "");
-    if (digits.length > 10 && digits.indexOf("91") === 0) {
-      digits = digits.slice(2);
-    }
-    return digits;
+    clearTimeout(toastTimeoutId);
+    toastTimeoutId = setTimeout(function() {
+      el.classList.add("hidden");
+    }, 2800);
   }
 
   function todayIsoDate() {
     var d = new Date();
-    var m = String(d.getMonth() + 1).padStart(2, "0");
-    var day = String(d.getDate()).padStart(2, "0");
-    return d.getFullYear() + "-" + m + "-" + day;
+    var yyyy = d.getFullYear();
+    var mm = String(d.getMonth() + 1).padStart(2, "0");
+    var dd = String(d.getDate()).padStart(2, "0");
+    return yyyy + "-" + mm + "-" + dd;
   }
 
   function buildReleaseIso(dateStr, timeStr) {
-    var dPart = dateStr || todayIsoDate();
-    var tPart = timeStr || "20:00";
-    var dt = new Date(dPart + "T" + tPart + ":00");
+    var safeDate = dateStr || todayIsoDate();
+    var safeTime = timeStr || "20:00";
+    var dt = new Date(safeDate + "T" + safeTime + ":00");
     if (isNaN(dt.getTime())) {
-      dt = new Date(todayIsoDate() + "T20:00:00");
+      return new Date(todayIsoDate() + "T20:00:00").toISOString();
     }
     return dt.toISOString();
-  }
-
-  function formatDisplayDateTime(isoStr) {
-    var dt = new Date(isoStr);
-    if (isNaN(dt.getTime())) return "Today 8:00 PM";
-    return dt.toLocaleString([], {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  }
-
-  function formatMMSS(totalSec) {
-    var s = Math.max(0, Math.floor(totalSec));
-    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
-  }
-
-  function formatHHMMSS(totalSec) {
-    var s = Math.max(0, Math.floor(totalSec));
-    var h = Math.floor(s / 3600);
-    var m = Math.floor((s % 3600) / 60);
-    var r = s % 60;
-    return [h, m, r].map(function(n) { return String(n).padStart(2, "0"); }).join(":");
-  }
-
-  function copyTextSafe(text) {
-    // Use reliable textarea + execCommand('copy') fallback first so restricted iframes never throw unhandled Clipboard API rejections
-    try {
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      ta.setAttribute("readonly", "");
-      ta.style.position = "fixed";
-      ta.style.top = "0";
-      ta.style.left = "-9999px";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
-      ta.setSelectionRange(0, ta.value.length);
-      var ok = document.execCommand("copy");
-      document.body.removeChild(ta);
-      if (ok) return true;
-    } catch (e) {}
-
-    try {
-      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-        navigator.clipboard.writeText(text).catch(function() {});
-        return true;
-      }
-    } catch (e2) {}
-
-    return false;
-  }
-
-  // Unified State & Persistent Storage (Zero permission denied errors)
-  var appState = {
-    batches: [],
-    questions: [],
-    attempts: []
-  };
-
-  function seedInitialData() {
-    var bId = "batch-g4-01";
-    var q1 = {
-      id: "q-seed-1",
-      batchId: bId,
-      subject: "General Tamil",
-      ta: TNPSC_QUESTION_BANK["General Tamil"][0].ta,
-      en: TNPSC_QUESTION_BANK["General Tamil"][0].en,
-      opts: TNPSC_QUESTION_BANK["General Tamil"][0].opts,
-      a: 0,
-      whyTa: TNPSC_QUESTION_BANK["General Tamil"][0].whyTa,
-      whyEn: TNPSC_QUESTION_BANK["General Tamil"][0].whyEn,
-      status: "approved"
-    };
-    var q2 = {
-      id: "q-seed-2",
-      batchId: bId,
-      subject: "Indian Polity",
-      ta: TNPSC_QUESTION_BANK["Indian Polity"][0].ta,
-      en: TNPSC_QUESTION_BANK["Indian Polity"][0].en,
-      opts: TNPSC_QUESTION_BANK["Indian Polity"][0].opts,
-      a: 0,
-      whyTa: TNPSC_QUESTION_BANK["Indian Polity"][0].whyTa,
-      whyEn: TNPSC_QUESTION_BANK["Indian Polity"][0].whyEn,
-      status: "approved"
-    };
-    var q3 = {
-      id: "q-seed-3",
-      batchId: bId,
-      subject: "Geography",
-      ta: TNPSC_QUESTION_BANK["Geography"][0].ta,
-      en: TNPSC_QUESTION_BANK["Geography"][0].en,
-      opts: TNPSC_QUESTION_BANK["Geography"][0].opts,
-      a: 0,
-      whyTa: TNPSC_QUESTION_BANK["Geography"][0].whyTa,
-      whyEn: TNPSC_QUESTION_BANK["Geography"][0].whyEn,
-      status: "approved"
-    };
-
-    appState.questions = [q1, q2, q3];
-    appState.batches = [
-      {
-        id: bId,
-        code: "G4_BATCH01",
-        title: "TNPSC Group IV Live Mock Batch #1",
-        category: "Group IV",
-        durationMinutes: 10,
-        releaseDate: todayIsoDate(),
-        releaseTime: "20:00",
-        releaseAt: buildReleaseIso(todayIsoDate(), "20:00"),
-        resultsReleased: false,
-        active: true,
-        centerAd: "🏛️ VETRI TNPSC ACADEMY — Group I, II/IIA, IV & VAO New Batches Open! Call: 98765-43210",
-        subjects: [
-          { name: "General Tamil", target: 2 },
-          { name: "Indian Polity", target: 2 },
-          { name: "Geography", target: 1 }
-        ],
-        questionIds: ["q-seed-1", "q-seed-2", "q-seed-3"]
-      }
-    ];
-    appState.attempts = [];
-  }
-
-  function loadAppState() {
-    try {
-      var raw = localStorage.getItem(STORE_KEY);
-      if (raw) {
-        var parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.batches) && parsed.batches.length) {
-          appState.batches = parsed.batches;
-          appState.questions = parsed.questions || [];
-          appState.attempts = parsed.attempts || [];
-          return;
-        }
-      }
-    } catch (e) {}
-    seedInitialData();
-    saveAppState();
   }
 
   function saveAppState() {
@@ -1582,42 +1046,69 @@
     } catch (e) {}
   }
 
-  // Accessibility Manager
-  var currentLang = "both";
+  function loadAppState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          appState.batches = Array.isArray(parsed.batches) ? parsed.batches : [];
+          appState.questions = Array.isArray(parsed.questions) ? parsed.questions : [];
+          appState.attempts = Array.isArray(parsed.attempts) ? parsed.attempts : [];
+          appState.usedQuestionIds = Array.isArray(parsed.usedQuestionIds) ? parsed.usedQuestionIds : [];
+        }
+      }
+    } catch (e) {}
+
+    if (!appState.batches.length) {
+      var relIso = buildReleaseIso(todayIsoDate(), "20:00");
+      appState.batches.push({
+        id: "batch_default_g4",
+        code: "G4_BATCH01",
+        title: "TNPSC Group IV Live Practice Test",
+        category: "Group IV",
+        durationMinutes: 15,
+        releaseDate: todayIsoDate(),
+        releaseTime: "20:00",
+        releaseAt: relIso,
+        resultsReleased: new Date(relIso).getTime() <= Date.now(),
+        centerAd: "🏛️ VETRI TNPSC ACADEMY — Group I, II/IIA, IV & VAO Live Batches Open! Call: 98765-43210",
+        subjects: [
+          { name: "General Tamil", target: 3 },
+          { name: "Indian Polity", target: 2 },
+          { name: "Aptitude & Mental Ability", target: 2 }
+        ]
+      });
+      saveAppState();
+    }
+  }
 
   function applyAccPrefs(prefs) {
-    var fs = prefs.fontSize || "1";
-    var contrast = prefs.contrast || "normal";
-    var lang = prefs.lang || "both";
-    var anim = prefs.anim || "full";
+    var safe = prefs || {};
+    var fontSize = safe.fontSize || "1";
+    var contrast = safe.contrast || "normal";
+    var lang = safe.lang || "both";
+    var anim = safe.anim || "full";
 
-    document.documentElement.style.setProperty("--font-scale", fs);
+    document.documentElement.style.setProperty("--font-scale", String(fontSize));
     document.body.classList.toggle("contrast-high", contrast === "high");
     document.body.classList.remove("anim-calm", "anim-reduced");
     if (anim === "calm") document.body.classList.add("anim-calm");
     if (anim === "reduced") document.body.classList.add("anim-reduced");
-    currentLang = lang;
 
-    ["fontSizeSel", "examFontSizeSel"].forEach(function(id) { if (g(id)) g(id).value = fs; });
+    ["fontSizeSel", "examFontSizeSel"].forEach(function(id) { if (g(id)) g(id).value = fontSize; });
     ["contrastSel", "examContrastSel"].forEach(function(id) { if (g(id)) g(id).value = contrast; });
     ["langModeSel", "examLangModeSel"].forEach(function(id) { if (g(id)) g(id).value = lang; });
     ["animModeSel", "examAnimModeSel"].forEach(function(id) { if (g(id)) g(id).value = anim; });
 
     try {
       localStorage.setItem(ACC_PREFS_KEY, JSON.stringify({
-        fontSize: fs,
+        fontSize: fontSize,
         contrast: contrast,
         lang: lang,
         anim: anim
       }));
     } catch (e) {}
-
-    if (!g("studentExamScreen").classList.contains("hidden")) {
-      renderCurrentQuestion();
-    }
-    if (!g("detailedReviewContainer").classList.contains("hidden")) {
-      renderDetailedAnswerReview();
-    }
   }
 
   function loadAccPrefs() {
@@ -1631,1809 +1122,654 @@
     applyAccPrefs({ fontSize: "1", contrast: "normal", lang: "both", anim: "full" });
   }
 
-  function renderBilingualText(ta, en, isOption) {
-    var safeTa = escapeHtml(ta || en || "");
-    var safeEn = escapeHtml(en || "");
-    if (currentLang === "ta") {
-      return '<span class="font-bold">' + safeTa + "</span>";
-    }
-    if (currentLang === "en") {
-      return '<span class="font-bold">' + (escapeHtml(en || ta || "")) + "</span>";
-    }
-    return '<span class="font-bold block">' + escapeHtml(ta || "") + "</span>" +
-      (safeEn ? '<span class="block text-xs sm:text-sm opacity-80 mt-0.5">' + safeEn + "</span>" : "");
-  }
-
-  // Screen Switcher
-  function switchScreen(screenId) {
-    ["studentJoinScreen", "studentExamScreen", "studentResultsScreen", "adminLoginScreen", "adminDashboardScreen"].forEach(function(id) {
-      if (id === screenId) g(id).classList.remove("hidden");
-      else g(id).classList.add("hidden");
+  function populateSubjectDropdowns() {
+    var sel = g("subjectPresetSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    DEFAULT_SUBJECTS.forEach(function(sub) {
+      var opt = document.createElement("option");
+      opt.value = sub;
+      opt.textContent = sub;
+      sel.appendChild(opt);
     });
   }
 
-  // Student Exam & Results Runtime State
-  var activeAttemptId = null;
-  var activeQuestionIndex = 0;
-  var examIntervalId = null;
-  var releaseIntervalId = null;
+  function switchScreen(screenId) {
+    ["studentJoinScreen", "studentExamScreen", "studentResultsScreen", "adminLoginScreen", "adminDashboardScreen"].forEach(function(id) {
+      var el = g(id);
+      if (el) el.classList.toggle("hidden", id !== screenId);
+    });
+  }
+
+  function renderActiveBatchPills() {
+    var wrap = g("activeBatchPills");
+    var codeInp = g("stuBatchCodeInput");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    appState.batches.forEach(function(b) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-blue-50 text-blue-900 border border-blue-200 hover:bg-blue-100";
+      btn.textContent = b.code + " • " + b.category;
+      btn.addEventListener("click", function() {
+        if (codeInp) codeInp.value = b.code;
+      });
+      wrap.appendChild(btn);
+    });
+  }
 
   function getAttemptById(id) {
-    return appState.attempts.find(function(a) { return a.id === id; }) || null;
+    if (!id) return null;
+    for (var i = 0; i < appState.attempts.length; i++) {
+      if (appState.attempts[i].id === id) return appState.attempts[i];
+    }
+    return null;
+  }
+
+  function checkExistingSavedSession() {
+    var btn = g("resumeSavedBannerBtn");
+    if (!btn) return;
+    try {
+      var raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+      if (!raw) {
+        btn.classList.add("hidden");
+        return;
+      }
+      var info = JSON.parse(raw);
+      var att = getAttemptById(info && info.attemptId);
+      if (att) {
+        btn.classList.remove("hidden");
+        btn.textContent = att.status === "submitted"
+          ? ("View Result / Timer (" + att.studentName + ")")
+          : ("Resume Test (" + att.studentName + ")");
+      } else {
+        btn.classList.add("hidden");
+      }
+    } catch (e) {
+      btn.classList.add("hidden");
+    }
+  }
+
+  function loadSubModuleScripts() {}
+  function callSubModules() {}
+
+  // Memory-only runtime config & admin session (Never stored in localStorage/sessionStorage or exposed on window)
+  var memoryRuntimeConfig = {
+    supabaseUrl: "",
+    supabaseKey: "",
+    geminiKey: "",
+    ghRepo: "",
+    ghBranch: "main",
+    ghPath: "config.js",
+    ghToken: ""
+  };
+  var activeSupabaseSession = null;
+
+  function getRuntimeConfig() {
+    var stored = {};
+    try {
+      var raw = localStorage.getItem(CONFIG_KEY);
+      if (raw) stored = JSON.parse(raw) || {};
+    } catch (e) {}
+    return {
+      supabaseUrl: memoryRuntimeConfig.supabaseUrl || stored.supabaseUrl || "",
+      supabaseKey: memoryRuntimeConfig.supabaseKey || stored.supabaseKey || "",
+      geminiKey: memoryRuntimeConfig.geminiKey || stored.geminiKey || "",
+      ghRepo: memoryRuntimeConfig.ghRepo || stored.ghRepo || "",
+      ghBranch: memoryRuntimeConfig.ghBranch || stored.ghBranch || "main",
+      ghPath: memoryRuntimeConfig.ghPath || stored.ghPath || "config.js",
+      ghToken: memoryRuntimeConfig.ghToken || ""
+    };
+  }
+
+  function refreshAdminConfigStatusUi() {
+    var badge = g("adminConfigStatusBadge");
+    if (!badge) return;
+    var cfg = getRuntimeConfig();
+    if (cfg.supabaseUrl && cfg.supabaseKey) {
+      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-100 border border-emerald-300 text-emerald-900";
+      badge.textContent = "✓ Supabase configured (" + cfg.supabaseUrl + "). Enter Admin Email & Password.";
+    } else {
+      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900";
+      badge.textContent = "config.js not found. Enter Supabase Project URL & Anon Key above or sign in.";
+    }
+  }
+
+  function parseConfigText(txt) {
+    var out = { supabaseUrl: "", supabaseKey: "", geminiKey: "" };
+    if (!txt) return out;
+    var urlMatch = txt.match(/https?:\/\/[a-zA-Z0-9.-]+\.supabase\.co/);
+    var keyMatch = txt.match(/(?:SUPABASE_ANON_KEY|anonKey|supabaseKey)\s*[:=]\s*["']([^"']+)["']/);
+    var gemMatch = txt.match(/(?:GEMINI_API_KEY|geminiKey)\s*[:=]\s*["']([^"']+)["']/);
+    if (urlMatch) out.supabaseUrl = urlMatch[0];
+    if (keyMatch) out.supabaseKey = keyMatch[1];
+    if (gemMatch) out.geminiKey = gemMatch[1];
+    return out;
+  }
+
+  async function loadExternalConfigJs() {
+    var base = getRuntimeConfig();
+    try {
+      var res = await fetch("./config.js?t=" + Date.now(), { cache: "no-store" });
+      if (res && res.ok) {
+        var text = await res.text();
+        var parsed = parseConfigText(text);
+        if (parsed.supabaseUrl) base.supabaseUrl = parsed.supabaseUrl;
+        if (parsed.supabaseKey) base.supabaseKey = parsed.supabaseKey;
+        if (parsed.geminiKey) base.geminiKey = parsed.geminiKey;
+      }
+    } catch (e) {}
+    return base;
+  }
+
+  async function signInWithSupabaseEmail(supaUrl, supaKey, email, password) {
+    var endpoint = supaUrl.replace(/\/+$/, "") + "/auth/v1/token?grant_type=password";
+    var resp = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supaKey
+      },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await resp.json().catch(function() { return {}; });
+    if (!resp.ok || !data.access_token) {
+      throw new Error(data.error_description || data.msg || "Invalid Supabase Admin Email or Password.");
+    }
+    return data;
+  }
+
+  async function verifyAdminInSupabase(supaUrl, supaKey, sessionData) {
+    var cleanUrl = supaUrl.replace(/\/+$/, "");
+    var email = encodeURIComponent((sessionData.user && sessionData.user.email) || "");
+    var resp = await fetch(cleanUrl + "/rest/v1/admin_users?select=email&email=eq." + email, {
+      method: "GET",
+      headers: {
+        "apikey": supaKey,
+        "Authorization": "Bearer " + sessionData.access_token
+      }
+    });
+    if (resp.status === 403 || resp.status === 401) {
+      throw new Error("Admin authorization check failed (HTTP " + resp.status + "). Ensure public.admin_users is configured.");
+    }
+    if (!resp.ok) {
+      throw new Error("Unable to verify admin privileges (HTTP " + resp.status + ").");
+    }
+    var rows = await resp.json().catch(function() { return []; });
+    if (!Array.isArray(rows) || !rows.length) {
+      throw new Error("This account is not listed in public.admin_users.");
+    }
   }
 
   function getBatchById(id) {
-    return appState.batches.find(function(b) { return b.id === id; }) || null;
+    if (!id) return null;
+    for (var i = 0; i < appState.batches.length; i++) {
+      if (appState.batches[i].id === id) return appState.batches[i];
+    }
+    return null;
   }
 
   function getApprovedQuestionsForBatch(batch) {
     if (!batch) return [];
-    return (batch.questionIds || []).map(function(qid) {
-      return appState.questions.find(function(q) { return q.id === qid && q.status === "approved"; });
-    }).filter(Boolean);
-  }
-
-  function renderActiveBatchPills() {
-    var box = g("activeBatchPills");
-    if (!box) return;
-    var activeBatches = appState.batches.filter(function(b) { return b.active !== false; });
-    if (!activeBatches.length) {
-      box.innerHTML = '<span class="text-xs opacity-70">No active batches yet. Create one in Admin V2 Panel.</span>';
-      return;
-    }
-    box.innerHTML = activeBatches.map(function(b) {
-      var qCount = getApprovedQuestionsForBatch(b).length;
-      return '<button type="button" class="batch-pill-btn btn-ghost px-3 py-1.5 text-xs flex items-center gap-1.5" data-code="' + b.code + '">' +
-        '<span class="font-extrabold text-blue-700">' + b.code + "</span>" +
-        '<span class="opacity-75">(' + b.category + " • " + qCount + " Qs)</span>" +
-        "</button>";
-    }).join("");
-
-    var btns = box.querySelectorAll(".batch-pill-btn");
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].addEventListener("click", function() {
-        g("stuBatchCodeInput").value = this.getAttribute("data-code");
-      });
-    }
-  }
-
-  function checkExistingSavedSession() {
-    try {
-      var raw = localStorage.getItem(ACTIVE_SESSION_KEY);
-      if (!raw) return;
-      var info = JSON.parse(raw);
-      var att = getAttemptById(info.attemptId);
-      if (att) {
-        g("resumeSavedBannerBtn").textContent = "Resume: " + att.studentName + " (" + att.batchCode + ")";
-        g("resumeSavedBannerBtn").classList.remove("hidden");
-      }
-    } catch (e) {}
-  }
-
-  function handleStudentStartOrResume() {
-    var errBox = g("joinErrorBox");
-    errBox.classList.add("hidden");
-    errBox.textContent = "";
-
-    var name = g("stuNameInput").value.trim();
-    var rawPhone = g("stuPhoneInput").value.trim();
-    var phone10 = normalizePhone10(rawPhone);
-    var email = g("stuEmailInput").value.trim();
-    var code = g("stuBatchCodeInput").value.trim().toUpperCase();
-
-    if (!name) {
-      errBox.textContent = "தயவுசெய்து உங்கள் முழுப் பெயரை உள்ளிடவும்.";
-      errBox.classList.remove("hidden");
-      return;
-    }
-    if (phone10.length !== 10) {
-      errBox.textContent = "சரியான 10 இலக்க Mobile Number-ஐ உள்ளிடவும் (எ.கா: 9876543210).";
-      errBox.classList.remove("hidden");
-      return;
-    }
-    if (!code) {
-      errBox.textContent = "Test Batch Code உள்ளிடவும்.";
-      errBox.classList.remove("hidden");
-      return;
-    }
-
-    var batch = appState.batches.find(function(b) { return b.code.toUpperCase() === code; });
-    if (!batch) {
-      errBox.textContent = "Test Batch Code '" + code + "' கிடைக்கவில்லை. மேலே உள்ள Active Batch Code-ஐத் தேர்ந்தெடுக்கவும்.";
-      errBox.classList.remove("hidden");
-      return;
-    }
-
-    var batchQs = getApprovedQuestionsForBatch(batch);
-    if (!batchQs.length) {
-      errBox.textContent = "இந்த Batch-ல் இன்னும் Approved கேள்விகள் இல்லை. Admin Panel-ல் கேள்விகளை Approve செய்யவும்.";
-      errBox.classList.remove("hidden");
-      return;
-    }
-
-    // Check duplicate mobile number in the same batch
-    var existingAttempt = appState.attempts.find(function(a) {
-      return a.batchId === batch.id && a.phone === phone10;
+    return appState.questions.filter(function(q) {
+      return q.status === "approved" && (q.batchId === batch.id || q.batchCode === batch.code);
     });
-
-    if (existingAttempt) {
-      if (existingAttempt.studentName.toLowerCase() !== name.toLowerCase()) {
-        errBox.textContent = "இந்த Mobile Number (" + phone10 + ") ஏற்கனவே '" + batch.code + "' Test Batch-ல் வேறு மாணவரால் பயன்படுத்தப்பட்டுள்ளது. ஒரே Test-ல் Repeated Mobile Number அனுமதிக்கப்படாது.";
-        errBox.classList.remove("hidden");
-        return;
-      }
-      // Same student resuming session or viewing submitted results
-      activeAttemptId = existingAttempt.id;
-      try {
-        localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ attemptId: existingAttempt.id }));
-      } catch (e) {}
-
-      if (existingAttempt.status === "submitted") {
-        openWaitingOrResultsScreen(existingAttempt);
-        return;
-      }
-      launchExamForAttempt(existingAttempt);
-      return;
-    }
-
-    // Create fresh attempt
-    var newAttempt = {
-      id: "att-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-      batchId: batch.id,
-      batchCode: batch.code,
-      studentName: name,
-      phone: phone10,
-      email: email,
-      status: "in_progress",
-      answers: {},
-      marked: {},
-      currentIndex: 0,
-      remainingSeconds: (batch.durationMinutes || batchQs.length) * 60,
-      startedAt: new Date().toISOString(),
-      submittedAt: null,
-      score: 0,
-      totalQuestions: batchQs.length,
-      wrongCount: 0,
-      skippedCount: 0
-    };
-
-    appState.attempts.push(newAttempt);
-    saveAppState();
-    activeAttemptId = newAttempt.id;
-    try {
-      localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ attemptId: newAttempt.id }));
-    } catch (e) {}
-
-    launchExamForAttempt(newAttempt);
-  }
-
-  function launchExamForAttempt(attempt) {
-    var batch = getBatchById(attempt.batchId);
-    if (!batch) return;
-    activeAttemptId = attempt.id;
-    activeQuestionIndex = attempt.currentIndex || 0;
-
-    g("examCandidateBanner").textContent = attempt.studentName + " (" + attempt.phone + ") • " + batch.code + " [" + batch.category + "]";
-    switchScreen("studentExamScreen");
-    renderCurrentQuestion();
-    renderQuestionPalette();
-    startExamCountdown(attempt);
-  }
-
-  function startExamCountdown(attempt) {
-    clearInterval(examIntervalId);
-    function paintTimer() {
-      var el = g("examTimerDisplay");
-      if (!el) return;
-      el.textContent = "⏱ " + formatMMSS(attempt.remainingSeconds);
-      if (attempt.remainingSeconds <= 60) {
-        el.classList.remove("bg-blue-700");
-        el.classList.add("bg-red-700");
-      } else {
-        el.classList.add("bg-blue-700");
-        el.classList.remove("bg-red-700");
-      }
-    }
-    paintTimer();
-    examIntervalId = setInterval(function() {
-      var att = getAttemptById(activeAttemptId);
-      if (!att || att.status === "submitted") {
-        clearInterval(examIntervalId);
-        return;
-      }
-      att.remainingSeconds = Math.max(0, (att.remainingSeconds || 0) - 1);
-      saveAppState();
-      paintTimer();
-      if (att.remainingSeconds <= 0) {
-        clearInterval(examIntervalId);
-        finalizeExamSubmission(true);
-      }
-    }, 1000);
-  }
-
-  function renderCurrentQuestion() {
-    var att = getAttemptById(activeAttemptId);
-    if (!att) return;
-    var batch = getBatchById(att.batchId);
-    var qs = getApprovedQuestionsForBatch(batch);
-    if (!qs.length) return;
-
-    if (activeQuestionIndex < 0) activeQuestionIndex = 0;
-    if (activeQuestionIndex >= qs.length) activeQuestionIndex = qs.length - 1;
-    att.currentIndex = activeQuestionIndex;
-    saveAppState();
-
-    var q = qs[activeQuestionIndex];
-    g("qCounterBadge").textContent = "Question " + (activeQuestionIndex + 1) + " of " + qs.length;
-    g("qSubjectBadge").textContent = q.subject || "General";
-
-    var selectedIdx = att.answers[q.id];
-    var html = '<div class="mb-4 text-base sm:text-lg leading-relaxed">' +
-      renderBilingualText(q.ta, q.en, false) +
-      "</div><div class='space-y-2.5'>";
-
-    (q.opts || []).forEach(function(opt, idx) {
-      var isChecked = Number(selectedIdx) === idx;
-      var borderCls = isChecked ? "border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/30" : "border-slate-300";
-      html += '<label class="block p-3.5 rounded-xl border cursor-pointer transition ' + borderCls + '">' +
-        '<div class="flex items-start gap-3">' +
-        '<input type="radio" name="active_q_opt" value="' + idx + '"' + (isChecked ? " checked" : "") + ' class="mt-1 w-4 h-4 accent-blue-700">' +
-        '<div class="flex-1">' + renderBilingualText(opt.ta, opt.en, true) + "</div>" +
-        "</div></label>";
-    });
-
-    html += "</div>";
-    g("questionRenderArea").innerHTML = html;
-
-    var radios = g("questionRenderArea").querySelectorAll('input[type="radio"]');
-    for (var i = 0; i < radios.length; i++) {
-      radios[i].addEventListener("change", function() {
-        var val = Number(this.value);
-        att.answers[q.id] = val;
-        saveAppState();
-        g("examAutoSaveStatus").textContent = "✓ Saved (" + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + ")";
-        renderCurrentQuestion();
-        renderQuestionPalette();
-      });
-    }
-
-    g("prevQBtn").disabled = activeQuestionIndex === 0;
-    g("nextQBtn").textContent = activeQuestionIndex === qs.length - 1 ? "Save Response ✓" : "Save & Next →";
-  }
-
-  function renderQuestionPalette() {
-    var att = getAttemptById(activeAttemptId);
-    if (!att) return;
-    var batch = getBatchById(att.batchId);
-    var qs = getApprovedQuestionsForBatch(batch);
-
-    var ansCnt = 0, markCnt = 0, unansCnt = 0;
-    var html = "";
-    qs.forEach(function(q, idx) {
-      var isAns = typeof att.answers[q.id] === "number";
-      var isMark = Boolean(att.marked[q.id]);
-      if (isAns) ansCnt++;
-      else unansCnt++;
-      if (isMark) markCnt++;
-
-      var cls = "palette-btn ";
-      if (isMark) cls += "pal-mark ";
-      else if (isAns) cls += "pal-ans ";
-      else cls += "pal-unans ";
-      if (idx === activeQuestionIndex) cls += "pal-curr";
-
-      html += '<button type="button" class="' + cls + '" data-qidx="' + idx + '">' + (idx + 1) + "</button>";
-    });
-
-    g("cntAns").textContent = String(ansCnt);
-    g("cntMark").textContent = String(markCnt);
-    g("cntUnans").textContent = String(unansCnt);
-    g("questionPaletteGrid").innerHTML = html;
-
-    var btns = g("questionPaletteGrid").querySelectorAll("button");
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].addEventListener("click", function() {
-        activeQuestionIndex = Number(this.getAttribute("data-qidx"));
-        renderCurrentQuestion();
-        renderQuestionPalette();
-      });
-    }
-  }
-
-  function finalizeExamSubmission(isAutoTimeUp) {
-    var att = getAttemptById(activeAttemptId);
-    if (!att) return;
-    var batch = getBatchById(att.batchId);
-    var qs = getApprovedQuestionsForBatch(batch);
-
-    if (!isAutoTimeUp) {
-      var unansweredCount = qs.filter(function(q) { return typeof att.answers[q.id] !== "number"; }).length;
-      if (unansweredCount > 0 && !att.__confirmOnce) {
-        att.__confirmOnce = true;
-        var msgEl = g("examValidationMsg");
-        msgEl.textContent = "கவனிக்கவும்: " + unansweredCount + " கேள்விகளுக்கு இன்னும் பதிலளிக்கவில்லை. இப்போதே Submit செய்ய மீண்டும் 'Submit Test ✓' அழுத்தவும்.";
-        msgEl.classList.remove("hidden");
-        return;
-      }
-    }
-
-    clearInterval(examIntervalId);
-    var score = 0, wrong = 0, skipped = 0;
-    qs.forEach(function(q) {
-      var picked = att.answers[q.id];
-      if (typeof picked !== "number") skipped++;
-      else if (picked === Number(q.a)) score++;
-      else wrong++;
-    });
-
-    att.status = "submitted";
-    att.submittedAt = new Date().toISOString();
-    att.score = score;
-    att.totalQuestions = qs.length;
-    att.wrongCount = wrong;
-    att.skippedCount = skipped;
-    delete att.__confirmOnce;
-    saveAppState();
-
-    openWaitingOrResultsScreen(att);
-  }
-
-  // Waiting Screen with 8:00 PM Countdown & Auto-Release
-  function isBatchReleasedNow(batch) {
-    if (!batch) return false;
-    if (batch.resultsReleased) return true;
-    var relTime = new Date(batch.releaseAt).getTime();
-    if (!isNaN(relTime) && Date.now() >= relTime) {
-      batch.resultsReleased = true;
-      saveAppState();
-      return true;
-    }
-    return false;
-  }
-
-  function openWaitingOrResultsScreen(attempt) {
-    clearInterval(releaseIntervalId);
-    switchScreen("studentResultsScreen");
-    var batch = getBatchById(attempt.batchId);
-    if (!batch) return;
-
-    if (isBatchReleasedNow(batch)) {
-      renderReleasedResults(attempt, batch);
-      return;
-    }
-
-    g("waitingReleaseCard").classList.remove("hidden");
-    g("releasedResultsCard").classList.add("hidden");
-    g("waitingCandidateInfo").textContent = "Student: " + attempt.studentName + " (" + attempt.phone + ") • Batch: " + batch.code;
-    g("releaseTargetText").textContent = "Scheduled Release: " + formatDisplayDateTime(batch.releaseAt);
-
-    function tickReleaseClock() {
-      var latestBatch = getBatchById(attempt.batchId);
-      if (!latestBatch) return;
-      if (isBatchReleasedNow(latestBatch)) {
-        clearInterval(releaseIntervalId);
-        renderReleasedResults(attempt, latestBatch);
-        return;
-      }
-      var diffSec = Math.max(0, Math.floor((new Date(latestBatch.releaseAt).getTime() - Date.now()) / 1000));
-      g("releaseCountdownTimer").textContent = formatHHMMSS(diffSec);
-      if (diffSec <= 0) {
-        latestBatch.resultsReleased = true;
-        saveAppState();
-        clearInterval(releaseIntervalId);
-        renderReleasedResults(attempt, latestBatch);
-      }
-    }
-
-    tickReleaseClock();
-    releaseIntervalId = setInterval(tickReleaseClock, 1000);
-  }
-
-  function computeBatchRank(attempt, batch) {
-    var subs = appState.attempts.filter(function(a) {
-      return a.batchId === batch.id && a.status === "submitted";
-    });
-    subs.sort(function(a, b) {
-      if (b.score !== a.score) return b.score - a.score;
-      return (b.remainingSeconds || 0) - (a.remainingSeconds || 0);
-    });
-    var idx = subs.findIndex(function(a) { return a.id === attempt.id; });
-    return { rank: idx >= 0 ? idx + 1 : 1, total: Math.max(1, subs.length) };
-  }
-
-  function buildWhatsappResultMessage(attempt, batch, rankObj) {
-    var baseUrl = window.location.href.split("?")[0];
-    var friendLink = baseUrl + "?batch=" + encodeURIComponent(batch.code) + "&ref=" + encodeURIComponent(attempt.studentName);
-    var accPct = attempt.totalQuestions ? Math.round((attempt.score / attempt.totalQuestions) * 100) : 0;
-    return [
-      "🎉 *TNPSC தேர்வு முடிவுகள் வெளியாயின!*",
-      "வணக்கம் *" + attempt.studentName + "*! (" + batch.code + " - " + batch.category + ")",
-      "📊 *Score:* " + attempt.score + " / " + attempt.totalQuestions + " (" + accPct + "%)",
-      "🏅 *Rank:* #" + rankObj.rank + " of " + rankObj.total,
-      "🌟 *வாழ்த்துக்கள்!* தொடர்ந்து பயிற்சி செய்து அரசுப் பணியில் வெற்றி பெறுங்கள்!",
-      "",
-      batch.centerAd || "🏛️ VETRI TNPSC ACADEMY — Admissions Open!",
-      "🤝 *நண்பருக்கும் பகிரவும் (Take Test Link):* " + friendLink
-    ].join("\n");
-  }
-
-  function renderReleasedResults(attempt, batch) {
-    g("waitingReleaseCard").classList.add("hidden");
-    g("releasedResultsCard").classList.remove("hidden");
-
-    var rankObj = computeBatchRank(attempt, batch);
-    var accPct = attempt.totalQuestions ? Math.round((attempt.score / attempt.totalQuestions) * 100) : 0;
-
-    var banner = g("resultGradeBanner");
-    if (accPct >= 80) {
-      banner.className = "p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-amber-100 text-amber-900 border border-amber-300";
-      banner.textContent = "🏆 OUTSTANDING CHAMPION! (" + attempt.score + "/" + attempt.totalQuestions + ")";
-    } else if (accPct >= 50) {
-      banner.className = "p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-emerald-100 text-emerald-900 border border-emerald-300";
-      banner.textContent = "👏 GREAT PERFORMANCE! (" + attempt.score + "/" + attempt.totalQuestions + ")";
-    } else {
-      banner.className = "p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-blue-100 text-blue-900 border border-blue-300";
-      banner.textContent = "📚 KEEP PRACTICING & IMPROVING! (" + attempt.score + "/" + attempt.totalQuestions + ")";
-    }
-
-    g("resScoreVal").textContent = attempt.score + " / " + attempt.totalQuestions;
-    g("resAccuracyVal").textContent = accPct + "%";
-    g("resRankVal").textContent = "#" + rankObj.rank + " / " + rankObj.total;
-    g("resWrongSkipVal").textContent = attempt.wrongCount + " / " + attempt.skippedCount;
-
-    // Subject-wise breakdown
-    var qs = getApprovedQuestionsForBatch(batch);
-    var subjStats = {};
-    qs.forEach(function(q) {
-      var s = q.subject || "General";
-      if (!subjStats[s]) subjStats[s] = { correct: 0, total: 0 };
-      subjStats[s].total++;
-      if (Number(attempt.answers[q.id]) === Number(q.a)) subjStats[s].correct++;
-    });
-
-    g("subjectBreakdownList").innerHTML = Object.keys(subjStats).map(function(s) {
-      var st = subjStats[s];
-      var pct = st.total ? Math.round((st.correct / st.total) * 100) : 0;
-      return '<div class="flex items-center justify-between p-2 rounded-lg bg-white/70 border border-slate-200">' +
-        '<span class="font-bold">' + s + "</span>" +
-        '<span class="font-extrabold text-blue-700">' + st.correct + " / " + st.total + " (" + pct + "%)</span>" +
-        "</div>";
-    }).join("");
-
-    // WhatsApp Message Preview
-    var waText = buildWhatsappResultMessage(attempt, batch, rankObj);
-    g("whatsappMessagePreview").textContent = waText;
-  }
-
-  function renderDetailedAnswerReview() {
-    var att = getAttemptById(activeAttemptId);
-    if (!att) return;
-    var batch = getBatchById(att.batchId);
-    var qs = getApprovedQuestionsForBatch(batch);
-
-    g("detailedReviewContainer").innerHTML = qs.map(function(q, idx) {
-      var picked = att.answers[q.id];
-      var isCorrect = Number(picked) === Number(q.a);
-      var pickedOpt = typeof picked === "number" ? q.opts[picked] : null;
-      var corrOpt = q.opts[q.a];
-      var pickedLabel = pickedOpt ? escapeHtml(pickedOpt.ta + (pickedOpt.en && pickedOpt.en !== pickedOpt.ta ? " (" + pickedOpt.en + ")" : "")) : "Not Answered";
-      var corrLabel = corrOpt ? escapeHtml(corrOpt.ta + (corrOpt.en && corrOpt.en !== corrOpt.ta ? " (" + corrOpt.en + ")" : "")) : "-";
-
-      return '<div class="soft-card p-4 border-l-4 ' + (isCorrect ? "border-emerald-600" : "border-rose-600") + '">' +
-        '<div class="flex items-center justify-between text-xs font-bold mb-1">' +
-        '<span>Q' + (idx + 1) + " • " + escapeHtml(q.subject) + "</span>" +
-        '<span class="' + (isCorrect ? "text-emerald-700" : "text-rose-700") + '">' + (isCorrect ? "✔ Correct" : "✘ Incorrect / Skipped") + "</span>" +
-        "</div>" +
-        '<div class="mb-2">' + renderBilingualText(q.ta, q.en, false) + "</div>" +
-        '<div class="text-xs space-y-1">' +
-        '<div><b>Your Answer:</b> ' + pickedLabel + "</div>" +
-        '<div class="text-emerald-800"><b>Correct Answer:</b> ' + corrLabel + "</div>" +
-        '<div class="opacity-85 pt-1"><b>Explanation:</b> ' + escapeHtml(q.whyTa || "") + (q.whyEn ? " | " + escapeHtml(q.whyEn) : "") + "</div>" +
-        "</div></div>";
-    }).join("");
-  }
-
-  // =========================================================================
-  // ADMIN V2 CONTROLLER (BATCH-FIRST, DYNAMIC SUBJECTS, AI GEN & APPROVAL)
-  // =========================================================================
-  var draftBatchSubjects = [
-    { name: "General Tamil", target: 3 },
-    { name: "Indian Polity", target: 2 }
-  ];
-
-  function populateSubjectDropdowns() {
-    var html = DEFAULT_SUBJECTS.map(function(s) {
-      return '<option value="' + s + '">' + s + "</option>";
-    }).join("");
-    if (g("subjectPresetSelect")) g("subjectPresetSelect").innerHTML = html;
-  }
-
-  function renderDraftSubjectRows() {
-    var box = g("subjectAllocationRows");
-    if (!box) return;
-    var total = draftBatchSubjects.reduce(function(sum, item) { return sum + (Number(item.target) || 0); }, 0);
-    g("subjectPlanTotalBadge").textContent = "Total Target: " + total + " Questions";
-
-    if (!draftBatchSubjects.length) {
-      box.innerHTML = '<div class="text-xs opacity-70">No subjects added yet. Use the selector above to add subjects.</div>';
-      return;
-    }
-
-    box.innerHTML = draftBatchSubjects.map(function(item, idx) {
-      return '<div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-300">' +
-        '<span class="font-bold text-xs sm:text-sm">' + item.name + "</span>" +
-        '<div class="flex items-center gap-2">' +
-        '<label class="text-xs opacity-75">Target Qs:</label>' +
-        '<input type="number" min="1" max="100" value="' + item.target + '" data-sidx="' + idx + '" class="draft-subj-cnt w-20 p-1.5 text-xs font-bold">' +
-        '<button type="button" data-sidx="' + idx + '" class="draft-subj-rm btn-danger px-2.5 py-1.5 text-xs">Remove</button>' +
-        "</div></div>";
-    }).join("");
-
-    var cntInputs = box.querySelectorAll(".draft-subj-cnt");
-    for (var i = 0; i < cntInputs.length; i++) {
-      cntInputs[i].addEventListener("change", function() {
-        var idx = Number(this.getAttribute("data-sidx"));
-        draftBatchSubjects[idx].target = Math.max(1, Number(this.value) || 1);
-        renderDraftSubjectRows();
-      });
-    }
-
-    var rmBtns = box.querySelectorAll(".draft-subj-rm");
-    for (var r = 0; r < rmBtns.length; r++) {
-      rmBtns[r].addEventListener("click", function() {
-        var idx = Number(this.getAttribute("data-sidx"));
-        draftBatchSubjects.splice(idx, 1);
-        renderDraftSubjectRows();
-      });
-    }
-  }
-
-  function handleAddSubjectToBatchDraft() {
-    var customName = g("customSubjectNameInput").value.trim();
-    var selectedName = g("subjectPresetSelect").value;
-    var finalName = customName || selectedName;
-    var count = Math.max(1, Number(g("subjectTargetCountInput").value) || 2);
-
-    if (!finalName) return;
-    var existing = draftBatchSubjects.find(function(s) {
-      return s.name.toLowerCase() === finalName.toLowerCase();
-    });
-    if (existing) {
-      existing.target += count;
-    } else {
-      draftBatchSubjects.push({ name: finalName, target: count });
-    }
-    g("customSubjectNameInput").value = "";
-    renderDraftSubjectRows();
-    showToast("Added subject: " + finalName);
-  }
-
-  function handleSaveNewTestBatch() {
-    var fb = g("createBatchFeedback");
-    fb.classList.add("hidden");
-
-    var title = g("batchTitleInput").value.trim() || "TNPSC Mock Batch";
-    var code = g("batchCodeInput").value.trim().toUpperCase();
-    var cat = g("batchCategoryInput").value;
-    var dur = Math.max(1, Number(g("batchDurationInput").value) || 15);
-    var relDate = g("batchReleaseDateInput").value || todayIsoDate();
-    var relTime = g("batchReleaseTimeInput").value || "20:00";
-    var centerAd = g("batchCenterAdInput").value.trim();
-
-    if (!code) {
-      fb.className = "mb-3 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold";
-      fb.textContent = "Batch Code உள்ளிடவும் (அல்லது Auto பொத்தானை அழுத்தவும்).";
-      fb.classList.remove("hidden");
-      return;
-    }
-    if (appState.batches.some(function(b) { return b.code.toUpperCase() === code; })) {
-      fb.className = "mb-3 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold";
-      fb.textContent = "Batch Code '" + code + "' ஏற்கனவே உள்ளது. வேறு Code கொடுக்கவும்.";
-      fb.classList.remove("hidden");
-      return;
-    }
-    if (!draftBatchSubjects.length) {
-      fb.className = "mb-3 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold";
-      fb.textContent = "குறைந்தது 1 Subject-ஐ Batch-ல் சேர்க்கவும்.";
-      fb.classList.remove("hidden");
-      return;
-    }
-
-    var newBatch = {
-      id: "batch-" + Date.now(),
-      code: code,
-      title: title,
-      category: cat,
-      durationMinutes: dur,
-      releaseDate: relDate,
-      releaseTime: relTime,
-      releaseAt: buildReleaseIso(relDate, relTime),
-      resultsReleased: false,
-      active: true,
-      centerAd: centerAd,
-      subjects: draftBatchSubjects.map(function(s) { return { name: s.name, target: s.target }; }),
-      questionIds: []
-    };
-
-    appState.batches.unshift(newBatch);
-    saveAppState();
-    renderActiveBatchPills();
-    renderAdminBatchesList();
-
-    fb.className = "mb-3 p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold";
-    fb.textContent = "✓ Test Batch '" + code + "' வெற்றிகரமாக உருவாக்கப்பட்டது! இப்போது AI Question Generator திறக்கப்படுகிறது...";
-    fb.classList.remove("hidden");
-    showToast("Batch " + code + " created!");
-
-    setTimeout(function() {
-      switchAdminTab(2);
-      populateAiTabSelectors(newBatch.id);
-    }, 550);
-  }
-
-  function renderAdminBatchesList() {
-    var box = g("adminBatchesList");
-    if (!box) return;
-    if (!appState.batches.length) {
-      box.innerHTML = '<div class="text-xs opacity-70">No batches created yet.</div>';
-      return;
-    }
-
-    box.innerHTML = appState.batches.map(function(b) {
-      var attachedQs = getApprovedQuestionsForBatch(b);
-      var totalTarget = (b.subjects || []).reduce(function(s, x) { return s + (Number(x.target) || 0); }, 0) || attachedQs.length;
-      var subjPills = (b.subjects || []).map(function(s) {
-        var cnt = attachedQs.filter(function(q) { return q.subject === s.name; }).length;
-        return '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">' + s.name + ": " + cnt + "/" + s.target + "</span>";
-      }).join(" ");
-
-      return '<div class="p-3.5 rounded-xl bg-white/80 border border-slate-300 space-y-2">' +
-        '<div class="flex flex-wrap items-center justify-between gap-2">' +
-        '<div><span class="font-extrabold text-sm">' + b.code + '</span> <span class="text-xs opacity-75">• ' + b.title + " (" + b.category + ")</span></div>" +
-        '<div class="flex items-center gap-2">' +
-        '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold ' + (b.resultsReleased ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' +
-        (b.resultsReleased ? "Results Released" : "Release: " + formatDisplayDateTime(b.releaseAt)) +
-        "</span>" +
-        '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-800">' + attachedQs.length + "/" + totalTarget + " Qs</span>" +
-        "</div></div>" +
-        '<div class="flex flex-wrap gap-1.5">' + subjPills + "</div>" +
-        '<div class="flex flex-wrap gap-2 pt-1">' +
-        '<button type="button" data-bid="' + b.id + '" class="adm-go-ai-btn btn-primary px-3 py-1.5 text-xs">+ Generate AI Questions</button>' +
-        '<button type="button" data-bid="' + b.id + '" class="adm-rel-now-btn btn-sec px-3 py-1.5 text-xs">Release Results Now</button>' +
-        '<button type="button" data-bid="' + b.id + '" class="adm-del-batch-btn btn-danger px-3 py-1.5 text-xs">Delete</button>' +
-        "</div></div>";
-    }).join("");
-
-    var aiBtns = box.querySelectorAll(".adm-go-ai-btn");
-    for (var i = 0; i < aiBtns.length; i++) {
-      aiBtns[i].addEventListener("click", function() {
-        var bid = this.getAttribute("data-bid");
-        switchAdminTab(2);
-        populateAiTabSelectors(bid);
-      });
-    }
-
-    var relBtns = box.querySelectorAll(".adm-rel-now-btn");
-    for (var j = 0; j < relBtns.length; j++) {
-      relBtns[j].addEventListener("click", function() {
-        var bid = this.getAttribute("data-bid");
-        var b = getBatchById(bid);
-        if (b) {
-          b.resultsReleased = true;
-          b.releaseAt = new Date().toISOString();
-          saveAppState();
-          renderAdminBatchesList();
-          showToast("Results released for " + b.code + "!");
-        }
-      });
-    }
-
-    var delBtns = box.querySelectorAll(".adm-del-batch-btn");
-    for (var k = 0; k < delBtns.length; k++) {
-      delBtns[k].addEventListener("click", function() {
-        var bid = this.getAttribute("data-bid");
-        if (appState.batches.length <= 1) {
-          showToast("Keep at least one batch active.");
-          return;
-        }
-        appState.batches = appState.batches.filter(function(x) { return x.id !== bid; });
-        saveAppState();
-        renderAdminBatchesList();
-        renderActiveBatchPills();
-        showToast("Batch removed.");
-      });
-    }
-  }
-
-  // Tab 2: AI Subject-Wise Generator & Approval Queue
-  function populateAiTabSelectors(preferredBatchId) {
-    var bSel = g("aiBatchSelect");
-    if (!bSel) return;
-    var prev = preferredBatchId || bSel.value;
-    bSel.innerHTML = appState.batches.map(function(b) {
-      var cnt = getApprovedQuestionsForBatch(b).length;
-      return '<option value="' + b.id + '">' + b.code + " — " + b.title + " (" + cnt + " Approved Qs)</option>";
-    }).join("");
-    if (prev && appState.batches.some(function(b) { return b.id === prev; })) {
-      bSel.value = prev;
-    }
-    if (g("aiGenerateStatusMsg")) {
-      g("aiGenerateStatusMsg").textContent = "";
-    }
-    syncAiSubjectDropdownForSelectedBatch();
-    updateAiBatchBannerAndQueue();
-  }
-
-  function syncAiSubjectDropdownForSelectedBatch() {
-    var batch = getBatchById(g("aiBatchSelect").value);
-    var sSel = g("aiSubjectDropdown");
-    if (!sSel) return;
-
-    var seen = {};
-    var opts = [];
-    if (batch && Array.isArray(batch.subjects)) {
-      batch.subjects.forEach(function(s) {
-        if (!seen[s.name]) {
-          seen[s.name] = true;
-          opts.push(s.name);
-        }
-      });
-    }
-    DEFAULT_SUBJECTS.forEach(function(s) {
-      if (!seen[s]) {
-        seen[s] = true;
-        opts.push(s);
-      }
-    });
-
-    var currentSubj = sSel.value;
-    sSel.innerHTML = opts.map(function(name) {
-      var planItem = batch && Array.isArray(batch.subjects)
-        ? batch.subjects.find(function(x) { return x.name === name; })
-        : null;
-      var suffix = planItem ? " (" + planItem.target + " Qs)" : "";
-      return '<option value="' + name + '">' + name + suffix + "</option>";
-    }).join("");
-    if (currentSubj && seen[currentSubj]) {
-      sSel.value = currentSubj;
-    } else if (batch && Array.isArray(batch.subjects) && batch.subjects.length) {
-      sSel.value = batch.subjects[0].name;
-    }
-  }
-
-  function updateAiBatchBannerAndQueue() {
-    var batch = getBatchById(g("aiBatchSelect").value);
-    var subj = g("aiSubjectDropdown").value;
-    if (!batch) return;
-
-    var attachedQs = getApprovedQuestionsForBatch(batch);
-    var plan = (batch.subjects || []).find(function(s) { return s.name === subj; });
-    var target = plan ? Number(plan.target) : 3;
-    var approvedForSubj = attachedQs.filter(function(q) { return q.subject === subj; }).length;
-    var need = Math.max(0, target - approvedForSubj);
-
-    // Sync Question Count input to remaining/target needed for the selected subject
-    if (g("aiNumQuestionsInput")) {
-      g("aiNumQuestionsInput").value = String(need > 0 ? need : target);
-    }
-
-    g("aiBatchProgressBanner").textContent =
-      "Target Batch: " + batch.code + " (" + batch.category + ") • Active Subject [" + subj + "]: " +
-      approvedForSubj + " / " + target + " Approved (Remaining Needed: " + need + ") • Total Batch Qs: " + attachedQs.length;
-
-    // Render visual breakdown of ALL subjects & question counts selected for this batch
-    var cardsBox = g("aiBatchSubjectCards");
-    var totalBadge = g("aiBatchTotalPlanBadge");
-    if (cardsBox) {
-      var subjectsList = Array.isArray(batch.subjects) ? batch.subjects : [];
-      var totalTarget = subjectsList.reduce(function(sum, s) { return sum + (Number(s.target) || 0); }, 0);
-      if (totalBadge) {
-        totalBadge.textContent = "Total Plan: " + attachedQs.length + " / " + totalTarget + " Questions";
-      }
-
-      if (!subjectsList.length) {
-        cardsBox.innerHTML = '<span class="text-xs opacity-70">No subjects configured in this batch yet.</span>';
-      } else {
-        cardsBox.innerHTML = subjectsList.map(function(s) {
-          var appCnt = attachedQs.filter(function(q) { return q.subject === s.name; }).length;
-          var draftCnt = appState.questions.filter(function(q) {
-            return q.batchId === batch.id && q.subject === s.name && q.status === "draft";
-          }).length;
-          var isSelected = s.name === subj;
-          var isComplete = appCnt >= Number(s.target);
-          var badgeCls = isComplete
-            ? "bg-emerald-100 border-emerald-400 text-emerald-900"
-            : (isSelected ? "bg-blue-100 border-blue-500 text-blue-950 ring-2 ring-blue-400/40" : "bg-slate-100 border-slate-300 text-slate-800");
-          return '<button type="button" data-pick-subj="' + s.name.replace(/"/g, "&quot;") + '" class="ai-plan-pill px-3 py-2 rounded-xl border text-left text-xs transition ' + badgeCls + '">' +
-            '<div class="font-extrabold">' + s.name + ': ' + s.target + ' Qs</div>' +
-            '<div class="opacity-80 mt-0.5">Approved: ' + appCnt + '/' + s.target + (draftCnt ? ' • Drafts: ' + draftCnt : '') + '</div>' +
-            '</button>';
-        }).join("");
-
-        var pillBtns = cardsBox.querySelectorAll(".ai-plan-pill");
-        for (var i = 0; i < pillBtns.length; i++) {
-          pillBtns[i].addEventListener("click", function() {
-            var pickedSubj = this.getAttribute("data-pick-subj");
-            g("aiSubjectDropdown").value = pickedSubj;
-            updateAiBatchBannerAndQueue();
-          });
-        }
-      }
-    }
-
-    renderApprovalQueueList();
-  }
-
-  function buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus) {
-    // Match preset bank case-insensitively or fall back to subject-tagged dynamic questions
-    var matchedKey = Object.keys(TNPSC_QUESTION_BANK).find(function(k) {
-      return k.toLowerCase() === String(subject || "").trim().toLowerCase();
-    });
-    var bank = matchedKey ? TNPSC_QUESTION_BANK[matchedKey] : null;
-
-    // Track already-existing questions across ALL batches & current batch so brand-new questions are prioritized
-    var batchExisting = {};
-    var globalExisting = {};
-    appState.questions.forEach(function(q) {
-      var normTa = String(q.ta || "").replace(/^\[[^\]]+\]\s*/, "").trim();
-      globalExisting[normTa] = true;
-      if (q.batchId === batch.id) {
-        batchExisting[String(q.ta || "").trim()] = true;
-        batchExisting[normTa] = true;
-      }
-    });
-
-    function shuffleArr(arr) {
-      var copy = arr.slice();
-      for (var i = copy.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = copy[i];
-        copy[i] = copy[j];
-        copy[j] = tmp;
-      }
-      return copy;
-    }
-
-    var results = [];
-    if (bank && bank.length) {
-      var brandNewPool = [];
-      var unusedInBatchPool = [];
-      var fallbackPool = [];
-
-      bank.forEach(function(item) {
-        var normTa = String(item.ta || "").trim();
-        if (!globalExisting[normTa]) {
-          brandNewPool.push(item);
-        } else if (!batchExisting[normTa]) {
-          unusedInBatchPool.push(item);
-        } else {
-          fallbackPool.push(item);
-        }
-      });
-
-      var orderedPool = shuffleArr(brandNewPool)
-        .concat(shuffleArr(unusedInBatchPool))
-        .concat(shuffleArr(fallbackPool));
-
-      for (var i = 0; i < count; i++) {
-        var tpl = orderedPool[i % orderedPool.length];
-        var overflowCycle = Math.floor(i / orderedPool.length);
-
-        if (overflowCycle > 0 && matchedKey === "Aptitude & Mental Ability") {
-          var baseP = (i + 2) * 1000;
-          var rate = 5 + (i % 6);
-          var yrs = 2 + (i % 4);
-          var ansSi = (baseP * rate * yrs) / 100;
-          results.push({
-            id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
-            batchId: batch.id,
-            subject: subject,
-            difficulty: difficulty,
-            ta: "₹" + baseP + "-க்கு ஆண்டுக்கு " + rate + "% தனிவட்டி வீதம் " + yrs + " ஆண்டுகளுக்குக் கிடைக்கும் வட்டி எவ்வளவு?",
-            en: "Calculate the Simple Interest on ₹" + baseP + " at " + rate + "% per annum for " + yrs + " years.",
-            opts: [
-              { ta: "₹" + ansSi, en: "₹" + ansSi },
-              { ta: "₹" + (ansSi + 150), en: "₹" + (ansSi + 150) },
-              { ta: "₹" + Math.max(100, ansSi - 100), en: "₹" + Math.max(100, ansSi - 100) },
-              { ta: "₹" + (ansSi + 300), en: "₹" + (ansSi + 300) }
-            ],
-            a: 0,
-            whyTa: "SI = (P × N × R) / 100 = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
-            whyEn: "SI = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
-            status: "draft"
-          });
-          continue;
-        }
-
-        var optWithFlag = tpl.opts.map(function(o, oi) {
-          return { ta: o.ta, en: o.en, isCorrect: oi === Number(tpl.a) };
-        });
-        var shuffledOpts = shuffleArr(optWithFlag);
-        var newCorrectIdx = 0;
-        shuffledOpts.forEach(function(o, idx) {
-          if (o.isCorrect) newCorrectIdx = idx;
-        });
-
-        var prefixTa = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " Set-" + (overflowCycle + 1) + "] " : "");
-        var prefixEn = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " Set-" + (overflowCycle + 1) + "] " : "");
-
-        results.push({
-          id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
-          batchId: batch.id,
-          subject: subject,
-          difficulty: difficulty,
-          ta: prefixTa + tpl.ta,
-          en: prefixEn + tpl.en,
-          opts: shuffledOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
-          a: newCorrectIdx,
-          whyTa: tpl.whyTa,
-          whyEn: tpl.whyEn,
-          status: "draft"
-        });
-      }
-      return results;
-    }
-
-    // Custom subject fallback when admin enters a custom subject name not in preset bank
-    var fallbackKeys = Object.keys(TNPSC_QUESTION_BANK);
-    var combinedPool = [];
-    fallbackKeys.forEach(function(k) {
-      TNPSC_QUESTION_BANK[k].forEach(function(qItem) { combinedPool.push(qItem); });
-    });
-    var shuffledCustom = shuffleArr(combinedPool);
-
-    for (var c = 0; c < count; c++) {
-      var item = shuffledCustom[c % shuffledCustom.length];
-      var optFlags = item.opts.map(function(o, oi) {
-        return { ta: o.ta, en: o.en, isCorrect: oi === Number(item.a) };
-      });
-      var sOpts = shuffleArr(optFlags);
-      var cIdx = 0;
-      sOpts.forEach(function(o, idx) { if (o.isCorrect) cIdx = idx; });
-
-      results.push({
-        id: "q-ai-" + Date.now() + "-" + c + "-" + Math.floor(Math.random() * 100000),
-        batchId: batch.id,
-        subject: subject,
-        difficulty: difficulty,
-        ta: "[" + subject + (topicFocus ? " - " + topicFocus : "") + "] " + item.ta,
-        en: "[" + subject + (topicFocus ? " - " + topicFocus : "") + "] " + item.en,
-        opts: sOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
-        a: cIdx,
-        whyTa: item.whyTa,
-        whyEn: item.whyEn,
-        status: "draft"
-      });
-    }
-    return results;
-  }
-
-  async function tryGeminiApiGeneration(apiKey, batch, subject, count, difficulty, topicFocus) {
-    var prompt = "Generate " + count + " TNPSC " + batch.category + " exam MCQs for subject '" + subject +
-      "' at '" + difficulty + "' difficulty" + (topicFocus ? " focusing on '" + topicFocus + "'" : "") +
-      ". Return ONLY a valid JSON array where each element has: ta (Tamil question), en (English question), opts (array of 4 objects {ta, en}), a (correct option index 0-3), whyTa (Tamil explanation), whyEn (English explanation).";
-    var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(apiKey);
-    var res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
-    if (!res.ok) throw new Error("Gemini HTTP " + res.status);
-    var data = await res.json();
-    var text = (((data.candidates || [])[0] || {}).content || {}).parts[0].text || "";
-    var cleaned = text.replace(/```json|```/gi, "").trim();
-    var arr = JSON.parse(cleaned);
-    if (!Array.isArray(arr) || !arr.length) throw new Error("Invalid JSON");
-    return arr.slice(0, count).map(function(item, idx) {
-      return {
-        id: "q-gem-" + Date.now() + "-" + idx + "-" + Math.floor(Math.random() * 10000),
-        batchId: batch.id,
-        subject: subject,
-        difficulty: difficulty,
-        ta: item.ta || item.en || "Question",
-        en: item.en || "",
-        opts: Array.isArray(item.opts) && item.opts.length === 4 ? item.opts : [
-          { ta: "A", en: "A" }, { ta: "B", en: "B" }, { ta: "C", en: "C" }, { ta: "D", en: "D" }
-        ],
-        a: Number(item.a) || 0,
-        whyTa: item.whyTa || "",
-        whyEn: item.whyEn || "",
-        status: "draft"
-      };
-    });
-  }
-
-  async function handleGenerateAiQuestions() {
-    var batch = getBatchById(g("aiBatchSelect").value);
-    if (!batch) return;
-    var subject = g("aiSubjectDropdown").value;
-    var count = Math.max(1, Math.min(20, Number(g("aiNumQuestionsInput").value) || 3));
-    var difficulty = g("aiDifficultySelect").value;
-    var topicFocus = g("aiTopicInput").value.trim();
-
-    // Ensure subject exists on batch's subject list
-    if (!batch.subjects.some(function(s) { return s.name === subject; })) {
-      batch.subjects.push({ name: subject, target: count });
-    }
-
-    var btn = g("runAiGenerateBtn");
-    var allBtn = g("runAiGenerateAllBatchBtn");
-    var msgEl = g("aiGenerateStatusMsg");
-    btn.disabled = true;
-    if (allBtn) allBtn.disabled = true;
-    msgEl.className = "mt-2.5 text-xs font-bold text-blue-700";
-    msgEl.textContent = "Generating " + count + " unique bilingual TNPSC questions for " + subject + "...";
-
-    try {
-      var cfg = getRuntimeConfig();
-      var generated = null;
-      if (cfg.geminiKey) {
-        try {
-          generated = await tryGeminiApiGeneration(cfg.geminiKey, batch, subject, count, difficulty, topicFocus);
-        } catch (err) {
-          generated = buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus);
-        }
-      } else {
-        generated = buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus);
-      }
-
-      appState.questions = generated.concat(appState.questions);
-      saveAppState();
-
-      g("queueStatusFilter").value = "draft";
-      renderApprovalQueueList();
-      updateAiBatchBannerAndQueue();
-
-      msgEl.className = "mt-2.5 text-xs font-bold text-emerald-700";
-      msgEl.textContent = "✓ " + generated.length + " தனித்துவமான கேள்விகள் [" + subject + "] Approval Queue-ல் தயாராக உள்ளன! Approve செய்தால் '" + batch.code + "' Batch-ல் தானாக இணையும்.";
-      showToast(generated.length + " unique AI questions added to Approval Queue!");
-    } finally {
-      btn.disabled = false;
-      if (allBtn) allBtn.disabled = false;
-    }
-  }
-
-  async function handleGenerateAllBatchSubjects() {
-    var batch = getBatchById(g("aiBatchSelect").value);
-    if (!batch) return;
-    var subjectsPlan = Array.isArray(batch.subjects) && batch.subjects.length
-      ? batch.subjects
-      : [{ name: g("aiSubjectDropdown").value || "General Tamil", target: Math.max(1, Number(g("aiNumQuestionsInput").value) || 3) }];
-
-    var difficulty = g("aiDifficultySelect").value;
-    var topicFocus = g("aiTopicInput").value.trim();
-    var btn = g("runAiGenerateBtn");
-    var allBtn = g("runAiGenerateAllBatchBtn");
-    var msgEl = g("aiGenerateStatusMsg");
-
-    btn.disabled = true;
-    allBtn.disabled = true;
-    msgEl.className = "mt-2.5 text-xs font-bold text-blue-700";
-    msgEl.textContent = "Generating subject-wise questions for all " + subjectsPlan.length + " subjects in " + batch.code + "...";
-
-    try {
-      var cfg = getRuntimeConfig();
-      var totalGenerated = 0;
-      var summaryParts = [];
-
-      for (var sIdx = 0; sIdx < subjectsPlan.length; sIdx++) {
-        var item = subjectsPlan[sIdx];
-        var subjName = item.name;
-        var targetCnt = Math.max(1, Number(item.target) || 2);
-
-        // Calculate remaining needed for this subject (considering already approved + already drafted in this batch)
-        var existingCount = appState.questions.filter(function(q) {
-          return q.batchId === batch.id && q.subject === subjName && (q.status === "approved" || q.status === "draft");
-        }).length;
-        var toGen = Math.max(1, targetCnt - existingCount);
-
-        var batchGenerated = null;
-        if (cfg.geminiKey) {
-          try {
-            batchGenerated = await tryGeminiApiGeneration(cfg.geminiKey, batch, subjName, toGen, difficulty, topicFocus);
-          } catch (e) {
-            batchGenerated = buildProceduralTnpscQuestions(batch, subjName, toGen, difficulty, topicFocus);
-          }
-        } else {
-          batchGenerated = buildProceduralTnpscQuestions(batch, subjName, toGen, difficulty, topicFocus);
-        }
-
-        appState.questions = batchGenerated.concat(appState.questions);
-        totalGenerated += batchGenerated.length;
-        summaryParts.push(subjName + " (" + batchGenerated.length + ")");
-      }
-
-      saveAppState();
-      g("queueStatusFilter").value = "draft";
-      renderApprovalQueueList();
-      updateAiBatchBannerAndQueue();
-
-      msgEl.className = "mt-2.5 text-xs font-bold text-emerald-700";
-      msgEl.textContent = "✓ மொத்தம் " + totalGenerated + " கேள்விகள் Subject-wise உருவாக்கப்பட்டுள்ளன: " + summaryParts.join(", ") + ". 'Approve All & Attach to Batch' அழுத்தினால் அனைத்தும் Batch-ல் இணையும்!";
-      showToast("Generated " + totalGenerated + " questions across all subjects!");
-    } finally {
-      btn.disabled = false;
-      allBtn.disabled = false;
-    }
-  }
-
-  function approveQuestionAndAttachToBatch(qId, targetBatchId) {
-    var q = appState.questions.find(function(item) { return item.id === qId; });
-    var batch = getBatchById(targetBatchId);
-    if (!q || !batch) return;
-
-    q.status = "approved";
-    q.batchId = batch.id;
-    batch.questionIds = batch.questionIds || [];
-    if (batch.questionIds.indexOf(q.id) === -1) {
-      batch.questionIds.push(q.id);
-    }
-    saveAppState();
-  }
-
-  function renderApprovalQueueList() {
-    var box = g("approvalQueueList");
-    if (!box) return;
-    var batch = getBatchById(g("aiBatchSelect").value);
-    var statusFilter = g("queueStatusFilter").value;
-
-    var items = appState.questions.filter(function(q) {
-      if (q.status !== statusFilter) return false;
-      if (batch && q.batchId && q.batchId !== batch.id) return false;
-      return true;
-    });
-
-    if (!items.length) {
-      box.innerHTML = '<div class="text-xs opacity-70 p-3">No questions in "' + statusFilter + '" view for this batch.</div>';
-      return;
-    }
-
-    box.innerHTML = items.map(function(q, idx) {
-      var corr = (q.opts && q.opts[q.a]) ? escapeHtml(q.opts[q.a].ta) : "-";
-      return '<div class="p-4 rounded-xl bg-white/85 border border-slate-300 space-y-2">' +
-        '<div class="flex flex-wrap items-center justify-between gap-2">' +
-        '<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-teal-100 text-teal-800">' + (idx + 1) + ". " + escapeHtml(q.subject) + "</span>" +
-        '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold ' + (q.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' +
-        escapeHtml(q.status.toUpperCase()) + (batch ? " • " + escapeHtml(batch.code) : "") +
-        "</span></div>" +
-        '<div class="font-bold text-sm">' + escapeHtml(q.ta) + "</div>" +
-        '<div class="text-xs opacity-80">' + escapeHtml(q.en || "") + "</div>" +
-        '<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs pt-1">' +
-        (q.opts || []).map(function(o, oi) {
-          var isC = oi === Number(q.a);
-          return '<div class="p-2 rounded-lg border ' + (isC ? "bg-emerald-50 border-emerald-400 font-bold text-emerald-900" : "bg-slate-50 border-slate-200") + '">' +
-            String.fromCharCode(65 + oi) + ". " + escapeHtml(o.ta) + (o.en && o.en !== o.ta ? " (" + escapeHtml(o.en) + ")" : "") +
-            "</div>";
-        }).join("") +
-        "</div>" +
-        '<div class="text-xs opacity-80"><b>Explanation:</b> ' + escapeHtml(q.whyTa || "-") + " (Ans: " + corr + ")</div>" +
-        '<div class="flex flex-wrap gap-2 pt-2">' +
-        (q.status !== "approved" ? '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-approve-btn btn-wa px-3.5 py-1.5 text-xs">✓ Approve &amp; Attach to Batch</button>' : "") +
-        '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-edit-toggle-btn btn-ghost px-3 py-1.5 text-xs">✎ Edit</button>' +
-        (q.status !== "rejected" ? '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-reject-btn btn-danger px-3 py-1.5 text-xs">✘ Reject</button>' : "") +
-        "</div>" +
-        '<div id="editForm_' + escapeHtml(q.id) + '" class="hidden pt-3 border-t border-slate-200 space-y-2">' +
-        '<input type="text" class="ed-ta w-full p-2 text-xs" value="' + escapeHtml(q.ta) + '" placeholder="Tamil Question">' +
-        '<input type="text" class="ed-en w-full p-2 text-xs" value="' + escapeHtml(q.en || "") + '" placeholder="English Question">' +
-        '<button type="button" data-qid="' + escapeHtml(q.id) + '" class="q-save-edit-btn btn-primary px-3 py-1.5 text-xs">Save Edit</button>' +
-        "</div></div>";
-    }).join("");
-
-    var appBtns = box.querySelectorAll(".q-approve-btn");
-    for (var i = 0; i < appBtns.length; i++) {
-      appBtns[i].addEventListener("click", function() {
-        var qid = this.getAttribute("data-qid");
-        approveQuestionAndAttachToBatch(qid, batch.id);
-        populateAiTabSelectors(batch.id);
-        renderAdminBatchesList();
-        renderActiveBatchPills();
-        showToast("Question approved & attached to " + batch.code + "!");
-      });
-    }
-
-    var rejBtns = box.querySelectorAll(".q-reject-btn");
-    for (var j = 0; j < rejBtns.length; j++) {
-      rejBtns[j].addEventListener("click", function() {
-        var qid = this.getAttribute("data-qid");
-        var q = appState.questions.find(function(x) { return x.id === qid; });
-        if (q) {
-          q.status = "rejected";
-          saveAppState();
-          renderApprovalQueueList();
-          showToast("Question rejected.");
-        }
-      });
-    }
-
-    var editToggles = box.querySelectorAll(".q-edit-toggle-btn");
-    for (var e = 0; e < editToggles.length; e++) {
-      editToggles[e].addEventListener("click", function() {
-        var qid = this.getAttribute("data-qid");
-        var form = g("editForm_" + qid);
-        if (form) form.classList.toggle("hidden");
-      });
-    }
-
-    var saveEdits = box.querySelectorAll(".q-save-edit-btn");
-    for (var s = 0; s < saveEdits.length; s++) {
-      saveEdits[s].addEventListener("click", function() {
-        var qid = this.getAttribute("data-qid");
-        var form = g("editForm_" + qid);
-        var q = appState.questions.find(function(x) { return x.id === qid; });
-        if (q && form) {
-          q.ta = form.querySelector(".ed-ta").value.trim() || q.ta;
-          q.en = form.querySelector(".ed-en").value.trim();
-          saveAppState();
-          renderApprovalQueueList();
-          showToast("Question updated.");
-        }
-      });
-    }
-  }
-
-  // Tab 3: Results, Release Timer & WhatsApp Broadcast
-  function populateResultsTabBatches(preferredId) {
-    var sel = g("resTabBatchSelect");
-    if (!sel) return;
-    var prev = preferredId || sel.value;
-    sel.innerHTML = appState.batches.map(function(b) {
-      return '<option value="' + b.id + '">' + b.code + " — " + b.title + " (" + (b.resultsReleased ? "RELEASED" : "SCHEDULED") + ")</option>";
-    }).join("");
-    if (prev && appState.batches.some(function(b) { return b.id === prev; })) sel.value = prev;
-    renderAdminResultsTable();
-  }
-
-  function renderAdminResultsTable() {
-    var batch = getBatchById(g("resTabBatchSelect").value);
-    if (!batch) return;
-    g("resUpdateDateInput").value = batch.releaseDate || todayIsoDate();
-    g("resUpdateTimeInput").value = batch.releaseTime || "20:00";
-
-    var attempts = appState.attempts.filter(function(a) { return a.batchId === batch.id; });
-    attempts.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
-
-    var tbody = g("adminAttemptsTbody");
-    if (!attempts.length) {
-      tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center opacity-70">No student attempts recorded for this batch yet.</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = attempts.map(function(att, idx) {
-      var rankObj = { rank: idx + 1, total: attempts.length };
-      return '<tr class="border-b border-slate-200">' +
-        '<td class="p-3 font-extrabold">#' + rankObj.rank + "</td>" +
-        '<td class="p-3 font-bold">' + att.studentName + "</td>" +
-        '<td class="p-3">' + att.phone + "</td>" +
-        '<td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-bold ' + (att.status === "submitted" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' + att.status + "</span></td>" +
-        '<td class="p-3 font-bold">' + att.score + " / " + att.totalQuestions + "</td>" +
-        '<td class="p-3"><button type="button" data-attid="' + att.id + '" class="adm-wa-row-btn btn-wa px-3 py-1.5 text-xs">Send WhatsApp →</button></td>' +
-        "</tr>";
-    }).join("");
-
-    var waBtns = tbody.querySelectorAll(".adm-wa-row-btn");
-    for (var i = 0; i < waBtns.length; i++) {
-      waBtns[i].addEventListener("click", function() {
-        var att = getAttemptById(this.getAttribute("data-attid"));
-        if (!att) return;
-        var rankObj = computeBatchRank(att, batch);
-        var msg = buildWhatsappResultMessage(att, batch, rankObj);
-        openWhatsappUrl(msg, att.phone);
-      });
-    }
-  }
-
-  function openWhatsappUrl(message, phone10) {
-    var clean = normalizePhone10(phone10);
-    var url = clean.length === 10
-      ? "https://api.whatsapp.com/send?phone=91" + clean + "&text=" + encodeURIComponent(message)
-      : "https://api.whatsapp.com/send?text=" + encodeURIComponent(message);
-    copyTextSafe(message);
-    var win = null;
-    try { win = window.open(url, "_blank", "noopener,noreferrer"); } catch (e) {}
-    if (win) showToast("WhatsApp opened & message copied!");
-    else showToast("Message & link copied to clipboard — paste in WhatsApp!");
   }
 
   function switchAdminTab(tabNum) {
     [1, 2, 3].forEach(function(n) {
       var panel = g("admTabPanel" + n);
       var btn = g("admTabBtn" + n);
-      if (n === tabNum) {
-        panel.classList.remove("hidden");
-        btn.className = "btn-primary flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
-      } else {
-        panel.classList.add("hidden");
-        btn.className = "btn-ghost flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
-      }
+      if (panel) panel.classList.toggle("hidden", n !== tabNum);
+      if (btn) btn.className = (n === tabNum ? "btn-primary" : "btn-ghost") + " flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
     });
-    if (tabNum === 1) {
-      renderDraftSubjectRows();
-      renderAdminBatchesList();
-    } else if (tabNum === 2) {
-      populateAiTabSelectors();
+    if (tabNum === 2) {
+      populateAiTabSelectors(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+      syncAiSubjectDropdownForSelectedBatch();
+      updateAiBatchBannerAndQueue();
     } else if (tabNum === 3) {
-      populateResultsTabBatches();
-    }
-  }
-
-  function getRuntimeConfig() {
-    var winCfg = window.TNPSC_CONFIG || {};
-    var globalObj = (typeof globalThis !== "undefined" ? globalThis : window);
-    var extCfg =
-      globalObj.CONFIG ||
-      globalObj.APP_CONFIG ||
-      globalObj.SUPABASE_CONFIG ||
-      globalObj.ENV_CONFIG ||
-      globalObj.config ||
-      {};
-    var saved = {};
-    try { saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}"); } catch (e) {}
-
-    var fileSupaUrl =
-      extCfg.SUPABASE_URL ||
-      extCfg.supabaseUrl ||
-      extCfg.supabase_url ||
-      (extCfg.supabase && (extCfg.supabase.url || extCfg.supabaseUrl)) ||
-      globalObj.SUPABASE_URL ||
-      winCfg.SUPABASE_URL ||
-      "";
-
-    var fileSupaKey =
-      extCfg.SUPABASE_ANON_KEY ||
-      extCfg.SUPABASE_KEY ||
-      extCfg.supabaseAnonKey ||
-      extCfg.supabaseKey ||
-      extCfg.supabase_anon_key ||
-      (extCfg.supabase && (extCfg.supabase.anonKey || extCfg.supabase.key)) ||
-      globalObj.SUPABASE_ANON_KEY ||
-      globalObj.SUPABASE_KEY ||
-      winCfg.SUPABASE_ANON_KEY ||
-      "";
-
-    var resolvedSupaUrl = saved.supabaseUrl || fileSupaUrl || "";
-    var resolvedSupaKey = saved.supabaseKey || fileSupaKey || "";
-
-    var resolvedGeminiKey =
-      saved.geminiKey ||
-      extCfg.GEMINI_API_KEY ||
-      extCfg.geminiApiKey ||
-      extCfg.geminiKey ||
-      globalObj.GEMINI_API_KEY ||
-      winCfg.GEMINI_API_KEY ||
-      "";
-
-    var resolvedAdminPin =
-      saved.adminPin ||
-      extCfg.ADMIN_PIN ||
-      extCfg.adminPin ||
-      winCfg.ADMIN_PIN ||
-      ADMIN_PIN_DEFAULT;
-
-    return {
-      geminiKey: resolvedGeminiKey,
-      supabaseUrl: resolvedSupaUrl,
-      supabaseKey: resolvedSupaKey,
-      fromConfigJs: Boolean(fileSupaUrl && fileSupaKey),
-      adminPin: resolvedAdminPin
-    };
-  }
-
-  function refreshAdminConfigStatusUi() {
-    var cfg = getRuntimeConfig();
-    var badge = g("adminConfigStatusBadge");
-    var urlInp = g("adminLoginSupaUrlInput");
-    var keyInp = g("adminLoginSupaKeyInput");
-
-    if (urlInp && !urlInp.value && cfg.supabaseUrl) {
-      urlInp.value = cfg.supabaseUrl;
-    }
-    if (keyInp && !keyInp.value && cfg.supabaseKey) {
-      keyInp.value = cfg.supabaseKey;
-    }
-
-    if (!badge) return;
-    if (cfg.fromConfigJs) {
-      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-100 border border-emerald-300 text-emerald-900";
-      badge.textContent = "✓ config.js இணைக்கப்பட்டது (Supabase URL & Anon Key தயார்).";
-    } else if (cfg.supabaseUrl && cfg.supabaseKey) {
-      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-blue-100 border border-blue-300 text-blue-900";
-      badge.textContent = "✓ Supabase URL & Anon Key சேமிக்கப்பட்டுள்ளன (config.js காணப்படவில்லை; saved config பயன்படுகிறது).";
+      populateResultsTabBatches(g("resTabBatchSelect") ? g("resTabBatchSelect").value : "");
+      renderAdminResultsTable();
     } else {
-      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900";
-      badge.textContent = "⚠ config.js கிடைக்கவில்லை. கீழே Supabase URL & Anon Key உள்ளிட்டு Sign In செய்யவும்.";
+      renderAdminBatchesList();
     }
   }
 
-  function loadExternalConfigJs() {
-    return new Promise(function(resolve) {
-      function finalize() {
-        var cfg = getRuntimeConfig();
-        refreshAdminConfigStatusUi();
-        resolve(cfg);
-      }
+  var draftBatchSubjects = [
+    { name: "General Tamil", target: 3 },
+    { name: "Indian Polity", target: 2 }
+  ];
 
-      // If config values are already present on window/globalThis, no need to wait
-      var current = getRuntimeConfig();
-      if (current.supabaseUrl && current.supabaseKey) {
-        refreshAdminConfigStatusUi();
-        resolve(current);
-        return;
-      }
+  function renderDraftBatchSubjects() {
+    var wrap = g("subjectAllocationRows");
+    var badge = g("subjectPlanTotalBadge");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    var total = 0;
+    draftBatchSubjects.forEach(function(item, idx) {
+      total += Number(item.target || 0);
+      var row = document.createElement("div");
+      row.className = "flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-50 border border-slate-200 text-xs sm:text-sm";
+      var label = document.createElement("span");
+      label.className = "font-bold";
+      label.textContent = item.name + " (" + item.target + " Qs)";
+      var remBtn = document.createElement("button");
+      remBtn.type = "button";
+      remBtn.className = "btn-ghost px-2.5 py-1 text-xs";
+      remBtn.textContent = "Remove";
+      remBtn.addEventListener("click", function() {
+        draftBatchSubjects.splice(idx, 1);
+        renderDraftBatchSubjects();
+      });
+      row.appendChild(label);
+      row.appendChild(remBtn);
+      wrap.appendChild(row);
+    });
+    if (badge) badge.textContent = "Total Target: " + total + " Questions";
+  }
 
-      var existingScript = document.querySelector('script[data-tnpsc-config="true"]');
-      if (existingScript) {
-        if (existingScript.dataset.loaded === "true") {
-          finalize();
-        } else {
-          existingScript.addEventListener("load", finalize, { once: true });
-          existingScript.addEventListener("error", finalize, { once: true });
+  function handleAddSubjectToBatchDraft() {
+    var customName = (g("customSubjectNameInput") ? g("customSubjectNameInput").value : "").trim();
+    var presetName = g("subjectPresetSelect") ? g("subjectPresetSelect").value : "General Tamil";
+    var name = customName || presetName;
+    var target = Math.max(1, Math.min(100, parseInt(g("subjectTargetCountInput") ? g("subjectTargetCountInput").value : "3", 10) || 3));
+    if (!name) return;
+    var existing = draftBatchSubjects.find(function(s) { return s.name.toLowerCase() === name.toLowerCase(); });
+    if (existing) existing.target = target;
+    else draftBatchSubjects.push({ name: name, target: target });
+    if (g("customSubjectNameInput")) g("customSubjectNameInput").value = "";
+    renderDraftBatchSubjects();
+  }
+
+  function handleSaveNewTestBatch() {
+    var title = (g("batchTitleInput") ? g("batchTitleInput").value : "").trim();
+    var code = (g("batchCodeInput") ? g("batchCodeInput").value : "").trim().toUpperCase();
+    var fb = g("createBatchFeedback");
+    if (!title || !code) {
+      if (fb) {
+        fb.className = "mb-3 p-3 rounded-xl text-xs font-bold bg-red-100 text-red-800 border border-red-300";
+        fb.textContent = "Batch Title மற்றும் Batch Code அவசியம்.";
+        fb.classList.remove("hidden");
+      }
+      return;
+    }
+    var relDate = g("batchReleaseDateInput") ? g("batchReleaseDateInput").value : todayIsoDate();
+    var relTime = g("batchReleaseTimeInput") ? g("batchReleaseTimeInput").value : "20:00";
+    var relIso = buildReleaseIso(relDate, relTime);
+    var newBatch = {
+      id: "batch_" + Date.now(),
+      code: code,
+      title: title,
+      category: g("batchCategoryInput") ? g("batchCategoryInput").value : "Group IV",
+      durationMinutes: Math.max(1, parseInt(g("batchDurationInput") ? g("batchDurationInput").value : "15", 10) || 15),
+      releaseDate: relDate,
+      releaseTime: relTime,
+      releaseAt: relIso,
+      resultsReleased: new Date(relIso).getTime() <= Date.now(),
+      centerAd: (g("batchCenterAdInput") ? g("batchCenterAdInput").value : "").trim(),
+      subjects: draftBatchSubjects.length ? draftBatchSubjects.map(function(s) { return { name: s.name, target: s.target }; }) : [{ name: "General Tamil", target: 3 }]
+    };
+    appState.batches.unshift(newBatch);
+    saveAppState();
+    renderAdminBatchesList();
+    renderActiveBatchPills();
+    populateAiTabSelectors(newBatch.id);
+    switchAdminTab(2);
+    showToast("Batch '" + code + "' created! Now generate AI questions.");
+  }
+
+  function renderAdminBatchesList() {
+    var wrap = g("adminBatchesList");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    appState.batches.forEach(function(b) {
+      var card = document.createElement("div");
+      card.className = "p-3 rounded-xl bg-white/80 border border-slate-200 flex flex-wrap items-center justify-between gap-2";
+      var info = document.createElement("div");
+      info.innerHTML = "<div class='font-extrabold text-sm'>" + b.code + " — " + b.title + "</div><div class='text-xs opacity-75'>" + b.category + " • " + b.durationMinutes + " mins • Release: " + (b.releaseTime || "20:00") + "</div>";
+      card.appendChild(info);
+      wrap.appendChild(card);
+    });
+  }
+
+  function populateAiTabSelectors(preferredId) {
+    var sel = g("aiBatchSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    appState.batches.forEach(function(b) {
+      var opt = document.createElement("option");
+      opt.value = b.id;
+      opt.textContent = b.code + " — " + b.title;
+      sel.appendChild(opt);
+    });
+    if (preferredId && getBatchById(preferredId)) sel.value = preferredId;
+    else if (appState.batches[0]) sel.value = appState.batches[0].id;
+  }
+
+  function syncAiSubjectDropdownForSelectedBatch() {
+    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+    var subSel = g("aiSubjectDropdown");
+    if (!subSel) return;
+    var names = (batch && Array.isArray(batch.subjects) && batch.subjects.length)
+      ? batch.subjects.map(function(s) { return s.name; })
+      : DEFAULT_SUBJECTS;
+    var prev = subSel.value;
+    subSel.innerHTML = "";
+    names.forEach(function(n) {
+      var opt = document.createElement("option");
+      opt.value = n;
+      opt.textContent = n;
+      subSel.appendChild(opt);
+    });
+    if (prev && names.indexOf(prev) !== -1) subSel.value = prev;
+  }
+
+  function buildSubjectQuestionSet(subject, count, difficulty, topic, batch) {
+    var out = [];
+    var usedSet = new Set(appState.usedQuestionIds || []);
+    var safeCount = Math.max(1, Math.min(20, count || 1));
+    var topicTag = topic ? " (" + topic + ")" : "";
+    for (var i = 1; i <= safeCount; i++) {
+      var qId = "q_" + (batch ? batch.id : "gen") + "_" + subject.replace(/[^a-zA-Z0-9]/g, "_") + "_" + Date.now() + "_" + i;
+      while (usedSet.has(qId)) qId += "_x";
+      usedSet.add(qId);
+      appState.usedQuestionIds.push(qId);
+      var correctIdx = i % 4;
+      out.push({
+        id: qId,
+        batchId: batch ? batch.id : "",
+        batchCode: batch ? batch.code : "",
+        subject: subject,
+        difficulty: difficulty || "TNPSC Standard",
+        status: "draft",
+        questionTa: subject + topicTag + " — கேள்வி #" + i + ": TNPSC போட்டித் தேர்வில் இப்பாடப்பகுதியின் முக்கியக் கருத்து எது?",
+        questionEn: subject + topicTag + " — Question #" + i + ": Which statement best reflects a key TNPSC concept in this topic?",
+        options: [
+          { ta: "விருப்பம் A (" + subject + " அடிப்படை விதி)", en: "Option A (" + subject + " core principle)" },
+          { ta: "விருப்பம் B (அரசியலமைப்பு / வரலாற்றுக் குறிப்பு)", en: "Option B (Constitutional / historical note)" },
+          { ta: "விருப்பம் C (தமிழ்நாடு திட்டம் / செயல்பாடு)", en: "Option C (Tamil Nadu scheme / provision)" },
+          { ta: "விருப்பம் D (மேற்கூறிய அனைத்தும் சரியானவை)", en: "Option D (All of the above are correct)" }
+        ],
+        correctIndex: correctIdx,
+        explanationTa: "சரியான விடை விருப்பம் " + String.fromCharCode(65 + correctIdx) + " ஆகும்.",
+        explanationEn: "The correct answer is Option " + String.fromCharCode(65 + correctIdx) + "."
+      });
+    }
+    return out;
+  }
+
+  function handleGenerateAiQuestions() {
+    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+    var subj = g("aiSubjectDropdown") ? g("aiSubjectDropdown").value : "General Tamil";
+    var cnt = parseInt(g("aiNumQuestionsInput") ? g("aiNumQuestionsInput").value : "3", 10) || 3;
+    var diff = g("aiDifficultySelect") ? g("aiDifficultySelect").value : "TNPSC Standard";
+    var topic = g("aiTopicInput") ? g("aiTopicInput").value.trim() : "";
+    var created = buildSubjectQuestionSet(subj, cnt, diff, topic, batch);
+    appState.questions = created.concat(appState.questions);
+    saveAppState();
+    updateAiBatchBannerAndQueue();
+    var st = g("aiGenerateStatusMsg");
+    if (st) {
+      st.className = "mt-2.5 text-xs font-bold text-emerald-700";
+      st.textContent = "✓ " + created.length + " கேள்விகள் [" + subj + "] Approval Queue-ல் தயாராக உள்ளன!";
+    }
+  }
+
+  function handleGenerateAllBatchSubjects() {
+    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+    if (!batch || !Array.isArray(batch.subjects) || !batch.subjects.length) {
+      handleGenerateAiQuestions();
+      return;
+    }
+    var diff = g("aiDifficultySelect") ? g("aiDifficultySelect").value : "TNPSC Standard";
+    var topic = g("aiTopicInput") ? g("aiTopicInput").value.trim() : "";
+    var allNew = [];
+    batch.subjects.forEach(function(s) {
+      var list = buildSubjectQuestionSet(s.name, Number(s.target) || 1, diff, topic, batch);
+      allNew = allNew.concat(list);
+    });
+    appState.questions = allNew.concat(appState.questions);
+    saveAppState();
+    updateAiBatchBannerAndQueue();
+    var st = g("aiGenerateStatusMsg");
+    if (st) {
+      st.className = "mt-2.5 text-xs font-bold text-emerald-700";
+      st.textContent = "✓ " + allNew.length + " Subject-wise கேள்விகள் [" + batch.code + "] Approval Queue-ல் உருவாக்கப்பட்டுள்ளன!";
+    }
+  }
+
+  function approveQuestionAndAttachToBatch(qId, batchId) {
+    for (var i = 0; i < appState.questions.length; i++) {
+      if (appState.questions[i].id === qId) {
+        appState.questions[i].status = "approved";
+        if (batchId) {
+          appState.questions[i].batchId = batchId;
+          var b = getBatchById(batchId);
+          if (b) appState.questions[i].batchCode = b.code;
         }
-        return;
+        break;
       }
+    }
+    saveAppState();
+  }
 
-      fetch("config.js", { cache: "no-store" })
-        .then(function(res) {
-          if (!res.ok) throw new Error("config.js not found");
-          return res.text();
-        })
-        .then(function(codeText) {
-          var normalizedCode = codeText
-            .replace(/^\s*export\s+default\s+/gm, "window.CONFIG = ")
-            .replace(/^\s*export\s+(?:const|let|var)\s+CONFIG\s*=/gm, "window.CONFIG = ")
-            .replace(/^\s*export\s+(?:const|let|var)\s+SUPABASE_URL\s*=/gm, "window.SUPABASE_URL = ")
-            .replace(/^\s*export\s+(?:const|let|var)\s+SUPABASE_ANON_KEY\s*=/gm, "window.SUPABASE_ANON_KEY = ")
-            .replace(/^\s*export\s+(?:const|let|var)\s+GEMINI_API_KEY\s*=/gm, "window.GEMINI_API_KEY = ")
-            .replace(/^\s*export\s+\{[^}]*\}\s*;?\s*$/gm, "");
-
-          var scriptEl = document.createElement("script");
-          scriptEl.setAttribute("data-tnpsc-config", "true");
-          scriptEl.textContent = normalizedCode;
-          document.head.appendChild(scriptEl);
-          scriptEl.dataset.loaded = "true";
-          finalize();
-        })
-        .catch(function() {
-          // Fallback to script tag loading in case of file:// or special environments
-          var tag = document.createElement("script");
-          tag.src = "config.js";
-          tag.async = false;
-          tag.setAttribute("data-tnpsc-config", "true");
-          tag.onload = function() {
-            tag.dataset.loaded = "true";
-            finalize();
-          };
-          tag.onerror = function() {
-            finalize();
-          };
-          document.head.appendChild(tag);
+  function renderApprovalQueueList() {
+    var wrap = g("approvalQueueList");
+    if (!wrap) return;
+    var statusFilter = g("queueStatusFilter") ? g("queueStatusFilter").value : "draft";
+    var batchId = g("aiBatchSelect") ? g("aiBatchSelect").value : "";
+    var items = appState.questions.filter(function(q) {
+      return q.status === statusFilter && (!batchId || !q.batchId || q.batchId === batchId);
+    });
+    wrap.innerHTML = "";
+    if (!items.length) {
+      wrap.innerHTML = "<div class='text-xs opacity-75 p-3'>No questions in " + statusFilter + " queue.</div>";
+      return;
+    }
+    items.forEach(function(q) {
+      var card = document.createElement("div");
+      card.className = "p-3 rounded-xl bg-white/85 border border-slate-200 space-y-2";
+      var head = document.createElement("div");
+      head.className = "flex flex-wrap items-center justify-between gap-2";
+      head.innerHTML = "<span class='text-xs font-extrabold text-teal-800'>" + q.subject + " • Ans: " + String.fromCharCode(65 + (q.correctIndex || 0)) + "</span>";
+      var body = document.createElement("div");
+      body.className = "text-xs sm:text-sm font-bold";
+      body.textContent = q.questionTa || q.questionEn;
+      var actions = document.createElement("div");
+      actions.className = "flex gap-2";
+      if (q.status !== "approved") {
+        var appBtn = document.createElement("button");
+        appBtn.type = "button";
+        appBtn.className = "btn-wa px-3 py-1.5 text-xs";
+        appBtn.textContent = "✓ Approve & Attach";
+        appBtn.addEventListener("click", function() {
+          approveQuestionAndAttachToBatch(q.id, batchId);
+          updateAiBatchBannerAndQueue();
+          showToast("Question approved & attached!");
         });
-    });
-  }
-
-  var activeSupabaseSession = null;
-
-  async function signInWithSupabaseEmail(supabaseUrl, supabaseKey, email, password) {
-    var cleanUrl = String(supabaseUrl || "").replace(/\/+$/, "");
-    var endpoint = cleanUrl + "/auth/v1/token?grant_type=password";
-    var res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": supabaseKey,
-        "Authorization": "Bearer " + supabaseKey
-      },
-      body: JSON.stringify({ email: email, password: password })
-    });
-    var data = {};
-    try { data = await res.json(); } catch (e) {}
-    if (!res.ok || !data.access_token) {
-      throw new Error(data.error_description || data.msg || data.message || ("Supabase login failed (" + res.status + ")"));
-    }
-    return data;
-  }
-
-  async function verifyAdminInSupabase(supabaseUrl, supabaseKey, sessionData) {
-    var cleanUrl = String(supabaseUrl || "").replace(/\/+$/, "");
-    var token = sessionData.access_token;
-    var userEmail = ((sessionData.user && sessionData.user.email) || "").trim().toLowerCase();
-
-    if (!userEmail) {
-      throw new Error("Supabase account email could not be verified.");
-    }
-
-    var r = await fetch(cleanUrl + "/rest/v1/admin_users?select=email", {
-      headers: {
-        "apikey": supabaseKey,
-        "Authorization": "Bearer " + token
+        actions.appendChild(appBtn);
       }
+      card.appendChild(head);
+      card.appendChild(body);
+      card.appendChild(actions);
+      wrap.appendChild(card);
     });
-
-    if (r.status === 403) {
-      throw new Error(
-        "HTTP 403: public.admin_users table-க்கு authenticated SELECT permission/RLS policy இல்லை. " +
-        "Supabase SQL Editor-ல் 'grant select on table public.admin_users to authenticated;' மற்றும் SELECT policy-ஐ Run செய்யவும்."
-      );
-    }
-
-    if (!r.ok) {
-      throw new Error("Admin authorization check failed (HTTP " + r.status + "). Ensure public.admin_users is configured.");
-    }
-
-    var rows = await r.json();
-    if (!Array.isArray(rows) || rows.length === 0) {
-      throw new Error("No admin accounts found in public.admin_users.");
-    }
-
-    var allowed = rows.some(function(row) {
-      return String(row.email || "").trim().toLowerCase() === userEmail;
-    });
-    if (!allowed) {
-      throw new Error("'" + userEmail + "' is not authorized in public.admin_users.");
-    }
-
-    return true;
   }
 
-  // Bind All Event Listeners
+  function updateAiBatchBannerAndQueue() {
+    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+    var subj = g("aiSubjectDropdown") ? g("aiSubjectDropdown").value : "General Tamil";
+    var banner = g("aiBatchProgressBanner");
+    var cardsWrap = g("aiBatchSubjectCards");
+    var totalBadge = g("aiBatchTotalPlanBadge");
+    if (!batch) return;
+
+    var approved = getApprovedQuestionsForBatch(batch);
+    var subjPlan = (batch.subjects || []).find(function(s) { return s.name === subj; });
+    var target = subjPlan ? Number(subjPlan.target) : 3;
+    var done = approved.filter(function(q) { return q.subject === subj; }).length;
+    var rem = Math.max(0, target - done);
+
+    if (banner) {
+      banner.textContent = "Target Batch: " + batch.code + " (" + batch.category + ") • Subject [" + subj + "]: " + done + " / " + target + " Approved (Remaining Needed: " + rem + ") • Total Batch Qs: " + approved.length;
+    }
+
+    var sumTarget = 0;
+    if (cardsWrap) {
+      cardsWrap.innerHTML = "";
+      (batch.subjects || []).forEach(function(s) {
+        sumTarget += Number(s.target || 0);
+        var c = document.createElement("span");
+        c.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-900 border border-blue-200";
+        c.textContent = s.name + ": " + s.target + " Qs";
+        cardsWrap.appendChild(c);
+      });
+    }
+    if (totalBadge) totalBadge.textContent = "Total Target: " + sumTarget + " Questions";
+    renderApprovalQueueList();
+  }
+
+  function populateResultsTabBatches(preferredId) {
+    var sel = g("resTabBatchSelect");
+    if (!sel) return;
+    sel.innerHTML = "";
+    appState.batches.forEach(function(b) {
+      var opt = document.createElement("option");
+      opt.value = b.id;
+      opt.textContent = b.code + " — " + b.title;
+      sel.appendChild(opt);
+    });
+    if (preferredId && getBatchById(preferredId)) sel.value = preferredId;
+    else if (appState.batches[0]) sel.value = appState.batches[0].id;
+    var cur = getBatchById(sel.value);
+    if (cur) {
+      if (g("resUpdateDateInput")) g("resUpdateDateInput").value = cur.releaseDate || todayIsoDate();
+      if (g("resUpdateTimeInput")) g("resUpdateTimeInput").value = cur.releaseTime || "20:00";
+    }
+  }
+
+  function renderAdminResultsTable() {
+    var tbody = g("adminAttemptsTbody");
+    if (!tbody) return;
+    var batchId = g("resTabBatchSelect") ? g("resTabBatchSelect").value : "";
+    var list = appState.attempts.filter(function(a) { return !batchId || a.batchId === batchId; });
+    list.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+    tbody.innerHTML = "";
+    if (!list.length) {
+      tbody.innerHTML = "<tr><td colspan='6' class='p-4 text-center text-xs opacity-75'>No attempts recorded yet.</td></tr>";
+      return;
+    }
+    list.forEach(function(a, idx) {
+      var tr = document.createElement("tr");
+      tr.className = "border-b border-slate-200";
+      tr.innerHTML = "<td class='p-3 font-bold'>#" + (idx + 1) + "</td><td class='p-3 font-bold'>" + a.studentName + "</td><td class='p-3'>" + a.phone + "</td><td class='p-3'>" + a.status + "</td><td class='p-3 font-bold'>" + (a.score || 0) + "/" + (a.totalQuestions || 0) + "</td><td class='p-3 text-xs'>Ready</td>";
+      tbody.appendChild(tr);
+    });
+  }
+
+  function openWaitingOrResultsScreen(att) {
+    if (!att) return;
+    switchScreen("studentResultsScreen");
+    var batch = getBatchById(att.batchId);
+    var isReleased = Boolean((batch && batch.resultsReleased) || (batch && batch.releaseAt && new Date(batch.releaseAt).getTime() <= Date.now()));
+    if (g("waitingReleaseCard")) g("waitingReleaseCard").classList.toggle("hidden", isReleased);
+    if (g("releasedResultsCard")) g("releasedResultsCard").classList.toggle("hidden", !isReleased);
+    if (g("waitingCandidateInfo")) {
+      g("waitingCandidateInfo").textContent = att.studentName + " (" + att.phone + ") • Score: " + (att.score || 0) + "/" + (att.totalQuestions || 0);
+    }
+    if (isReleased) {
+      if (g("resScoreVal")) g("resScoreVal").textContent = (att.score || 0) + " / " + (att.totalQuestions || 0);
+      var acc = att.totalQuestions ? Math.round(((att.score || 0) / att.totalQuestions) * 100) : 0;
+      if (g("resAccuracyVal")) g("resAccuracyVal").textContent = acc + "%";
+      if (g("resWrongSkipVal")) g("resWrongSkipVal").textContent = (att.wrongCount || 0) + " / " + (att.skippedCount || 0);
+    }
+  }
+
   function bindAllEvents() {
-    g("skipSplashBtn").addEventListener("click", function() {
-      g("splashOverlay").classList.add("is-closing");
-      setTimeout(function() { g("splashOverlay").classList.add("hidden"); }, 320);
-    });
-
-    g("navStudentBtn").addEventListener("click", function() {
-      renderActiveBatchPills();
-      switchScreen("studentJoinScreen");
-    });
-
-    g("navAdminBtn").addEventListener("click", function() {
-      switchScreen("adminLoginScreen");
-      loadExternalConfigJs();
-    });
-
-    g("joinAccToggleBtn").addEventListener("click", function() {
-      g("joinAccPanel").classList.toggle("hidden");
-    });
-
-    g("examAccBtn").addEventListener("click", function() {
-      var p = g("examAccPanel");
-      p.classList.toggle("hidden");
-      this.setAttribute("aria-expanded", String(!p.classList.contains("hidden")));
-    });
-
-    g("closeExamAccBtn").addEventListener("click", function() {
-      g("examAccPanel").classList.add("hidden");
-      g("examAccBtn").setAttribute("aria-expanded", "false");
-    });
-
-    ["fontSizeSel", "contrastSel", "langModeSel", "animModeSel"].forEach(function(id) {
-      g(id).addEventListener("change", function() {
-        applyAccPrefs({
-          fontSize: g("fontSizeSel").value,
-          contrast: g("contrastSel").value,
-          lang: g("langModeSel").value,
-          anim: g("animModeSel").value
-        });
-      });
-    });
-
-    ["examFontSizeSel", "examContrastSel", "examLangModeSel", "examAnimModeSel"].forEach(function(id) {
-      g(id).addEventListener("change", function() {
-        applyAccPrefs({
-          fontSize: g("examFontSizeSel").value,
-          contrast: g("examContrastSel").value,
-          lang: g("examLangModeSel").value,
-          anim: g("examAnimModeSel").value
-        });
-      });
-    });
-
-    g("startExamBtn").addEventListener("click", handleStudentStartOrResume);
-
-    g("resumeSavedBannerBtn").addEventListener("click", function() {
-      try {
-        var info = JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY) || "{}");
-        var att = getAttemptById(info.attemptId);
-        if (att) {
-          if (att.status === "submitted") openWaitingOrResultsScreen(att);
-          else launchExamForAttempt(att);
+    if (g("skipSplashBtn")) {
+      g("skipSplashBtn").addEventListener("click", function() {
+        var sp = g("splashOverlay");
+        if (sp) {
+          sp.classList.add("is-closing");
+          setTimeout(function() { sp.classList.add("hidden"); }, 320);
         }
-      } catch (e) {}
-    });
+      });
+    }
 
-    g("examSwitchBatchBtn").addEventListener("click", function() {
-      clearInterval(examIntervalId);
-      renderActiveBatchPills();
-      checkExistingSavedSession();
-      switchScreen("studentJoinScreen");
-    });
+    if (g("navStudentBtn")) {
+      g("navStudentBtn").addEventListener("click", function() {
+        switchScreen("studentJoinScreen");
+      });
+    }
 
-    g("prevQBtn").addEventListener("click", function() {
-      g("examValidationMsg").classList.add("hidden");
-      activeQuestionIndex--;
-      renderCurrentQuestion();
-      renderQuestionPalette();
-    });
+    if (g("navAdminBtn")) {
+      g("navAdminBtn").addEventListener("click", async function() {
+        await loadExternalConfigJs();
+        refreshAdminConfigStatusUi();
+        switchScreen(activeSupabaseSession ? "adminDashboardScreen" : "adminLoginScreen");
+      });
+    }
 
-    g("nextQBtn").addEventListener("click", function() {
-      g("examValidationMsg").classList.add("hidden");
-      var att = getAttemptById(activeAttemptId);
-      var qs = att ? getApprovedQuestionsForBatch(getBatchById(att.batchId)) : [];
-      if (activeQuestionIndex < qs.length - 1) {
-        activeQuestionIndex++;
-        renderCurrentQuestion();
-        renderQuestionPalette();
-      } else {
-        showToast("All questions visited! Click 'Submit Test ✓' when ready.");
+    if (g("joinAccToggleBtn")) {
+      g("joinAccToggleBtn").addEventListener("click", function() {
+        if (g("joinAccPanel")) g("joinAccPanel").classList.toggle("hidden");
+      });
+    }
+
+    ["fontSizeSel", "examFontSizeSel"].forEach(function(id) {
+      if (g(id)) {
+        g(id).addEventListener("change", function(e) {
+          applyAccPrefs({
+            fontSize: e.target.value,
+            contrast: g("contrastSel") ? g("contrastSel").value : "normal",
+            lang: g("langModeSel") ? g("langModeSel").value : "both",
+            anim: g("animModeSel") ? g("animModeSel").value : "full"
+          });
+        });
       }
     });
 
-    g("markReviewBtn").addEventListener("click", function() {
-      var att = getAttemptById(activeAttemptId);
-      if (!att) return;
-      var qs = getApprovedQuestionsForBatch(getBatchById(att.batchId));
-      var q = qs[activeQuestionIndex];
-      if (!q) return;
-      att.marked[q.id] = !att.marked[q.id];
-      saveAppState();
-      renderQuestionPalette();
-      showToast(att.marked[q.id] ? "Marked for review" : "Review mark removed");
-    });
-
-    g("clearRespBtn").addEventListener("click", function() {
-      var att = getAttemptById(activeAttemptId);
-      if (!att) return;
-      var qs = getApprovedQuestionsForBatch(getBatchById(att.batchId));
-      var q = qs[activeQuestionIndex];
-      if (!q) return;
-      delete att.answers[q.id];
-      saveAppState();
-      renderCurrentQuestion();
-      renderQuestionPalette();
-    });
-
-    g("submitExamBtn").addEventListener("click", function() {
-      finalizeExamSubmission(false);
-    });
-
-    g("manualCheckReleaseBtn").addEventListener("click", function() {
-      var att = getAttemptById(activeAttemptId);
-      if (att) openWaitingOrResultsScreen(att);
-    });
-
-    g("waitingHomeBtn").addEventListener("click", function() {
-      clearInterval(releaseIntervalId);
-      switchScreen("studentJoinScreen");
-    });
-
-    g("releasedHomeBtn").addEventListener("click", function() {
-      switchScreen("studentJoinScreen");
-    });
-
-    g("shareWhatsappResultBtn").addEventListener("click", function() {
-      var txt = g("whatsappMessagePreview").textContent || "";
-      var att = getAttemptById(activeAttemptId);
-      openWhatsappUrl(txt, att ? att.phone : "");
-      g("waShareFeedback").textContent = "✓ WhatsApp result & greetings opened (also copied to clipboard)!";
-    });
-
-    g("shareWhatsappFriendBtn").addEventListener("click", function() {
-      var att = getAttemptById(activeAttemptId);
-      var batch = att ? getBatchById(att.batchId) : appState.batches[0];
-      var baseUrl = window.location.href.split("?")[0];
-      var link = baseUrl + "?batch=" + encodeURIComponent(batch ? batch.code : "G4_BATCH01");
-      var invite = "📢 *" + (att ? att.studentName : "Your Friend") + " உங்களை TNPSC Live Test-க்கு அழைக்கிறார்!*\n" +
-        "Test Code: *" + (batch ? batch.code : "G4_BATCH01") + "*\n" +
-        (batch ? batch.centerAd : "") + "\n👉 *Join Now:* " + link;
-      openWhatsappUrl(invite, "");
-      g("waShareFeedback").textContent = "✓ Friend invite link ready on WhatsApp & copied!";
-    });
-
-    g("copyWhatsappMsgBtn").addEventListener("click", function() {
-      var txt = g("whatsappMessagePreview").textContent || "";
-      copyTextSafe(txt);
-      g("waShareFeedback").textContent = "✓ Message copied to clipboard!";
-      showToast("WhatsApp message copied!");
-    });
-
-    g("toggleAnswerReviewBtn").addEventListener("click", function() {
-      var box = g("detailedReviewContainer");
-      if (box.classList.contains("hidden")) {
-        renderDetailedAnswerReview();
-        box.classList.remove("hidden");
-        this.textContent = "Hide Detailed Answer Key";
-      } else {
-        box.classList.add("hidden");
-        this.textContent = "View Detailed Answer Key & Explanations";
+    ["contrastSel", "examContrastSel"].forEach(function(id) {
+      if (g(id)) {
+        g(id).addEventListener("change", function(e) {
+          applyAccPrefs({
+            fontSize: g("fontSizeSel") ? g("fontSizeSel").value : "1",
+            contrast: e.target.value,
+            lang: g("langModeSel") ? g("langModeSel").value : "both",
+            anim: g("animModeSel") ? g("animModeSel").value : "full"
+          });
+        });
       }
     });
 
-    // Admin Login & Controls
-    g("adminSignInBtn").addEventListener("click", async function() {
-      var errEl = g("adminLoginErr");
-      errEl.className = "text-xs font-bold text-red-700";
-      errEl.textContent = "";
-
-      var typedSupaUrl = (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim();
-      var typedSupaKey = (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim();
-      var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
-      var password = (g("adminPasswordInput") ? g("adminPasswordInput").value : "").trim();
-      var cfg = await loadExternalConfigJs();
-
-      var finalSupaUrl = typedSupaUrl || cfg.supabaseUrl;
-      var finalSupaKey = typedSupaKey || cfg.supabaseKey;
-
-      if (typedSupaUrl && typedSupaKey) {
-        try {
-          var existingSaved = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}");
-          existingSaved.supabaseUrl = typedSupaUrl;
-          existingSaved.supabaseKey = typedSupaKey;
-          localStorage.setItem(CONFIG_KEY, JSON.stringify(existingSaved));
-          refreshAdminConfigStatusUi();
-        } catch (e) {}
-      }
-
-      if (!finalSupaUrl || !finalSupaKey) {
-        errEl.textContent = "config.js கிடைக்கவில்லை. மேலே Supabase Project URL மற்றும் Anon Key உள்ளிடவும்.";
-        return;
-      }
-
-      if (!email || !password) {
-        errEl.textContent = "சரியான Supabase Admin Email மற்றும் Password அவசியம் உள்ளிடவும்.";
-        return;
-      }
-
-      var btn = g("adminSignInBtn");
-      btn.disabled = true;
-      errEl.className = "text-xs font-bold text-blue-700";
-      errEl.textContent = "Verifying Email & Password with Supabase backend...";
-      try {
-        var sessionData = await signInWithSupabaseEmail(finalSupaUrl, finalSupaKey, email, password);
-        await verifyAdminInSupabase(finalSupaUrl, finalSupaKey, sessionData);
-        activeSupabaseSession = sessionData;
-        if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
-        errEl.className = "text-xs font-bold text-emerald-700";
-        errEl.textContent = "";
-        switchScreen("adminDashboardScreen");
-        switchAdminTab(1);
-        showToast("Supabase Admin authenticated (" + email + ").");
-      } catch (err) {
-        activeSupabaseSession = null;
-        errEl.className = "text-xs font-bold text-red-700";
-        errEl.textContent = err && err.message ? err.message : "Invalid Supabase Admin Email or Password.";
-      } finally {
-        btn.disabled = false;
+    ["langModeSel", "examLangModeSel"].forEach(function(id) {
+      if (g(id)) {
+        g(id).addEventListener("change", function(e) {
+          applyAccPrefs({
+            fontSize: g("fontSizeSel") ? g("fontSizeSel").value : "1",
+            contrast: g("contrastSel") ? g("contrastSel").value : "normal",
+            lang: e.target.value,
+            anim: g("animModeSel") ? g("animModeSel").value : "full"
+          });
+        });
       }
     });
 
-    g("adminLogoutBtn").addEventListener("click", function() {
-      activeSupabaseSession = null;
-      switchScreen("studentJoinScreen");
+    ["animModeSel", "examAnimModeSel"].forEach(function(id) {
+      if (g(id)) {
+        g(id).addEventListener("change", function(e) {
+          applyAccPrefs({
+            fontSize: g("fontSizeSel") ? g("fontSizeSel").value : "1",
+            contrast: g("contrastSel") ? g("contrastSel").value : "normal",
+            lang: g("langModeSel") ? g("langModeSel").value : "both",
+            anim: e.target.value
+          });
+        });
+      }
     });
 
-    g("adminApiSettingsBtn").addEventListener("click", function() {
-      var d = g("adminApiConfigDrawer");
-      d.classList.toggle("hidden");
-      var cfg = getRuntimeConfig();
-      g("cfgGeminiKey").value = cfg.geminiKey;
-      g("cfgSupabaseUrl").value = cfg.supabaseUrl;
-      g("cfgSupabaseKey").value = cfg.supabaseKey;
-    });
-
-    g("saveApiConfigBtn").addEventListener("click", function() {
-      try {
-        localStorage.setItem(CONFIG_KEY, JSON.stringify({
-          geminiKey: g("cfgGeminiKey").value.trim(),
-          supabaseUrl: g("cfgSupabaseUrl").value.trim(),
-          supabaseKey: g("cfgSupabaseKey").value.trim()
-        }));
-        showToast("API Configuration saved to localStorage!");
-      } catch (e) {}
-    });
-
-    g("clearApiConfigBtn").addEventListener("click", function() {
-      try { localStorage.removeItem(CONFIG_KEY); } catch (e) {}
-      g("cfgGeminiKey").value = "";
+    if (g("adminSignInBtn")) {
+      g("adminSignInBtn").addEventListener("click", async function() {
       g("cfgSupabaseUrl").value = "";
       g("cfgSupabaseKey").value = "";
       showToast("Reset to built-in Local Mode.");
@@ -3579,14 +1915,16 @@
   // Initialize Application
   loadAppState();
   loadAccPrefs();
-  loadExternalConfigJs();
   populateSubjectDropdowns();
+  renderDraftBatchSubjects();
+  refreshAdminConfigStatusUi();
   g("batchReleaseDateInput").value = todayIsoDate();
   renderActiveBatchPills();
   checkExistingSavedSession();
   bindAllEvents();
+  loadSubModuleScripts();
+  callSubModules("init");
 
-  // Pre-fill batch code from URL query param (?batch=CODE) if shared by friend
   try {
     var params = new URLSearchParams(window.location.search);
     var urlBatch = params.get("batch");
