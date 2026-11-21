@@ -3148,6 +3148,13 @@
       }
     });
 
+    if (r.status === 403) {
+      throw new Error(
+        "HTTP 403: public.admin_users table-க்கு authenticated SELECT permission/RLS policy இல்லை. " +
+        "Supabase SQL Editor-ல் 'grant select on table public.admin_users to authenticated;' மற்றும் SELECT policy-ஐ Run செய்யவும்."
+      );
+    }
+
     if (!r.ok) {
       throw new Error("Admin authorization check failed (HTTP " + r.status + "). Ensure public.admin_users is configured.");
     }
