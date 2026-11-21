@@ -791,12 +791,23 @@
           Select a batch to view subject-wise approved question status.
         </div>
 
+        <!-- Visual Batch Subject Plan Breakdown (Shows exact subjects & counts selected during Batch creation) -->
+        <div id="aiBatchSubjectsPlanBox" class="p-3.5 rounded-xl bg-white/85 border border-slate-300 mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+              Selected Batch Subject Plan (நீங்கள் தேர்ந்தெடுத்த பாடங்கள் &amp; கேள்வி எண்ணிக்கை)
+            </span>
+            <span id="aiBatchTotalPlanBadge" class="text-xs font-extrabold text-blue-700">Total: 0 Questions</span>
+          </div>
+          <div id="aiBatchSubjectCards" class="flex flex-wrap gap-2"></div>
+        </div>
+
         <div class="flex flex-wrap gap-2.5">
-          <button type="button" id="runAiGenerateBtn" class="btn-primary flex-1 min-w-[200px] py-3 px-4 text-sm shadow">
-            ✨ Generate Selected Subject
+          <button type="button" id="runAiGenerateAllBatchBtn" class="btn-primary flex-1 min-w-[230px] py-3 px-4 text-sm shadow">
+            ✨ AI Question Generate (All Batch Subjects)
           </button>
-          <button type="button" id="runAiGenerateAllBatchBtn" class="btn-sec flex-1 min-w-[220px] py-3 px-4 text-sm shadow">
-            ⚡ Generate All Batch Subjects (Full Plan)
+          <button type="button" id="runAiGenerateBtn" class="btn-sec py-3 px-4 text-xs sm:text-sm">
+            Generate Selected Subject Only
           </button>
           <button type="button" id="setRemainingCountBtn" class="btn-ghost py-3 px-4 text-xs sm:text-sm">
             Auto-Set Remaining
@@ -2223,6 +2234,9 @@
     if (prev && appState.batches.some(function(b) { return b.id === prev; })) {
       bSel.value = prev;
     }
+    if (g("aiGenerateStatusMsg")) {
+      g("aiGenerateStatusMsg").textContent = "";
+    }
     syncAiSubjectDropdownForSelectedBatch();
     updateAiBatchBannerAndQueue();
   }
@@ -2251,9 +2265,17 @@
 
     var currentSubj = sSel.value;
     sSel.innerHTML = opts.map(function(name) {
-      return '<option value="' + name + '">' + name + "</option>";
+      var planItem = batch && Array.isArray(batch.subjects)
+        ? batch.subjects.find(function(x) { return x.name === name; })
+        : null;
+      var suffix = planItem ? " (" + planItem.target + " Qs)" : "";
+      return '<option value="' + name + '">' + name + suffix + "</option>";
     }).join("");
-    if (currentSubj && seen[currentSubj]) sSel.value = currentSubj;
+    if (currentSubj && seen[currentSubj]) {
+      sSel.value = currentSubj;
+    } else if (batch && Array.isArray(batch.subjects) && batch.subjects.length) {
+      sSel.value = batch.subjects[0].name;
+    }
   }
 
   function updateAiBatchBannerAndQueue() {
@@ -2267,33 +2289,74 @@
     var approvedForSubj = attachedQs.filter(function(q) { return q.subject === subj; }).length;
     var need = Math.max(0, target - approvedForSubj);
 
+    // Sync Question Count input to remaining/target needed for the selected subject
+    if (g("aiNumQuestionsInput")) {
+      g("aiNumQuestionsInput").value = String(need > 0 ? need : target);
+    }
+
     g("aiBatchProgressBanner").textContent =
-      "Target Batch: " + batch.code + " (" + batch.category + ") • Subject [" + subj + "]: " +
+      "Target Batch: " + batch.code + " (" + batch.category + ") • Active Subject [" + subj + "]: " +
       approvedForSubj + " / " + target + " Approved (Remaining Needed: " + need + ") • Total Batch Qs: " + attachedQs.length;
+
+    // Render visual breakdown of ALL subjects & question counts selected for this batch
+    var cardsBox = g("aiBatchSubjectCards");
+    var totalBadge = g("aiBatchTotalPlanBadge");
+    if (cardsBox) {
+      var subjectsList = Array.isArray(batch.subjects) ? batch.subjects : [];
+      var totalTarget = subjectsList.reduce(function(sum, s) { return sum + (Number(s.target) || 0); }, 0);
+      if (totalBadge) {
+        totalBadge.textContent = "Total Plan: " + attachedQs.length + " / " + totalTarget + " Questions";
+      }
+
+      if (!subjectsList.length) {
+        cardsBox.innerHTML = '<span class="text-xs opacity-70">No subjects configured in this batch yet.</span>';
+      } else {
+        cardsBox.innerHTML = subjectsList.map(function(s) {
+          var appCnt = attachedQs.filter(function(q) { return q.subject === s.name; }).length;
+          var draftCnt = appState.questions.filter(function(q) {
+            return q.batchId === batch.id && q.subject === s.name && q.status === "draft";
+          }).length;
+          var isSelected = s.name === subj;
+          var isComplete = appCnt >= Number(s.target);
+          var badgeCls = isComplete
+            ? "bg-emerald-100 border-emerald-400 text-emerald-900"
+            : (isSelected ? "bg-blue-100 border-blue-500 text-blue-950 ring-2 ring-blue-400/40" : "bg-slate-100 border-slate-300 text-slate-800");
+          return '<button type="button" data-pick-subj="' + s.name.replace(/"/g, "&quot;") + '" class="ai-plan-pill px-3 py-2 rounded-xl border text-left text-xs transition ' + badgeCls + '">' +
+            '<div class="font-extrabold">' + s.name + ': ' + s.target + ' Qs</div>' +
+            '<div class="opacity-80 mt-0.5">Approved: ' + appCnt + '/' + s.target + (draftCnt ? ' • Drafts: ' + draftCnt : '') + '</div>' +
+            '</button>';
+        }).join("");
+
+        var pillBtns = cardsBox.querySelectorAll(".ai-plan-pill");
+        for (var i = 0; i < pillBtns.length; i++) {
+          pillBtns[i].addEventListener("click", function() {
+            var pickedSubj = this.getAttribute("data-pick-subj");
+            g("aiSubjectDropdown").value = pickedSubj;
+            updateAiBatchBannerAndQueue();
+          });
+        }
+      }
+    }
 
     renderApprovalQueueList();
   }
 
   function buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus) {
-    var bank = TNPSC_QUESTION_BANK[subject] || TNPSC_QUESTION_BANK["Indian Polity"];
-
-    // Track already-existing questions in this batch so we never pick the same question twice
-    var existingTexts = {};
-    appState.questions.forEach(function(q) {
-      if (q.batchId === batch.id) {
-        existingTexts[String(q.ta || "").trim()] = true;
-      }
+    // Match preset bank case-insensitively or fall back to subject-tagged dynamic questions
+    var matchedKey = Object.keys(TNPSC_QUESTION_BANK).find(function(k) {
+      return k.toLowerCase() === String(subject || "").trim().toLowerCase();
     });
+    var bank = matchedKey ? TNPSC_QUESTION_BANK[matchedKey] : null;
 
-    // Shuffle unused pool first, then used pool if count exceeds bank size
-    var unused = [];
-    var used = [];
-    bank.forEach(function(item) {
-      var candidateTa = (topicFocus ? "[" + topicFocus + "] " : "") + item.ta;
-      if (existingTexts[candidateTa.trim()] || existingTexts[item.ta.trim()]) {
-        used.push(item);
-      } else {
-        unused.push(item);
+    // Track already-existing questions across ALL batches & current batch so brand-new questions are prioritized
+    var batchExisting = {};
+    var globalExisting = {};
+    appState.questions.forEach(function(q) {
+      var normTa = String(q.ta || "").replace(/^\[[^\]]+\]\s*/, "").trim();
+      globalExisting[normTa] = true;
+      if (q.batchId === batch.id) {
+        batchExisting[String(q.ta || "").trim()] = true;
+        batchExisting[normTa] = true;
       }
     });
 
@@ -2308,64 +2371,114 @@
       return copy;
     }
 
-    var orderedPool = shuffleArr(unused).concat(shuffleArr(used));
     var results = [];
+    if (bank && bank.length) {
+      var brandNewPool = [];
+      var unusedInBatchPool = [];
+      var fallbackPool = [];
 
-    for (var i = 0; i < count; i++) {
-      var tpl = orderedPool[i % orderedPool.length];
-      var overflowCycle = Math.floor(i / orderedPool.length);
+      bank.forEach(function(item) {
+        var normTa = String(item.ta || "").trim();
+        if (!globalExisting[normTa]) {
+          brandNewPool.push(item);
+        } else if (!batchExisting[normTa]) {
+          unusedInBatchPool.push(item);
+        } else {
+          fallbackPool.push(item);
+        }
+      });
 
-      // Generate dynamic arithmetic variations if Aptitude bank overflows
-      if (overflowCycle > 0 && subject === "Aptitude & Mental Ability") {
-        var baseP = (i + 2) * 1000;
-        var rate = 5 + (i % 6);
-        var yrs = 2 + (i % 4);
-        var ansSi = (baseP * rate * yrs) / 100;
+      var orderedPool = shuffleArr(brandNewPool)
+        .concat(shuffleArr(unusedInBatchPool))
+        .concat(shuffleArr(fallbackPool));
+
+      for (var i = 0; i < count; i++) {
+        var tpl = orderedPool[i % orderedPool.length];
+        var overflowCycle = Math.floor(i / orderedPool.length);
+
+        if (overflowCycle > 0 && matchedKey === "Aptitude & Mental Ability") {
+          var baseP = (i + 2) * 1000;
+          var rate = 5 + (i % 6);
+          var yrs = 2 + (i % 4);
+          var ansSi = (baseP * rate * yrs) / 100;
+          results.push({
+            id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
+            batchId: batch.id,
+            subject: subject,
+            difficulty: difficulty,
+            ta: "₹" + baseP + "-க்கு ஆண்டுக்கு " + rate + "% தனிவட்டி வீதம் " + yrs + " ஆண்டுகளுக்குக் கிடைக்கும் வட்டி எவ்வளவு?",
+            en: "Calculate the Simple Interest on ₹" + baseP + " at " + rate + "% per annum for " + yrs + " years.",
+            opts: [
+              { ta: "₹" + ansSi, en: "₹" + ansSi },
+              { ta: "₹" + (ansSi + 150), en: "₹" + (ansSi + 150) },
+              { ta: "₹" + Math.max(100, ansSi - 100), en: "₹" + Math.max(100, ansSi - 100) },
+              { ta: "₹" + (ansSi + 300), en: "₹" + (ansSi + 300) }
+            ],
+            a: 0,
+            whyTa: "SI = (P × N × R) / 100 = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
+            whyEn: "SI = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
+            status: "draft"
+          });
+          continue;
+        }
+
+        var optWithFlag = tpl.opts.map(function(o, oi) {
+          return { ta: o.ta, en: o.en, isCorrect: oi === Number(tpl.a) };
+        });
+        var shuffledOpts = shuffleArr(optWithFlag);
+        var newCorrectIdx = 0;
+        shuffledOpts.forEach(function(o, idx) {
+          if (o.isCorrect) newCorrectIdx = idx;
+        });
+
+        var prefixTa = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " Set-" + (overflowCycle + 1) + "] " : "");
+        var prefixEn = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " Set-" + (overflowCycle + 1) + "] " : "");
+
         results.push({
           id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
           batchId: batch.id,
           subject: subject,
           difficulty: difficulty,
-          ta: "₹" + baseP + "-க்கு ஆண்டுக்கு " + rate + "% தனிவட்டி வீதம் " + yrs + " ஆண்டுகளுக்குக் கிடைக்கும் வட்டி எவ்வளவு?",
-          en: "Calculate the Simple Interest on ₹" + baseP + " at " + rate + "% per annum for " + yrs + " years.",
-          opts: [
-            { ta: "₹" + ansSi, en: "₹" + ansSi },
-            { ta: "₹" + (ansSi + 150), en: "₹" + (ansSi + 150) },
-            { ta: "₹" + Math.max(100, ansSi - 100), en: "₹" + Math.max(100, ansSi - 100) },
-            { ta: "₹" + (ansSi + 300), en: "₹" + (ansSi + 300) }
-          ],
-          a: 0,
-          whyTa: "SI = (P × N × R) / 100 = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
-          whyEn: "SI = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
+          ta: prefixTa + tpl.ta,
+          en: prefixEn + tpl.en,
+          opts: shuffledOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
+          a: newCorrectIdx,
+          whyTa: tpl.whyTa,
+          whyEn: tpl.whyEn,
           status: "draft"
         });
-        continue;
       }
+      return results;
+    }
 
-      // Shuffle options for variety while preserving exact correct index
-      var optWithFlag = tpl.opts.map(function(o, oi) {
-        return { ta: o.ta, en: o.en, isCorrect: oi === Number(tpl.a) };
-      });
-      var shuffledOpts = shuffleArr(optWithFlag);
-      var newCorrectIdx = 0;
-      shuffledOpts.forEach(function(o, idx) {
-        if (o.isCorrect) newCorrectIdx = idx;
-      });
+    // Custom subject fallback when admin enters a custom subject name not in preset bank
+    var fallbackKeys = Object.keys(TNPSC_QUESTION_BANK);
+    var combinedPool = [];
+    fallbackKeys.forEach(function(k) {
+      TNPSC_QUESTION_BANK[k].forEach(function(qItem) { combinedPool.push(qItem); });
+    });
+    var shuffledCustom = shuffleArr(combinedPool);
 
-      var prefixTa = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " #" + (i + 1) + "] " : "");
-      var prefixEn = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " #" + (i + 1) + "] " : "");
+    for (var c = 0; c < count; c++) {
+      var item = shuffledCustom[c % shuffledCustom.length];
+      var optFlags = item.opts.map(function(o, oi) {
+        return { ta: o.ta, en: o.en, isCorrect: oi === Number(item.a) };
+      });
+      var sOpts = shuffleArr(optFlags);
+      var cIdx = 0;
+      sOpts.forEach(function(o, idx) { if (o.isCorrect) cIdx = idx; });
 
       results.push({
-        id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
+        id: "q-ai-" + Date.now() + "-" + c + "-" + Math.floor(Math.random() * 100000),
         batchId: batch.id,
         subject: subject,
         difficulty: difficulty,
-        ta: prefixTa + tpl.ta,
-        en: prefixEn + tpl.en,
-        opts: shuffledOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
-        a: newCorrectIdx,
-        whyTa: tpl.whyTa,
-        whyEn: tpl.whyEn,
+        ta: "[" + subject + (topicFocus ? " - " + topicFocus : "") + "] " + item.ta,
+        en: "[" + subject + (topicFocus ? " - " + topicFocus : "") + "] " + item.en,
+        opts: sOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
+        a: cIdx,
+        whyTa: item.whyTa,
+        whyEn: item.whyEn,
         status: "draft"
       });
     }
