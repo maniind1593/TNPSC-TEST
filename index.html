@@ -2577,7 +2577,7 @@
   /* ===== END ADDED ===== */
 
   /* ===== ADDED 2: Gemini generation, JSON import, preview/edit/reject, image upload ===== */
-  var GEMINI_MODEL = "gemini-2.5-flash";
+  var GEMINI_MODEL = "gemini-3.8-flash";
   var LETTERS = ["A", "B", "C", "D"];
   var editingQid = null;
   var JSON_SAMPLE = '[{"subject":"General Tamil","questionTa":"திருக்குறளின் ஆசிரியர் யார்?","questionEn":"Who wrote Thirukkural?","options":[{"ta":"இளங்கோவடிகள்","en":"Ilango Adigal"},{"ta":"திருவள்ளுவர்","en":"Thiruvalluvar"},{"ta":"கம்பர்","en":"Kambar"},{"ta":"பாரதியார்","en":"Bharathiyar"}],"correctIndex":1,"explanationTa":"","explanationEn":"","image":"https://... (optional)"}]';
@@ -2873,6 +2873,7 @@
     p.innerHTML = "<h3 class='font-extrabold text-base'>Add Questions: AI Key / JSON Paste / Manual (+ Images)</h3>" +
       "<p class='text-xs opacity-80'>AI-ku Gemini key podunga (browser memory-la mattum — refresh panna clear aagum). Illana JSON paste panni Run pannunga, allathu manual-ah type panni image upload pannunga. Ellaame mudhalla keezha Preview Queue-la varum; angae Approve / Edit / Reject pannalaam. Answer: <code>correctIndex</code> 0-3 allathu <code>answer</code> A-D.</p>" +
       "<input id='inlineGeminiKey' type='password' autocomplete='off' placeholder='Gemini API Key (AIza...)' class='w-full p-2.5 text-xs'>" +
+      "<input id='inlineGeminiModel' type='text' autocomplete='off' value='" + esc(GEMINI_MODEL) + "' title='Gemini model name' class='w-full p-2.5 text-xs'>" +
       "<textarea id='jsonQInput' rows='7' class='w-full p-2.5 text-xs font-mono' placeholder='" + esc(JSON_SAMPLE) + "'></textarea>" +
       "<div class='flex flex-wrap gap-2'><button type='button' id='runJsonBtn' class='btn-primary px-4 py-2 text-xs'>▶ Run JSON → Preview</button>" +
       "<label class='btn-ghost px-4 py-2 text-xs cursor-pointer font-bold'>📂 JSON file<input type='file' id='jsonFileInput' accept='.json,.txt,application/json' class='hidden'></label>" +
@@ -2883,6 +2884,7 @@
     var keyIn = g("inlineGeminiKey");
     keyIn.value = memoryRuntimeConfig.geminiKey || "";
     keyIn.addEventListener("input", function() { memoryRuntimeConfig.geminiKey = keyIn.value.trim(); });
+    g("inlineGeminiModel").addEventListener("input", function(e) { GEMINI_MODEL = e.target.value.trim() || "gemini-3.8-flash"; });
 
     function status(msg, ok) { var s = g("jsonImportStatus"); s.className = "text-xs font-bold " + (ok ? "text-emerald-700" : "text-red-700"); s.textContent = msg; }
     function toQueue() {
