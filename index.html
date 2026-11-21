@@ -634,12 +634,40 @@
         <input id="adminPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••" class="w-full p-3">
       </div>
 
+      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <button type="button" id="forgotPasswordBtn" class="underline font-bold text-blue-700 hover:text-blue-900">
+          Forgot Password? (Send Reset Link)
+        </button>
+        <button type="button" id="toggleChangePasswordPanelBtn" class="underline font-bold text-teal-700 hover:text-teal-900">
+          Change Password Here
+        </button>
+      </div>
+
+      <div id="inAppChangePasswordBox" class="hidden p-3.5 rounded-xl bg-teal-50/90 border border-teal-300 space-y-2.5">
+        <div class="text-xs font-extrabold text-teal-900">Change Supabase Admin Password Directly</div>
+        <p class="text-[11px] text-teal-800">
+          மேலே Admin Email &amp; Current Password உள்ளிட்டு (அல்லது ஏற்கனவே login செய்திருந்தால்), கீழே புதிய Password உள்ளிடவும்.
+        </p>
+        <div>
+          <label for="newAdminPasswordInput" class="block text-xs font-bold mb-1">New Password *</label>
+          <input id="newAdminPasswordInput" type="password" autocomplete="new-password" placeholder="Minimum 6 characters" class="w-full p-2.5 text-xs">
+        </div>
+        <div>
+          <label for="confirmNewAdminPasswordInput" class="block text-xs font-bold mb-1">Confirm New Password *</label>
+          <input id="confirmNewAdminPasswordInput" type="password" autocomplete="new-password" placeholder="Re-enter new password" class="w-full p-2.5 text-xs">
+        </div>
+        <button type="button" id="submitChangePasswordBtn" class="btn-sec w-full py-2.5 px-4 text-xs">
+          Update Admin Password
+        </button>
+      </div>
+
       <div class="flex flex-wrap gap-2.5 pt-2">
         <button type="button" id="adminSignInBtn" class="btn-primary flex-1 py-3 px-4 text-sm">
           Sign In to Admin V2
         </button>
       </div>
       <div id="adminLoginErr" class="text-xs font-bold text-red-700"></div>
+      <div id="adminLoginInfo" class="text-xs font-bold text-emerald-700"></div>
     </div>
   </section>
 
@@ -957,8 +985,8 @@
   var ACC_PREFS_KEY = "tnpsc_v2_acc_prefs_v1";
   var ACTIVE_SESSION_KEY = "tnpsc_v2_active_session_v1";
   var CONFIG_KEY = "tnpsc_v2_config_v1";
+  var CONFIG_SETUP_DONE_KEY = "tnpsc_v2_config_setup_done_v1";
   var SPLASH_ENABLED_KEY = "tnpsc_v2_splash_after_setup_v1";
-  var ADMIN_PIN_DEFAULT = "admin123";
   var DEFAULT_SUBJECTS = [
     "General Tamil",
     "General English",
@@ -983,6 +1011,17 @@
   var examIntervalId = null;
   var releaseIntervalId = null;
   var toastTimeoutId = null;
+
+  var memoryRuntimeConfig = {
+    supabaseUrl: "",
+    supabaseKey: "",
+    geminiKey: "",
+    ghRepo: "",
+    ghBranch: "main",
+    ghPath: "config.js",
+    ghToken: ""
+  };
+  var activeSupabaseSession = null;
 
   function g(id) {
     return document.getElementById(id);
@@ -1049,7 +1088,7 @@
         releaseTime: "20:00",
         releaseAt: relIso,
         resultsReleased: new Date(relIso).getTime() <= Date.now(),
-        centerAd: "🏛️ VETRI TNPSC ACADEMY — Group I, II/IIA, IV & VAO Live Batches Open! Call: 98765-43210",
+        centerAd: "VETRI TNPSC ACADEMY — Group I, II/IIA, IV & VAO Live Batches Open! Call: 98765-43210",
         subjects: [
           { name: "General Tamil", target: 3 },
           { name: "Indian Polity", target: 2 },
@@ -1167,10 +1206,25 @@
     }
   }
 
-  function markSplashEnabledAfterAdminSetup() {
+  function markConfigSetupDone() {
     try {
+      localStorage.setItem(CONFIG_SETUP_DONE_KEY, "1");
       localStorage.setItem(SPLASH_ENABLED_KEY, "1");
     } catch (e) {}
+    syncOneTimeSetupVisibility();
+  }
+
+  function isConfigSetupDone() {
+    try {
+      if (localStorage.getItem(CONFIG_SETUP_DONE_KEY) === "1") return true;
+    } catch (e) {}
+    return Boolean(memoryRuntimeConfig.supabaseUrl && memoryRuntimeConfig.supabaseKey);
+  }
+
+  function syncOneTimeSetupVisibility() {
+    var box = g("oneTimeSupabaseSetupFields");
+    if (!box) return;
+    box.classList.toggle("hidden", isConfigSetupDone());
   }
 
   function shouldShowSplashOnOpen(loadedConfig) {
@@ -1207,34 +1261,14 @@
     }, 1500);
   }
 
-  function loadSubModuleScripts() {}
-  function callSubModules() {}
-
-  // Memory-only runtime config & admin session (Never stored in localStorage/sessionStorage or exposed on window)
-  var memoryRuntimeConfig = {
-    supabaseUrl: "",
-    supabaseKey: "",
-    geminiKey: "",
-    ghRepo: "",
-    ghBranch: "main",
-    ghPath: "config.js",
-    ghToken: ""
-  };
-  var activeSupabaseSession = null;
-
   function getRuntimeConfig() {
-    var stored = {};
-    try {
-      var raw = localStorage.getItem(CONFIG_KEY);
-      if (raw) stored = JSON.parse(raw) || {};
-    } catch (e) {}
     return {
-      supabaseUrl: memoryRuntimeConfig.supabaseUrl || stored.supabaseUrl || "",
-      supabaseKey: memoryRuntimeConfig.supabaseKey || stored.supabaseKey || "",
-      geminiKey: memoryRuntimeConfig.geminiKey || stored.geminiKey || "",
-      ghRepo: memoryRuntimeConfig.ghRepo || stored.ghRepo || "",
-      ghBranch: memoryRuntimeConfig.ghBranch || stored.ghBranch || "main",
-      ghPath: memoryRuntimeConfig.ghPath || stored.ghPath || "config.js",
+      supabaseUrl: memoryRuntimeConfig.supabaseUrl || "",
+      supabaseKey: memoryRuntimeConfig.supabaseKey || "",
+      geminiKey: memoryRuntimeConfig.geminiKey || "",
+      ghRepo: memoryRuntimeConfig.ghRepo || "",
+      ghBranch: memoryRuntimeConfig.ghBranch || "main",
+      ghPath: memoryRuntimeConfig.ghPath || "config.js",
       ghToken: memoryRuntimeConfig.ghToken || ""
     };
   }
@@ -1245,11 +1279,12 @@
     var cfg = getRuntimeConfig();
     if (cfg.supabaseUrl && cfg.supabaseKey) {
       badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-100 border border-emerald-300 text-emerald-900";
-      badge.textContent = "✓ Supabase configured (" + cfg.supabaseUrl + "). Enter Admin Email & Password.";
+      badge.textContent = "Live config.js verified (" + cfg.supabaseUrl + "). Enter Admin Email & Password.";
     } else {
       badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900";
-      badge.textContent = "config.js not found. Enter Supabase Project URL & Anon Key above or sign in.";
+      badge.textContent = "One-time setup required: Save Supabase details to GitHub config.js.";
     }
+    syncOneTimeSetupVisibility();
   }
 
   function parseConfigText(txt) {
@@ -1274,6 +1309,12 @@
         if (parsed.supabaseUrl) base.supabaseUrl = parsed.supabaseUrl;
         if (parsed.supabaseKey) base.supabaseKey = parsed.supabaseKey;
         if (parsed.geminiKey) base.geminiKey = parsed.geminiKey;
+        if (base.supabaseUrl && base.supabaseKey) {
+          memoryRuntimeConfig.supabaseUrl = base.supabaseUrl;
+          memoryRuntimeConfig.supabaseKey = base.supabaseKey;
+          if (base.geminiKey) memoryRuntimeConfig.geminiKey = base.geminiKey;
+          markConfigSetupDone();
+        }
       }
     } catch (e) {}
     return base;
@@ -1318,6 +1359,39 @@
     }
   }
 
+  async function sendSupabasePasswordReset(supaUrl, supaKey, email) {
+    var endpoint = supaUrl.replace(/\/+$/, "") + "/auth/v1/recover";
+    var resp = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supaKey
+      },
+      body: JSON.stringify({ email: email })
+    });
+    var data = await resp.json().catch(function() { return {}; });
+    if (!resp.ok) {
+      throw new Error(data.error_description || data.msg || "Failed to send password reset email.");
+    }
+  }
+
+  async function updateSupabaseUserPassword(supaUrl, supaKey, accessToken, newPassword) {
+    var endpoint = supaUrl.replace(/\/+$/, "") + "/auth/v1/user";
+    var resp = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": supaKey,
+        "Authorization": "Bearer " + accessToken
+      },
+      body: JSON.stringify({ password: newPassword })
+    });
+    var data = await resp.json().catch(function() { return {}; });
+    if (!resp.ok) {
+      throw new Error(data.error_description || data.msg || "Failed to update password.");
+    }
+  }
+
   function getBatchById(id) {
     if (!id) return null;
     for (var i = 0; i < appState.batches.length; i++) {
@@ -1331,25 +1405,6 @@
     return appState.questions.filter(function(q) {
       return q.status === "approved" && (q.batchId === batch.id || q.batchCode === batch.code);
     });
-  }
-
-  function switchAdminTab(tabNum) {
-    [1, 2, 3].forEach(function(n) {
-      var panel = g("admTabPanel" + n);
-      var btn = g("admTabBtn" + n);
-      if (panel) panel.classList.toggle("hidden", n !== tabNum);
-      if (btn) btn.className = (n === tabNum ? "btn-primary" : "btn-ghost") + " flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
-    });
-    if (tabNum === 2) {
-      populateAiTabSelectors(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
-      syncAiSubjectDropdownForSelectedBatch();
-      updateAiBatchBannerAndQueue();
-    } else if (tabNum === 3) {
-      populateResultsTabBatches(g("resTabBatchSelect") ? g("resTabBatchSelect").value : "");
-      renderAdminResultsTable();
-    } else {
-      renderAdminBatchesList();
-    }
   }
 
   var draftBatchSubjects = [
@@ -1398,43 +1453,6 @@
     renderDraftBatchSubjects();
   }
 
-  function handleSaveNewTestBatch() {
-    var title = (g("batchTitleInput") ? g("batchTitleInput").value : "").trim();
-    var code = (g("batchCodeInput") ? g("batchCodeInput").value : "").trim().toUpperCase();
-    var fb = g("createBatchFeedback");
-    if (!title || !code) {
-      if (fb) {
-        fb.className = "mb-3 p-3 rounded-xl text-xs font-bold bg-red-100 text-red-800 border border-red-300";
-        fb.textContent = "Batch Title மற்றும் Batch Code அவசியம்.";
-        fb.classList.remove("hidden");
-      }
-      return;
-    }
-    var relDate = g("batchReleaseDateInput") ? g("batchReleaseDateInput").value : todayIsoDate();
-    var relTime = g("batchReleaseTimeInput") ? g("batchReleaseTimeInput").value : "20:00";
-    var relIso = buildReleaseIso(relDate, relTime);
-    var newBatch = {
-      id: "batch_" + Date.now(),
-      code: code,
-      title: title,
-      category: g("batchCategoryInput") ? g("batchCategoryInput").value : "Group IV",
-      durationMinutes: Math.max(1, parseInt(g("batchDurationInput") ? g("batchDurationInput").value : "15", 10) || 15),
-      releaseDate: relDate,
-      releaseTime: relTime,
-      releaseAt: relIso,
-      resultsReleased: new Date(relIso).getTime() <= Date.now(),
-      centerAd: (g("batchCenterAdInput") ? g("batchCenterAdInput").value : "").trim(),
-      subjects: draftBatchSubjects.length ? draftBatchSubjects.map(function(s) { return { name: s.name, target: s.target }; }) : [{ name: "General Tamil", target: 3 }]
-    };
-    appState.batches.unshift(newBatch);
-    saveAppState();
-    renderAdminBatchesList();
-    renderActiveBatchPills();
-    populateAiTabSelectors(newBatch.id);
-    switchAdminTab(2);
-    showToast("Batch '" + code + "' created! Now generate AI questions.");
-  }
-
   function renderAdminBatchesList() {
     var wrap = g("adminBatchesList");
     if (!wrap) return;
@@ -1443,7 +1461,7 @@
       var card = document.createElement("div");
       card.className = "p-3 rounded-xl bg-white/80 border border-slate-200 flex flex-wrap items-center justify-between gap-2";
       var info = document.createElement("div");
-      info.innerHTML = "<div class='font-extrabold text-sm'>" + b.code + " — " + b.title + "</div><div class='text-xs opacity-75'>" + b.category + " • " + b.durationMinutes + " mins • Release: " + (b.releaseTime || "20:00") + "</div>";
+      info.innerHTML = "<div class='font-extrabold text-sm'>" + esc(b.code) + " — " + esc(b.title) + "</div><div class='text-xs opacity-75'>" + esc(b.category) + " • " + b.durationMinutes + " mins • Release: " + (b.releaseTime || "20:00") + "</div>";
       card.appendChild(info);
       wrap.appendChild(card);
     });
@@ -1513,46 +1531,6 @@
       });
     }
     return out;
-  }
-
-  function handleGenerateAiQuestions() {
-    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
-    var subj = g("aiSubjectDropdown") ? g("aiSubjectDropdown").value : "General Tamil";
-    var cnt = parseInt(g("aiNumQuestionsInput") ? g("aiNumQuestionsInput").value : "3", 10) || 3;
-    var diff = g("aiDifficultySelect") ? g("aiDifficultySelect").value : "TNPSC Standard";
-    var topic = g("aiTopicInput") ? g("aiTopicInput").value.trim() : "";
-    var created = buildSubjectQuestionSet(subj, cnt, diff, topic, batch);
-    appState.questions = created.concat(appState.questions);
-    saveAppState();
-    updateAiBatchBannerAndQueue();
-    var st = g("aiGenerateStatusMsg");
-    if (st) {
-      st.className = "mt-2.5 text-xs font-bold text-emerald-700";
-      st.textContent = "✓ " + created.length + " கேள்விகள் [" + subj + "] Approval Queue-ல் தயாராக உள்ளன!";
-    }
-  }
-
-  function handleGenerateAllBatchSubjects() {
-    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
-    if (!batch || !Array.isArray(batch.subjects) || !batch.subjects.length) {
-      handleGenerateAiQuestions();
-      return;
-    }
-    var diff = g("aiDifficultySelect") ? g("aiDifficultySelect").value : "TNPSC Standard";
-    var topic = g("aiTopicInput") ? g("aiTopicInput").value.trim() : "";
-    var allNew = [];
-    batch.subjects.forEach(function(s) {
-      var list = buildSubjectQuestionSet(s.name, Number(s.target) || 1, diff, topic, batch);
-      allNew = allNew.concat(list);
-    });
-    appState.questions = allNew.concat(appState.questions);
-    saveAppState();
-    updateAiBatchBannerAndQueue();
-    var st = g("aiGenerateStatusMsg");
-    if (st) {
-      st.className = "mt-2.5 text-xs font-bold text-emerald-700";
-      st.textContent = "✓ " + allNew.length + " Subject-wise கேள்விகள் [" + batch.code + "] Approval Queue-ல் உருவாக்கப்பட்டுள்ளன!";
-    }
   }
 
   function approveQuestionAndAttachToBatch(qId, batchId) {
@@ -1679,26 +1657,153 @@
     list.forEach(function(a, idx) {
       var tr = document.createElement("tr");
       tr.className = "border-b border-slate-200";
-      tr.innerHTML = "<td class='p-3 font-bold'>#" + (idx + 1) + "</td><td class='p-3 font-bold'>" + a.studentName + "</td><td class='p-3'>" + a.phone + "</td><td class='p-3'>" + a.status + "</td><td class='p-3 font-bold'>" + (a.score || 0) + "/" + (a.totalQuestions || 0) + "</td><td class='p-3 text-xs'>Ready</td>";
+      tr.innerHTML = "<td class='p-3 font-bold'>#" + (idx + 1) + "</td><td class='p-3 font-bold'>" + esc(a.studentName) + "</td><td class='p-3'>" + esc(a.phone) + "</td><td class='p-3'>" + esc(a.status) + "</td><td class='p-3 font-bold'>" + (a.score || 0) + "/" + (a.totalQuestions || 0) + "</td><td class='p-3 text-xs'>Ready</td>";
       tbody.appendChild(tr);
     });
   }
 
-  function openWaitingOrResultsScreen(att) {
-    if (!att) return;
-    switchScreen("studentResultsScreen");
-    var batch = getBatchById(att.batchId);
-    var isReleased = Boolean((batch && batch.resultsReleased) || (batch && batch.releaseAt && new Date(batch.releaseAt).getTime() <= Date.now()));
-    if (g("waitingReleaseCard")) g("waitingReleaseCard").classList.toggle("hidden", isReleased);
-    if (g("releasedResultsCard")) g("releasedResultsCard").classList.toggle("hidden", !isReleased);
-    if (g("waitingCandidateInfo")) {
-      g("waitingCandidateInfo").textContent = att.studentName + " (" + att.phone + ") • Score: " + (att.score || 0) + "/" + (att.totalQuestions || 0);
+  function switchAdminTab(tabNum) {
+    [1, 2, 3].forEach(function(n) {
+      var panel = g("admTabPanel" + n);
+      var btn = g("admTabBtn" + n);
+      if (panel) panel.classList.toggle("hidden", n !== tabNum);
+      if (btn) btn.className = (n === tabNum ? "btn-primary" : "btn-ghost") + " flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
+    });
+    if (tabNum === 2) {
+      populateAiTabSelectors(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+      syncAiSubjectDropdownForSelectedBatch();
+      updateAiBatchBannerAndQueue();
+    } else if (tabNum === 3) {
+      populateResultsTabBatches(g("resTabBatchSelect") ? g("resTabBatchSelect").value : "");
+      renderAdminResultsTable();
+    } else {
+      renderAdminBatchesList();
     }
-    if (isReleased) {
-      if (g("resScoreVal")) g("resScoreVal").textContent = (att.score || 0) + " / " + (att.totalQuestions || 0);
-      var acc = att.totalQuestions ? Math.round(((att.score || 0) / att.totalQuestions) * 100) : 0;
-      if (g("resAccuracyVal")) g("resAccuracyVal").textContent = acc + "%";
-      if (g("resWrongSkipVal")) g("resWrongSkipVal").textContent = (att.wrongCount || 0) + " / " + (att.skippedCount || 0);
+  }
+
+  function handleSaveNewTestBatch() {
+    var title = (g("batchTitleInput") ? g("batchTitleInput").value : "").trim();
+    var code = (g("batchCodeInput") ? g("batchCodeInput").value : "").trim().toUpperCase();
+    var fb = g("createBatchFeedback");
+    if (!title || !code) {
+      if (fb) {
+        fb.className = "mb-3 p-3 rounded-xl text-xs font-bold bg-red-100 text-red-800 border border-red-300";
+        fb.textContent = "Batch Title மற்றும் Batch Code அவசியம்.";
+        fb.classList.remove("hidden");
+      }
+      return;
+    }
+    var relDate = g("batchReleaseDateInput") ? g("batchReleaseDateInput").value : todayIsoDate();
+    var relTime = g("batchReleaseTimeInput") ? g("batchReleaseTimeInput").value : "20:00";
+    var relIso = buildReleaseIso(relDate, relTime);
+    var newBatch = {
+      id: "batch_" + Date.now(),
+      code: code,
+      title: title,
+      category: g("batchCategoryInput") ? g("batchCategoryInput").value : "Group IV",
+      durationMinutes: Math.max(1, parseInt(g("batchDurationInput") ? g("batchDurationInput").value : "15", 10) || 15),
+      releaseDate: relDate,
+      releaseTime: relTime,
+      releaseAt: relIso,
+      resultsReleased: new Date(relIso).getTime() <= Date.now(),
+      centerAd: (g("batchCenterAdInput") ? g("batchCenterAdInput").value : "").trim(),
+      subjects: draftBatchSubjects.length ? draftBatchSubjects.map(function(s) { return { name: s.name, target: s.target }; }) : [{ name: "General Tamil", target: 3 }]
+    };
+    appState.batches.unshift(newBatch);
+    saveAppState();
+    renderAdminBatchesList();
+    renderActiveBatchPills();
+    populateAiTabSelectors(newBatch.id);
+    switchAdminTab(2);
+    showToast("Batch '" + code + "' created! Now generate AI questions.");
+  }
+
+  function handleGenerateAiQuestions() {
+    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+    var subj = g("aiSubjectDropdown") ? g("aiSubjectDropdown").value : "General Tamil";
+    var cnt = parseInt(g("aiNumQuestionsInput") ? g("aiNumQuestionsInput").value : "3", 10) || 3;
+    var diff = g("aiDifficultySelect") ? g("aiDifficultySelect").value : "TNPSC Standard";
+    var topic = g("aiTopicInput") ? g("aiTopicInput").value.trim() : "";
+    var created = buildSubjectQuestionSet(subj, cnt, diff, topic, batch);
+    appState.questions = created.concat(appState.questions);
+    saveAppState();
+    updateAiBatchBannerAndQueue();
+    var st = g("aiGenerateStatusMsg");
+    if (st) {
+      st.className = "mt-2.5 text-xs font-bold text-emerald-700";
+      st.textContent = "✓ " + created.length + " கேள்விகள் [" + subj + "] Approval Queue-ல் தயாராக உள்ளன!";
+    }
+  }
+
+  function handleGenerateAllBatchSubjects() {
+    var batch = getBatchById(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
+    if (!batch || !Array.isArray(batch.subjects) || !batch.subjects.length) {
+      handleGenerateAiQuestions();
+      return;
+    }
+    var diff = g("aiDifficultySelect") ? g("aiDifficultySelect").value : "TNPSC Standard";
+    var topic = g("aiTopicInput") ? g("aiTopicInput").value.trim() : "";
+    var allNew = [];
+    batch.subjects.forEach(function(s) {
+      var list = buildSubjectQuestionSet(s.name, Number(s.target) || 1, diff, topic, batch);
+      allNew = allNew.concat(list);
+    });
+    appState.questions = allNew.concat(appState.questions);
+    saveAppState();
+    updateAiBatchBannerAndQueue();
+    var st = g("aiGenerateStatusMsg");
+    if (st) {
+      st.className = "mt-2.5 text-xs font-bold text-emerald-700";
+      st.textContent = "✓ " + allNew.length + " Subject-wise கேள்விகள் [" + batch.code + "] Approval Queue-ல் உருவாக்கப்பட்டுள்ளன!";
+    }
+  }
+
+  async function writeConfigJsToGithub(cfg) {
+    if (!cfg.ghRepo || !cfg.ghToken || !cfg.supabaseUrl || !cfg.supabaseKey) {
+      throw new Error("Supabase URL, Anon Key, GitHub Repo (owner/repo), மற்றும் Token அவசியம்.");
+    }
+    var fileContent =
+      "window.CONFIG = {\n" +
+      "  SUPABASE_URL: " + JSON.stringify(cfg.supabaseUrl) + ",\n" +
+      "  SUPABASE_ANON_KEY: " + JSON.stringify(cfg.supabaseKey) +
+      (cfg.geminiKey ? (",\n  GEMINI_API_KEY: " + JSON.stringify(cfg.geminiKey)) : "") + "\n" +
+      "};\n" +
+      "window.SUPABASE_URL = window.CONFIG.SUPABASE_URL;\n" +
+      "window.SUPABASE_ANON_KEY = window.CONFIG.SUPABASE_ANON_KEY;\n";
+
+    var apiBase = "https://api.github.com/repos/" + cfg.ghRepo + "/contents/" + encodeURIComponent(cfg.ghPath || "config.js").replace(/%2F/g, "/");
+    var sha = "";
+    var getRes = await fetch(apiBase + "?ref=" + encodeURIComponent(cfg.ghBranch || "main"), {
+      headers: {
+        "Authorization": "Bearer " + cfg.ghToken,
+        "Accept": "application/vnd.github+json"
+      }
+    });
+    if (getRes.ok) {
+      var existingFile = await getRes.json();
+      if (existingFile && existingFile.sha) sha = existingFile.sha;
+    }
+
+    var b64 = btoa(unescape(encodeURIComponent(fileContent)));
+    var putPayload = {
+      message: "chore: save config.js via Admin V2",
+      content: b64,
+      branch: cfg.ghBranch || "main"
+    };
+    if (sha) putPayload.sha = sha;
+
+    var putRes = await fetch(apiBase, {
+      method: "PUT",
+      headers: {
+        "Authorization": "Bearer " + cfg.ghToken,
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(putPayload)
+    });
+    if (!putRes.ok) {
+      var errJson = await putRes.json().catch(function() { return {}; });
+      throw new Error(errJson.message || ("GitHub save failed (HTTP " + putRes.status + ")"));
     }
   }
 
@@ -1786,32 +1891,75 @@
       }
     });
 
+    if (g("saveSupabaseToGithubConfigBtn")) {
+      g("saveSupabaseToGithubConfigBtn").addEventListener("click", async function() {
+        var stEl = g("ghConfigSaveStatus");
+        var cfg = {
+          supabaseUrl: (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim(),
+          supabaseKey: (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim(),
+          ghRepo: (g("ghRepoInput") ? g("ghRepoInput").value : "").trim(),
+          ghBranch: (g("ghBranchInput") ? g("ghBranchInput").value : "main").trim() || "main",
+          ghPath: (g("ghFilePathInput") ? g("ghFilePathInput").value : "config.js").trim() || "config.js",
+          ghToken: (g("ghTokenInput") ? g("ghTokenInput").value : "").trim(),
+          geminiKey: memoryRuntimeConfig.geminiKey || ""
+        };
+        try {
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-blue-700";
+            stEl.textContent = "Saving config.js to GitHub...";
+          }
+          await writeConfigJsToGithub(cfg);
+          memoryRuntimeConfig.supabaseUrl = cfg.supabaseUrl;
+          memoryRuntimeConfig.supabaseKey = cfg.supabaseKey;
+          markConfigSetupDone();
+          refreshAdminConfigStatusUi();
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-emerald-700";
+            stEl.textContent = "Saved to GitHub config.js! Next login will ask only Email & Password.";
+          }
+          showToast("config.js saved to GitHub!");
+        } catch (err) {
+          if (stEl) {
+            stEl.className = "text-xs font-bold text-red-700";
+            stEl.textContent = err && err.message ? err.message : "Failed to save config.js.";
+          }
+        }
+      });
+    }
+
     if (g("adminSignInBtn")) {
       g("adminSignInBtn").addEventListener("click", async function() {
         var errEl = g("adminLoginErr");
+        var infoEl = g("adminLoginInfo");
         if (errEl) errEl.textContent = "";
+        if (infoEl) infoEl.textContent = "";
+
         var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
         var password = g("adminPasswordInput") ? g("adminPasswordInput").value : "";
         if (!email || !password) {
           if (errEl) errEl.textContent = "சரியான Supabase Admin Email மற்றும் Password அவசியம் உள்ளிடவும்.";
           return;
         }
+
         var cfg = await loadExternalConfigJs();
         var inputUrl = (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim();
         var inputKey = (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim();
         var supaUrl = inputUrl || cfg.supabaseUrl;
         var supaKey = inputKey || cfg.supabaseKey;
+
         if (!supaUrl || !supaKey) {
-          if (errEl) errEl.textContent = "Supabase URL மற்றும் Anon Key உள்ளிடவும் அல்லது config.js அமைக்கவும்.";
+          if (errEl) errEl.textContent = "config.js அல்லது Supabase URL & Anon Key கிடைக்கவில்லை.";
           return;
         }
+
         memoryRuntimeConfig.supabaseUrl = supaUrl;
         memoryRuntimeConfig.supabaseKey = supaKey;
+
         try {
           var sessionData = await signInWithSupabaseEmail(supaUrl, supaKey, email, password);
           await verifyAdminInSupabase(supaUrl, supaKey, sessionData);
           activeSupabaseSession = sessionData;
-          markSplashEnabledAfterAdminSetup();
+          markConfigSetupDone();
           if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
           switchScreen("adminDashboardScreen");
           switchAdminTab(1);
@@ -1822,10 +1970,99 @@
       });
     }
 
+    if (g("forgotPasswordBtn")) {
+      g("forgotPasswordBtn").addEventListener("click", async function() {
+        var errEl = g("adminLoginErr");
+        var infoEl = g("adminLoginInfo");
+        if (errEl) errEl.textContent = "";
+        if (infoEl) infoEl.textContent = "";
+        var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
+        if (!email) {
+          if (errEl) errEl.textContent = "Password reset link அனுப்ப முதலில் Admin Email உள்ளிடவும்.";
+          return;
+        }
+        var cfg = await loadExternalConfigJs();
+        var supaUrl = cfg.supabaseUrl || (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value.trim() : "");
+        var supaKey = cfg.supabaseKey || (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value.trim() : "");
+        if (!supaUrl || !supaKey) {
+          if (errEl) errEl.textContent = "Supabase URL & Anon Key / config.js அவசியம்.";
+          return;
+        }
+        try {
+          await sendSupabasePasswordReset(supaUrl, supaKey, email);
+          if (infoEl) infoEl.textContent = "Password reset link உங்கள் Email (" + email + ")-க்கு அனுப்பப்பட்டுள்ளது.";
+          showToast("Password reset link sent!");
+        } catch (err) {
+          if (errEl) errEl.textContent = err && err.message ? err.message : "Unable to send reset link.";
+        }
+      });
+    }
+
+    if (g("toggleChangePasswordPanelBtn")) {
+      g("toggleChangePasswordPanelBtn").addEventListener("click", function() {
+        var box = g("inAppChangePasswordBox");
+        if (box) box.classList.toggle("hidden");
+      });
+    }
+
+    if (g("submitChangePasswordBtn")) {
+      g("submitChangePasswordBtn").addEventListener("click", async function() {
+        var errEl = g("adminLoginErr");
+        var infoEl = g("adminLoginInfo");
+        if (errEl) errEl.textContent = "";
+        if (infoEl) infoEl.textContent = "";
+
+        var newPass = g("newAdminPasswordInput") ? g("newAdminPasswordInput").value : "";
+        var confirmPass = g("confirmNewAdminPasswordInput") ? g("confirmNewAdminPasswordInput").value : "";
+        if (!newPass || newPass.length < 6) {
+          if (errEl) errEl.textContent = "புதிய Password குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்.";
+          return;
+        }
+        if (newPass !== confirmPass) {
+          if (errEl) errEl.textContent = "New Password மற்றும் Confirm Password ஒத்துப்போகவில்லை.";
+          return;
+        }
+
+        var cfg = await loadExternalConfigJs();
+        var supaUrl = cfg.supabaseUrl || (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value.trim() : "");
+        var supaKey = cfg.supabaseKey || (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value.trim() : "");
+        if (!supaUrl || !supaKey) {
+          if (errEl) errEl.textContent = "Supabase URL & Anon Key / config.js அவசியம்.";
+          return;
+        }
+
+        try {
+          var sessionToUse = activeSupabaseSession;
+          if (!sessionToUse || !sessionToUse.access_token) {
+            var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
+            var currentPass = g("adminPasswordInput") ? g("adminPasswordInput").value : "";
+            if (!email || !currentPass) {
+              throw new Error("Password மாற்ற Admin Email மற்றும் Current Password உள்ளிடவும்.");
+            }
+            sessionToUse = await signInWithSupabaseEmail(supaUrl, supaKey, email, currentPass);
+            await verifyAdminInSupabase(supaUrl, supaKey, sessionToUse);
+          }
+
+          await updateSupabaseUserPassword(supaUrl, supaKey, sessionToUse.access_token, newPass);
+          activeSupabaseSession = null;
+          if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
+          if (g("newAdminPasswordInput")) g("newAdminPasswordInput").value = "";
+          if (g("confirmNewAdminPasswordInput")) g("confirmNewAdminPasswordInput").value = "";
+          if (g("inAppChangePasswordBox")) g("inAppChangePasswordBox").classList.add("hidden");
+          if (infoEl) infoEl.textContent = "Password வெற்றிகரமாக மாற்றப்பட்டது! புதிய Password கொண்டு Sign In செய்யவும்.";
+          showToast("Admin password updated!");
+        } catch (err) {
+          if (errEl) errEl.textContent = err && err.message ? err.message : "Password update failed.";
+        }
+      });
+    }
+
     if (g("adminLogoutBtn")) {
       g("adminLogoutBtn").addEventListener("click", function() {
         activeSupabaseSession = null;
+        if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
         switchScreen("adminLoginScreen");
+        refreshAdminConfigStatusUi();
         showToast("Admin locked.");
       });
     }
@@ -1836,141 +2073,6 @@
         if (dr) dr.classList.toggle("hidden");
       });
     }
-
-    if (g("clearApiConfigBtn")) {
-      g("clearApiConfigBtn").addEventListener("click", function() {
-        memoryRuntimeConfig.supabaseUrl = "";
-        memoryRuntimeConfig.supabaseKey = "";
-        memoryRuntimeConfig.geminiKey = "";
-        if (g("cfgSupabaseUrl")) g("cfgSupabaseUrl").value = "";
-        if (g("cfgSupabaseKey")) g("cfgSupabaseKey").value = "";
-        if (g("cfgGeminiKey")) g("cfgGeminiKey").value = "";
-        showToast("Reset to built-in Local Mode.");
-      });
-    }
-
-    if (g("saveSupabaseToGithubConfigBtn")) {
-      g("saveSupabaseToGithubConfigBtn").addEventListener("click", async function() {
-        var stEl = g("ghConfigSaveStatus");
-        var supaUrl = (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim();
-        var supaKey = (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim();
-        var repo = (g("ghRepoInput") ? g("ghRepoInput").value : "").trim();
-        var branch = (g("ghBranchInput") ? g("ghBranchInput").value : "main").trim() || "main";
-        var path = (g("ghFilePathInput") ? g("ghFilePathInput").value : "config.js").trim() || "config.js";
-        var token = (g("ghTokenInput") ? g("ghTokenInput").value : "").trim();
-
-        if (!supaUrl || !supaKey || !repo || !token) {
-          if (stEl) {
-            stEl.className = "text-xs font-bold text-red-700";
-            stEl.textContent = "Supabase URL, Anon Key, GitHub Repo (owner/repo) மற்றும் Token அவசியம்.";
-          }
-          return;
-        }
-
-        memoryRuntimeConfig.supabaseUrl = supaUrl;
-        memoryRuntimeConfig.supabaseKey = supaKey;
-        refreshAdminConfigStatusUi();
-
-        var fileContent =
-          "window.CONFIG = {\n" +
-          "  SUPABASE_URL: " + JSON.stringify(supaUrl) + ",\n" +
-          "  SUPABASE_ANON_KEY: " + JSON.stringify(supaKey) + "\n" +
-          "};\n" +
-          "window.SUPABASE_URL = window.CONFIG.SUPABASE_URL;\n" +
-          "window.SUPABASE_ANON_KEY = window.CONFIG.SUPABASE_ANON_KEY;\n";
-
-        try {
-          if (stEl) {
-            stEl.className = "text-xs font-bold text-blue-700";
-            stEl.textContent = "Saving config.js to GitHub...";
-          }
-          var apiBase = "https://api.github.com/repos/" + repo + "/contents/" + encodeURIComponent(path).replace(/%2F/g, "/");
-          var sha = "";
-          var getRes = await fetch(apiBase + "?ref=" + encodeURIComponent(branch), {
-            headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" }
-          });
-          if (getRes.ok) {
-            var existingFile = await getRes.json();
-            if (existingFile && existingFile.sha) sha = existingFile.sha;
-          }
-
-          var b64 = btoa(unescape(encodeURIComponent(fileContent)));
-          var putPayload = {
-            message: "chore: update config.js via Admin V2",
-            content: b64,
-            branch: branch
-          };
-          if (sha) putPayload.sha = sha;
-
-          var putRes = await fetch(apiBase, {
-            method: "PUT",
-            headers: {
-              "Authorization": "Bearer " + token,
-              "Accept": "application/vnd.github+json",
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(putPayload)
-          });
-          if (!putRes.ok) {
-            var errJson = await putRes.json().catch(function() { return {}; });
-            throw new Error(errJson.message || ("GitHub save failed (HTTP " + putRes.status + ")"));
-          }
-
-          if (stEl) {
-            stEl.className = "text-xs font-bold text-emerald-700";
-            stEl.textContent = "✓ Saved to GitHub (" + repo + "/" + path + ")! Now enter Admin Email & Password.";
-          }
-          showToast("config.js saved to GitHub!");
-        } catch (err) {
-          if (stEl) {
-            stEl.className = "text-xs font-bold text-red-700";
-            stEl.textContent = err && err.message ? err.message : "Failed to save config.js to GitHub.";
-          }
-        }
-      });
-    }
-
-    if (g("adminLogoutBtn")) {
-      g("adminLogoutBtn").addEventListener("click", function() {
-        activeSupabaseSession = null;
-        switchScreen("adminLoginScreen");
-        refreshAdminConfigStatusUi();
-        showToast("Admin locked.");
-      });
-    }
-
-    if (g("adminApiSettingsBtn")) {
-      g("adminApiSettingsBtn").addEventListener("click", function() {
-        if (g("adminApiConfigDrawer")) g("adminApiConfigDrawer").classList.toggle("hidden");
-      });
-    }
-
-    if (g("saveApiConfigBtn")) {
-      g("saveApiConfigBtn").addEventListener("click", function() {
-        if (g("cfgGeminiKey")) memoryRuntimeConfig.geminiKey = g("cfgGeminiKey").value.trim();
-        if (g("cfgSupabaseUrl")) memoryRuntimeConfig.supabaseUrl = g("cfgSupabaseUrl").value.trim();
-        if (g("cfgSupabaseKey")) memoryRuntimeConfig.supabaseKey = g("cfgSupabaseKey").value.trim();
-        refreshAdminConfigStatusUi();
-        showToast("Updated runtime config in memory.");
-      });
-    }
-
-    if (g("clearApiConfigBtn")) {
-      g("clearApiConfigBtn").addEventListener("click", function() {
-        memoryRuntimeConfig.supabaseUrl = "";
-        memoryRuntimeConfig.supabaseKey = "";
-        memoryRuntimeConfig.geminiKey = "";
-        if (g("cfgSupabaseUrl")) g("cfgSupabaseUrl").value = "";
-        if (g("cfgSupabaseKey")) g("cfgSupabaseKey").value = "";
-        if (g("cfgGeminiKey")) g("cfgGeminiKey").value = "";
-        refreshAdminConfigStatusUi();
-        showToast("Cleared memory config.");
-      });
-    }
-
-    if (g("admTabBtn1")) g("admTabBtn1").addEventListener("click", function() { switchAdminTab(1); });
-    if (g("admTabBtn2")) g("admTabBtn2").addEventListener("click", function() { switchAdminTab(2); });
-    if (g("admTabBtn3")) g("admTabBtn3").addEventListener("click", function() { switchAdminTab(3); });
 
     if (g("saveApiConfigBtn")) {
       g("saveApiConfigBtn").addEventListener("click", async function() {
@@ -1983,53 +2085,25 @@
         var token = g("cfgGhToken") ? g("cfgGhToken").value.trim() : "";
 
         memoryRuntimeConfig.geminiKey = gemKey;
-        memoryRuntimeConfig.supabaseUrl = supaUrl;
-        memoryRuntimeConfig.supabaseKey = supaKey;
+        if (supaUrl) memoryRuntimeConfig.supabaseUrl = supaUrl;
+        if (supaKey) memoryRuntimeConfig.supabaseKey = supaKey;
         memoryRuntimeConfig.ghRepo = repo;
         memoryRuntimeConfig.ghBranch = branch;
         memoryRuntimeConfig.ghPath = filePath;
         if (token) memoryRuntimeConfig.ghToken = token;
 
-        if (repo && token && supaUrl && supaKey) {
-          var jsContent = "window.CONFIG = {\n" +
-            "  SUPABASE_URL: " + JSON.stringify(supaUrl) + ",\n" +
-            "  SUPABASE_ANON_KEY: " + JSON.stringify(supaKey) + (gemKey ? (",\n  GEMINI_API_KEY: " + JSON.stringify(gemKey)) : "") + "\n" +
-            "};\n";
+        if (repo && token) {
           try {
-            var apiBase = "https://api.github.com/repos/" + repo + "/contents/" + encodeURIComponent(filePath).replace(/%2F/g, "/");
-            var sha = "";
-            var getResp = await fetch(apiBase + "?ref=" + encodeURIComponent(branch), {
-              headers: {
-                "Authorization": "Bearer " + token,
-                "Accept": "application/vnd.github+json"
-              }
+            await writeConfigJsToGithub({
+              supabaseUrl: memoryRuntimeConfig.supabaseUrl,
+              supabaseKey: memoryRuntimeConfig.supabaseKey,
+              geminiKey: gemKey,
+              ghRepo: repo,
+              ghBranch: branch,
+              ghPath: filePath,
+              ghToken: token
             });
-            if (getResp.ok) {
-              var existingFile = await getResp.json();
-              if (existingFile && existingFile.sha) sha = existingFile.sha;
-            }
-            var b64 = btoa(unescape(encodeURIComponent(jsContent)));
-            var putPayload = {
-              message: "Update config.js via Admin V2",
-              content: b64,
-              branch: branch
-            };
-            if (sha) putPayload.sha = sha;
-            var putResp = await fetch(apiBase, {
-              method: "PUT",
-              headers: {
-                "Authorization": "Bearer " + token,
-                "Accept": "application/vnd.github+json",
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify(putPayload)
-            });
-            if (!putResp.ok) {
-              var errJson = await putResp.json().catch(function() { return {}; });
-              throw new Error(errJson.message || ("GitHub save failed (HTTP " + putResp.status + ")"));
-            }
-
-            markSplashEnabledAfterAdminSetup();
+            markConfigSetupDone();
             showToast("config.js saved to GitHub!");
           } catch (err) {
             showToast((err && err.message) ? err.message : "GitHub save failed.");
@@ -2057,34 +2131,465 @@
       });
     }
 
-    if (g("adminLogoutBtn")) {
-      g("adminLogoutBtn").addEventListener("click", function() {
-        activeSupabaseSession = null;
-        if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
-        switchScreen("adminLoginScreen");
-        refreshAdminConfigStatusUi();
-        showToast("Admin locked.");
+    if (g("admTabBtn1")) g("admTabBtn1").addEventListener("click", function() { switchAdminTab(1); });
+    if (g("admTabBtn2")) g("admTabBtn2").addEventListener("click", function() { switchAdminTab(2); });
+    if (g("admTabBtn3")) g("admTabBtn3").addEventListener("click", function() { switchAdminTab(3); });
+
+    if (g("addSubjectRowBtn")) g("addSubjectRowBtn").addEventListener("click", handleAddSubjectToBatchDraft);
+    if (g("saveNewBatchBtn")) g("saveNewBatchBtn").addEventListener("click", handleSaveNewTestBatch);
+    if (g("runAiGenerateAllBatchBtn")) g("runAiGenerateAllBatchBtn").addEventListener("click", handleGenerateAllBatchSubjects);
+    if (g("runAiGenerateBtn")) g("runAiGenerateBtn").addEventListener("click", handleGenerateAiQuestions);
+    if (g("aiBatchSelect")) {
+      g("aiBatchSelect").addEventListener("change", function() {
+        syncAiSubjectDropdownForSelectedBatch();
+        updateAiBatchBannerAndQueue();
       });
     }
+    if (g("aiSubjectDropdown")) g("aiSubjectDropdown").addEventListener("change", updateAiBatchBannerAndQueue);
+    if (g("queueStatusFilter")) g("queueStatusFilter").addEventListener("change", renderApprovalQueueList);
   }
+
+  /* ===== ADDED: student exam flow + missing admin handlers ===== */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function pad2(n) { return String(n).padStart(2, "0"); }
+  function fmtClock(sec, withHours) {
+    sec = Math.max(0, Math.floor(sec));
+    var h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return (withHours || h ? pad2(h) + ":" : "") + pad2(m) + ":" + pad2(s);
+  }
+  function curLang() { return g("langModeSel") ? g("langModeSel").value : "both"; }
+  function showJoinError(msg) {
+    var el = g("joinErrorBox");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.classList.toggle("hidden", !msg);
+  }
+  function setActiveSession(id) {
+    try {
+      if (id) localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ attemptId: id }));
+      else localStorage.removeItem(ACTIVE_SESSION_KEY);
+    } catch (e) {}
+  }
+  function batchIsReleased(b) {
+    return !!b && (b.resultsReleased || new Date(b.releaseAt).getTime() <= Date.now());
+  }
+  function questionsOf(att) {
+    return (att.qIds || []).map(function(id) {
+      return appState.questions.filter(function(q) { return q.id === id; })[0];
+    }).filter(Boolean);
+  }
+  function batchRank(att) {
+    var list = appState.attempts.filter(function(a) { return a.batchId === att.batchId && a.status === "submitted"; });
+    list.sort(function(a, b) { return (b.score - a.score) || ((a.submittedAt || 0) - (b.submittedAt || 0)); });
+    for (var i = 0; i < list.length; i++) if (list[i].id === att.id) return i + 1;
+    return list.length + 1;
+  }
+
+  function handleStartExam() {
+    showJoinError("");
+    var name = g("stuNameInput").value.trim();
+    var phone = g("stuPhoneInput").value.replace(/\D/g, "").slice(-10);
+    var code = g("stuBatchCodeInput").value.trim().toUpperCase();
+    var email = g("stuEmailInput").value.trim();
+    if (!name) return showJoinError("பெயர் உள்ளிடவும் (Name required).");
+    if (!/^[6-9]\d{9}$/.test(phone)) return showJoinError("சரியான 10 இலக்க Mobile Number உள்ளிடவும்.");
+    var batch = appState.batches.filter(function(b) { return b.code === code; })[0];
+    if (!batch) return showJoinError("Batch Code '" + code + "' கிடைக்கவில்லை.");
+    var att = appState.attempts.filter(function(a) { return a.batchId === batch.id && a.phone === phone; })[0];
+    if (att) {
+      if (att.studentName.toLowerCase() !== name.toLowerCase()) {
+        return showJoinError("இந்த Mobile Number இந்த Batch-ல் ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது.");
+      }
+      return openAttempt(att);
+    }
+    if (batch.resultsReleased) return showJoinError("இந்த Batch-ன் முடிவுகள் வெளியிடப்பட்டுவிட்டன; தேர்வு மூடப்பட்டது.");
+    var order = (batch.subjects || []).map(function(s) { return s.name; });
+    var qs = getApprovedQuestionsForBatch(batch).slice().sort(function(a, b) {
+      return order.indexOf(a.subject) - order.indexOf(b.subject);
+    });
+    if (!qs.length) return showJoinError("இந்த Batch-ல் இன்னும் Approved கேள்விகள் இல்லை. Admin-ஐ தொடர்பு கொள்ளவும்.");
+    att = {
+      id: "att_" + Date.now(), batchId: batch.id, batchCode: batch.code,
+      studentName: name, phone: phone, email: email, status: "in_progress",
+      qIds: qs.map(function(q) { return q.id; }), answers: {}, marked: {}, cursor: 0,
+      startedAt: Date.now(), endsAt: Date.now() + batch.durationMinutes * 60000,
+      score: 0, totalQuestions: qs.length
+    };
+    appState.attempts.push(att);
+    saveAppState();
+    openAttempt(att);
+  }
+
+  function openAttempt(att) {
+    activeAttemptId = att.id;
+    activeQuestionIndex = att.cursor || 0;
+    setActiveSession(att.id);
+    if (att.status === "submitted") return showResultsScreen(att);
+    switchScreen("studentExamScreen");
+    g("examCandidateBanner").textContent = att.studentName + " • " + att.batchCode;
+    startExamTimer(att);
+    renderQuestion();
+  }
+
+  function startExamTimer(att) {
+    clearInterval(examIntervalId);
+    function tick() {
+      var left = Math.ceil((att.endsAt - Date.now()) / 1000);
+      g("examTimerDisplay").textContent = "⏱ " + fmtClock(left);
+      if (left <= 0) {
+        clearInterval(examIntervalId);
+        showToast("நேரம் முடிந்தது — தானாகச் சமர்ப்பிக்கப்படுகிறது.");
+        finishExam(att.id);
+      }
+    }
+    tick();
+    if (att.status === "in_progress") examIntervalId = setInterval(tick, 1000);
+  }
+
+  function persistAttempt() {
+    saveAppState();
+    var el = g("examAutoSaveStatus");
+    if (el) el.textContent = "✓ Auto-Saved " + new Date().toLocaleTimeString();
+  }
+
+  function renderQuestion() {
+    var att = getAttemptById(activeAttemptId);
+    if (!att) return;
+    var qs = questionsOf(att), q = qs[activeQuestionIndex];
+    if (!q) return;
+    var lang = curLang();
+    att.cursor = activeQuestionIndex;
+    g("qCounterBadge").textContent = "Question " + (activeQuestionIndex + 1) + " of " + qs.length;
+    g("qSubjectBadge").textContent = q.subject;
+    var area = g("questionRenderArea");
+    area.innerHTML = "";
+    var qt = document.createElement("div");
+    qt.className = "font-bold mb-4";
+    qt.innerHTML = (lang !== "en" ? "<div>" + esc(q.questionTa) + "</div>" : "") +
+      (lang !== "ta" ? "<div class='text-sm opacity-80 mt-1'>" + esc(q.questionEn) + "</div>" : "");
+    area.appendChild(qt);
+    q.options.forEach(function(o, i) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = (att.answers[q.id] === i ? "btn-primary" : "btn-ghost") + " w-full text-left p-3 mb-2 text-sm";
+      b.textContent = String.fromCharCode(65 + i) + ". " + (lang === "en" ? o.en : lang === "ta" ? o.ta : o.ta + "  /  " + o.en);
+      b.addEventListener("click", function() {
+        att.answers[q.id] = i;
+        persistAttempt();
+        renderQuestion();
+      });
+      area.appendChild(b);
+    });
+    g("markReviewBtn").textContent = att.marked[q.id] ? "★ Marked" : "★ Mark Review";
+    g("prevQBtn").disabled = activeQuestionIndex === 0;
+    g("nextQBtn").textContent = activeQuestionIndex === qs.length - 1 ? "Save ✓" : "Save & Next →";
+    g("examValidationMsg").classList.add("hidden");
+    renderPalette(att, qs);
+  }
+
+  function renderPalette(att, qs) {
+    var wrap = g("questionPaletteGrid"), a = 0, m = 0;
+    wrap.innerHTML = "";
+    qs.forEach(function(q, i) {
+      var has = att.answers[q.id] !== undefined, mk = !!att.marked[q.id];
+      if (has) a++;
+      if (mk) m++;
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "palette-btn " + (mk ? "pal-mark" : has ? "pal-ans" : "pal-unans") + (i === activeQuestionIndex ? " pal-curr" : "");
+      b.textContent = i + 1;
+      b.addEventListener("click", function() { activeQuestionIndex = i; renderQuestion(); });
+      wrap.appendChild(b);
+    });
+    g("cntAns").textContent = a;
+    g("cntMark").textContent = m;
+    g("cntUnans").textContent = qs.length - a;
+  }
+
+  function finishExam(id) {
+    var att = getAttemptById(id);
+    if (!att || att.status === "submitted") return;
+    var qs = questionsOf(att), s = 0;
+    qs.forEach(function(q) { if (att.answers[q.id] === q.correctIndex) s++; });
+    att.score = s;
+    att.totalQuestions = qs.length;
+    att.status = "submitted";
+    att.submittedAt = Date.now();
+    clearInterval(examIntervalId);
+    saveAppState();
+    showResultsScreen(att);
+  }
+
+  function showResultsScreen(att) {
+    clearInterval(releaseIntervalId);
+    activeAttemptId = att.id;
+    setActiveSession(att.id);
+    switchScreen("studentResultsScreen");
+    var batch = getBatchById(att.batchId);
+    g("waitingCandidateInfo").textContent = att.studentName + " • " + att.batchCode;
+    if (batchIsReleased(batch)) return showReleasedResult(att, batch);
+    g("waitingReleaseCard").classList.remove("hidden");
+    g("releasedResultsCard").classList.add("hidden");
+    var target = new Date(batch.releaseAt).getTime();
+    g("releaseTargetText").textContent = "Scheduled Release: " + new Date(target).toLocaleString();
+    function tick() {
+      var left = Math.ceil((target - Date.now()) / 1000);
+      if (left <= 0 || batch.resultsReleased) {
+        clearInterval(releaseIntervalId);
+        batch.resultsReleased = true;
+        saveAppState();
+        showReleasedResult(att, batch);
+        return;
+      }
+      g("releaseCountdownTimer").textContent = fmtClock(left, true);
+    }
+    tick();
+    if (!g("waitingReleaseCard").classList.contains("hidden")) releaseIntervalId = setInterval(tick, 1000);
+  }
+
+  function inviteLink(batch) {
+    return location.href.split(/[?#]/)[0] + "?batch=" + encodeURIComponent(batch.code);
+  }
+  function buildWaMessage(att, batch, total, acc, rank) {
+    return "🏆 *" + batch.title + "* (" + batch.category + ")\n" +
+      "👤 " + att.studentName + "\n" +
+      "✅ Score: " + att.score + "/" + total + " | 🎯 Accuracy: " + acc + "% | 🥇 Batch Rank: #" + rank + "\n\n" +
+      (batch.centerAd ? batch.centerAd + "\n\n" : "") +
+      "நீங்களும் இந்த Test எழுதுங்கள் 👉 " + inviteLink(batch);
+  }
+
+  function showReleasedResult(att, batch) {
+    g("waitingReleaseCard").classList.add("hidden");
+    g("releasedResultsCard").classList.remove("hidden");
+    var qs = questionsOf(att), wrong = 0, skipped = 0, subj = {}, order = [];
+    qs.forEach(function(q) {
+      if (!subj[q.subject]) { subj[q.subject] = { ok: 0, total: 0 }; order.push(q.subject); }
+      subj[q.subject].total++;
+      var a = att.answers[q.id];
+      if (a === undefined) skipped++;
+      else if (a === q.correctIndex) subj[q.subject].ok++;
+      else wrong++;
+    });
+    var total = qs.length, acc = total ? Math.round(att.score / total * 100) : 0, rank = batchRank(att);
+    g("resScoreVal").textContent = att.score + " / " + total;
+    g("resAccuracyVal").textContent = acc + "%";
+    g("resRankVal").textContent = "#" + rank;
+    g("resWrongSkipVal").textContent = wrong + " / " + skipped;
+    g("subjectBreakdownList").innerHTML = order.map(function(n) {
+      var s = subj[n], pct = Math.round(s.ok / s.total * 100);
+      return "<div><div class='flex justify-between font-bold'><span>" + esc(n) + "</span><span>" + s.ok + "/" + s.total +
+        "</span></div><div class='h-2 rounded bg-slate-200 overflow-hidden'><div class='h-full bg-emerald-600' style='width:" + pct + "%'></div></div></div>";
+    }).join("");
+    g("whatsappMessagePreview").textContent = buildWaMessage(att, batch, total, acc, rank);
+    g("detailedReviewContainer").innerHTML = qs.map(function(q, i) {
+      var a = att.answers[q.id], ok = a === q.correctIndex;
+      return "<div class='soft-card p-3 text-sm'><div class='font-bold'>" + (i + 1) + ". " + esc(q.questionTa) + "</div>" +
+        "<div class='opacity-80 text-xs mb-1'>" + esc(q.questionEn) + "</div>" +
+        "<div class='font-bold " + (ok ? "text-emerald-700" : "text-red-700") + "'>உங்கள் விடை: " +
+        (a === undefined ? "— (Skipped)" : String.fromCharCode(65 + a)) + " | சரியான விடை: " + String.fromCharCode(65 + q.correctIndex) + "</div>" +
+        "<div class='text-xs mt-1'>" + esc(q.explanationTa) + " " + esc(q.explanationEn) + "</div></div>";
+    }).join("");
+  }
+
+  function currentResultAttempt() { return getAttemptById(activeAttemptId); }
+  function waText(btnKind) {
+    var att = currentResultAttempt();
+    if (!att) return "";
+    var batch = getBatchById(att.batchId);
+    if (btnKind === "friend") return "TNPSC Test எழுத வாருங்கள்! 👉 " + inviteLink(batch);
+    return g("whatsappMessagePreview").textContent;
+  }
+  function openWhatsApp(text) {
+    window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank", "noopener");
+    if (g("waShareFeedback")) g("waShareFeedback").textContent = "WhatsApp திறக்கப்பட்டது ✓";
+  }
+
+  function goStudentHome() {
+    clearInterval(examIntervalId);
+    clearInterval(releaseIntervalId);
+    switchScreen("studentJoinScreen");
+    checkExistingSavedSession();
+  }
+
+  function csvCell(v) {
+    var s = String(v == null ? "" : v);
+    if (/^[=+\-@]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  function bindExtraEvents() {
+    function on(id, fn) { if (g(id)) g(id).addEventListener("click", fn); }
+
+    on("startExamBtn", handleStartExam);
+    on("resumeSavedBannerBtn", function() {
+      try {
+        var info = JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY) || "null");
+        var att = getAttemptById(info && info.attemptId);
+        if (att) openAttempt(att);
+      } catch (e) {}
+    });
+    on("prevQBtn", function() { if (activeQuestionIndex > 0) { activeQuestionIndex--; renderQuestion(); } });
+    on("nextQBtn", function() {
+      var att = getAttemptById(activeAttemptId);
+      if (!att) return;
+      persistAttempt();
+      if (activeQuestionIndex < att.qIds.length - 1) { activeQuestionIndex++; renderQuestion(); }
+      else {
+        var m = g("examValidationMsg");
+        m.textContent = "கடைசி கேள்வி. முடித்ததும் 'Submit Test' அழுத்தவும்.";
+        m.classList.remove("hidden");
+      }
+    });
+    on("markReviewBtn", function() {
+      var att = getAttemptById(activeAttemptId), q = att && questionsOf(att)[activeQuestionIndex];
+      if (!q) return;
+      att.marked[q.id] = !att.marked[q.id];
+      persistAttempt();
+      renderQuestion();
+    });
+    on("clearRespBtn", function() {
+      var att = getAttemptById(activeAttemptId), q = att && questionsOf(att)[activeQuestionIndex];
+      if (!q) return;
+      delete att.answers[q.id];
+      persistAttempt();
+      renderQuestion();
+    });
+    on("submitExamBtn", function() {
+      var att = getAttemptById(activeAttemptId);
+      if (!att) return;
+      var left = att.qIds.length - Object.keys(att.answers).length;
+      if (confirm((left ? left + " கேள்விகளுக்கு பதிலளிக்கவில்லை. " : "") + "தேர்வைச் சமர்ப்பிக்கவா? (Submit the test?)")) finishExam(att.id);
+    });
+    on("examAccBtn", function() {
+      var p = g("examAccPanel"), open = p.classList.toggle("hidden") === false;
+      g("examAccBtn").setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    on("closeExamAccBtn", function() { g("examAccPanel").classList.add("hidden"); g("examAccBtn").setAttribute("aria-expanded", "false"); });
+    on("examSwitchBatchBtn", goStudentHome);
+    on("waitingHomeBtn", goStudentHome);
+    on("releasedHomeBtn", goStudentHome);
+    on("manualCheckReleaseBtn", function() {
+      loadAppState();
+      var att = getAttemptById(activeAttemptId);
+      if (!att) return;
+      showResultsScreen(att);
+      if (!batchIsReleased(getBatchById(att.batchId))) showToast("முடிவுகள் இன்னும் வெளியாகவில்லை.");
+    });
+    on("toggleAnswerReviewBtn", function() { g("detailedReviewContainer").classList.toggle("hidden"); });
+    on("shareWhatsappResultBtn", function() { openWhatsApp(waText("result")); });
+    on("shareWhatsappFriendBtn", function() { openWhatsApp(waText("friend")); });
+    on("copyWhatsappMsgBtn", function() {
+      var t = waText("result");
+      function done() { showToast("Message copied!"); }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, done);
+      else done();
+    });
+    ["langModeSel", "examLangModeSel"].forEach(function(id) {
+      if (g(id)) g(id).addEventListener("change", function() {
+        if (!g("studentExamScreen").classList.contains("hidden")) renderQuestion();
+      });
+    });
+
+    /* ---- admin ---- */
+    on("genBatchCodeBtn", function() {
+      var map = { "Group IV": "G4", "Group II / IIA": "G2", "Group I": "G1", "VAO": "VAO" };
+      var pre = map[g("batchCategoryInput").value] || "TN", code;
+      do { code = pre + "_MOCK" + (Math.floor(Math.random() * 90) + 10); }
+      while (appState.batches.some(function(b) { return b.code === code; }));
+      g("batchCodeInput").value = code;
+    });
+    on("aiAddNewSubjBtn", function() {
+      var batch = getBatchById(g("aiBatchSelect").value), name = g("aiQuickNewSubjInput").value.trim();
+      if (!batch || !name) return showToast("Batch தேர்ந்தெடுத்து Subject பெயர் உள்ளிடவும்.");
+      var n = Math.max(1, parseInt(g("aiNumQuestionsInput").value, 10) || 3);
+      batch.subjects = batch.subjects || [];
+      var ex = batch.subjects.filter(function(s) { return s.name.toLowerCase() === name.toLowerCase(); })[0];
+      if (ex) ex.target = n; else batch.subjects.push({ name: name, target: n });
+      saveAppState();
+      g("aiQuickNewSubjInput").value = "";
+      syncAiSubjectDropdownForSelectedBatch();
+      g("aiSubjectDropdown").value = ex ? ex.name : name;
+      updateAiBatchBannerAndQueue();
+      showToast("Subject '" + name + "' சேர்க்கப்பட்டது.");
+    });
+    on("setRemainingCountBtn", function() {
+      var batch = getBatchById(g("aiBatchSelect").value), subj = g("aiSubjectDropdown").value;
+      if (!batch) return;
+      var plan = (batch.subjects || []).filter(function(s) { return s.name === subj; })[0];
+      var done = getApprovedQuestionsForBatch(batch).filter(function(q) { return q.subject === subj; }).length;
+      var rem = Math.max(0, (plan ? Number(plan.target) : 3) - done);
+      g("aiNumQuestionsInput").value = Math.max(1, Math.min(20, rem));
+      showToast("Remaining needed: " + rem);
+    });
+    on("approveAllQueueBtn", function() {
+      var batchId = g("aiBatchSelect").value, n = 0;
+      appState.questions.slice().forEach(function(q) {
+        if (q.status === "draft" && (!q.batchId || q.batchId === batchId)) { approveQuestionAndAttachToBatch(q.id, batchId); n++; }
+      });
+      updateAiBatchBannerAndQueue();
+      showToast(n + " கேள்விகள் Approve செய்யப்பட்டன.");
+    });
+    if (g("resTabBatchSelect")) g("resTabBatchSelect").addEventListener("change", function() {
+      var b = getBatchById(g("resTabBatchSelect").value);
+      if (b) { g("resUpdateDateInput").value = b.releaseDate || todayIsoDate(); g("resUpdateTimeInput").value = b.releaseTime || "20:00"; }
+      renderAdminResultsTable();
+    });
+    on("saveResScheduleBtn", function() {
+      var b = getBatchById(g("resTabBatchSelect").value);
+      if (!b) return;
+      b.releaseDate = g("resUpdateDateInput").value || todayIsoDate();
+      b.releaseTime = g("resUpdateTimeInput").value || "20:00";
+      b.releaseAt = buildReleaseIso(b.releaseDate, b.releaseTime);
+      b.resultsReleased = new Date(b.releaseAt).getTime() <= Date.now();
+      saveAppState();
+      showToast(b.resultsReleased ? "Time வந்துவிட்டது — முடிவுகள் வெளியிடப்பட்டன." : "Release schedule saved.");
+    });
+    on("releaseNowBtn", function() {
+      var b = getBatchById(g("resTabBatchSelect").value);
+      if (!b) return;
+      b.resultsReleased = true;
+      saveAppState();
+      renderAdminResultsTable();
+      showToast("முடிவுகள் உடனடியாக வெளியிடப்பட்டன!");
+    });
+    on("exportBatchCsvBtn", function() {
+      var id = g("resTabBatchSelect").value;
+      var list = appState.attempts.filter(function(a) { return a.batchId === id; }).sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+      var rows = [["Rank", "Name", "Mobile", "Email", "Status", "Score", "Total"]].concat(list.map(function(a, i) {
+        return [i + 1, a.studentName, a.phone, a.email || "", a.status, a.score || 0, a.totalQuestions || 0];
+      }));
+      var blob = new Blob(["\ufeff" + rows.map(function(r) { return r.map(csvCell).join(","); }).join("\r\n")], { type: "text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "tnpsc_results_" + todayIsoDate() + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+  }
+  /* ===== END ADDED ===== */
 
   loadAppState();
   loadAccPrefs();
   populateSubjectDropdowns();
   renderDraftBatchSubjects();
+  renderAdminBatchesList();
   refreshAdminConfigStatusUi();
-  g("batchReleaseDateInput").value = todayIsoDate();
+  if (g("batchReleaseDateInput")) g("batchReleaseDateInput").value = todayIsoDate();
   renderActiveBatchPills();
   checkExistingSavedSession();
   bindAllEvents();
-  loadSubModuleScripts();
-  callSubModules("init");
+  bindExtraEvents();
 
   try {
     var params = new URLSearchParams(window.location.search);
     var urlBatch = params.get("batch");
-    if (urlBatch) g("stuBatchCodeInput").value = urlBatch.toUpperCase();
-    else if (appState.batches[0]) g("stuBatchCodeInput").value = appState.batches[0].code;
+    if (urlBatch && g("stuBatchCodeInput")) g("stuBatchCodeInput").value = urlBatch.toUpperCase();
+    else if (appState.batches[0] && g("stuBatchCodeInput")) g("stuBatchCodeInput").value = appState.batches[0].code;
   } catch (e) {}
 
   initSplashScreen(false);
