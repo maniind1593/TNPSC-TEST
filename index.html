@@ -583,11 +583,22 @@
   <!-- 5. ADMIN LOGIN GATE -->
   <section id="adminLoginScreen" class="glass-card p-6 max-w-lg mx-auto hidden">
     <h2 class="text-xl font-extrabold mb-1">Admin V2 Secure Access</h2>
-    <p class="text-xs opacity-80 mb-4">
-      Supabase Backend-ல் பதிவு செய்யப்பட்ட <strong>Admin Email &amp; Password</strong> மூலம் மட்டுமே உள்நுழைய முடியும். (<code>config.js</code>-ல் Supabase விவரங்கள் இருந்தால் தானாக இணைக்கப்படும்).
+    <p class="text-xs opacity-80 mb-3">
+      Supabase Backend-ல் பதிவு செய்யப்பட்ட <strong>Admin Email &amp; Password</strong> மூலம் மட்டுமே உள்நுழைய முடியும். (<code>config.js</code> இருந்தால் தானாக இணைக்கப்படும்; இல்லையெனில் கீழே Supabase URL &amp; Anon Key உள்ளிடவும்).
     </p>
+    <div id="adminConfigStatusBadge" class="mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900">
+      Checking config.js &amp; Supabase configuration...
+    </div>
 
     <div class="space-y-3">
+      <div>
+        <label for="adminLoginSupaUrlInput" class="block text-xs font-bold mb-1">Supabase Project URL (if not in config.js)</label>
+        <input id="adminLoginSupaUrlInput" type="text" placeholder="https://your-project.supabase.co" class="w-full p-2.5">
+      </div>
+      <div>
+        <label for="adminLoginSupaKeyInput" class="block text-xs font-bold mb-1">Supabase Anon Key (if not in config.js)</label>
+        <input id="adminLoginSupaKeyInput" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full p-2.5">
+      </div>
       <div>
         <label for="adminEmailInput" class="block text-xs font-bold mb-1">Supabase Admin Email *</label>
         <input id="adminEmailInput" type="email" autocomplete="username" placeholder="admin@youracademy.com" class="w-full p-3">
@@ -2958,8 +2969,7 @@
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}"); } catch (e) {}
 
-    var resolvedSupaUrl =
-      saved.supabaseUrl ||
+    var fileSupaUrl =
       extCfg.SUPABASE_URL ||
       extCfg.supabaseUrl ||
       extCfg.supabase_url ||
@@ -2968,8 +2978,7 @@
       winCfg.SUPABASE_URL ||
       "";
 
-    var resolvedSupaKey =
-      saved.supabaseKey ||
+    var fileSupaKey =
       extCfg.SUPABASE_ANON_KEY ||
       extCfg.SUPABASE_KEY ||
       extCfg.supabaseAnonKey ||
@@ -2980,6 +2989,9 @@
       globalObj.SUPABASE_KEY ||
       winCfg.SUPABASE_ANON_KEY ||
       "";
+
+    var resolvedSupaUrl = saved.supabaseUrl || fileSupaUrl || "";
+    var resolvedSupaKey = saved.supabaseKey || fileSupaKey || "";
 
     var resolvedGeminiKey =
       saved.geminiKey ||
@@ -3001,19 +3013,49 @@
       geminiKey: resolvedGeminiKey,
       supabaseUrl: resolvedSupaUrl,
       supabaseKey: resolvedSupaKey,
+      fromConfigJs: Boolean(fileSupaUrl && fileSupaKey),
       adminPin: resolvedAdminPin
     };
+  }
+
+  function refreshAdminConfigStatusUi() {
+    var cfg = getRuntimeConfig();
+    var badge = g("adminConfigStatusBadge");
+    var urlInp = g("adminLoginSupaUrlInput");
+    var keyInp = g("adminLoginSupaKeyInput");
+
+    if (urlInp && !urlInp.value && cfg.supabaseUrl) {
+      urlInp.value = cfg.supabaseUrl;
+    }
+    if (keyInp && !keyInp.value && cfg.supabaseKey) {
+      keyInp.value = cfg.supabaseKey;
+    }
+
+    if (!badge) return;
+    if (cfg.fromConfigJs) {
+      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-100 border border-emerald-300 text-emerald-900";
+      badge.textContent = "✓ config.js இணைக்கப்பட்டது (Supabase URL & Anon Key தயார்).";
+    } else if (cfg.supabaseUrl && cfg.supabaseKey) {
+      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-blue-100 border border-blue-300 text-blue-900";
+      badge.textContent = "✓ Supabase URL & Anon Key சேமிக்கப்பட்டுள்ளன (config.js காணப்படவில்லை; saved config பயன்படுகிறது).";
+    } else {
+      badge.className = "mb-3 px-3 py-2 rounded-xl text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900";
+      badge.textContent = "⚠ config.js கிடைக்கவில்லை. கீழே Supabase URL & Anon Key உள்ளிட்டு Sign In செய்யவும்.";
+    }
   }
 
   function loadExternalConfigJs() {
     return new Promise(function(resolve) {
       function finalize() {
-        resolve(getRuntimeConfig());
+        var cfg = getRuntimeConfig();
+        refreshAdminConfigStatusUi();
+        resolve(cfg);
       }
 
       // If config values are already present on window/globalThis, no need to wait
       var current = getRuntimeConfig();
       if (current.supabaseUrl && current.supabaseKey) {
+        refreshAdminConfigStatusUi();
         resolve(current);
         return;
       }
@@ -3139,6 +3181,7 @@
 
     g("navAdminBtn").addEventListener("click", function() {
       switchScreen("adminLoginScreen");
+      loadExternalConfigJs();
     });
 
     g("joinAccToggleBtn").addEventListener("click", function() {
@@ -3304,17 +3347,32 @@
       errEl.className = "text-xs font-bold text-red-700";
       errEl.textContent = "";
 
+      var typedSupaUrl = (g("adminLoginSupaUrlInput") ? g("adminLoginSupaUrlInput").value : "").trim();
+      var typedSupaKey = (g("adminLoginSupaKeyInput") ? g("adminLoginSupaKeyInput").value : "").trim();
       var email = (g("adminEmailInput") ? g("adminEmailInput").value : "").trim();
       var password = (g("adminPasswordInput") ? g("adminPasswordInput").value : "").trim();
       var cfg = await loadExternalConfigJs();
 
-      if (!email || !password) {
-        errEl.textContent = "சரியான Supabase Admin Email மற்றும் Password அவசியம் உள்ளிடவும்.";
+      var finalSupaUrl = typedSupaUrl || cfg.supabaseUrl;
+      var finalSupaKey = typedSupaKey || cfg.supabaseKey;
+
+      if (typedSupaUrl && typedSupaKey) {
+        try {
+          var existingSaved = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}");
+          existingSaved.supabaseUrl = typedSupaUrl;
+          existingSaved.supabaseKey = typedSupaKey;
+          localStorage.setItem(CONFIG_KEY, JSON.stringify(existingSaved));
+          refreshAdminConfigStatusUi();
+        } catch (e) {}
+      }
+
+      if (!finalSupaUrl || !finalSupaKey) {
+        errEl.textContent = "config.js கிடைக்கவில்லை. மேலே Supabase Project URL மற்றும் Anon Key உள்ளிடவும்.";
         return;
       }
 
-      if (!cfg.supabaseUrl || !cfg.supabaseKey) {
-        errEl.textContent = "config.js அல்லது Optional API Config-ல் Supabase URL மற்றும் Anon Key கிடைக்கவில்லை.";
+      if (!email || !password) {
+        errEl.textContent = "சரியான Supabase Admin Email மற்றும் Password அவசியம் உள்ளிடவும்.";
         return;
       }
 
@@ -3323,8 +3381,8 @@
       errEl.className = "text-xs font-bold text-blue-700";
       errEl.textContent = "Verifying Email & Password with Supabase backend...";
       try {
-        var sessionData = await signInWithSupabaseEmail(cfg.supabaseUrl, cfg.supabaseKey, email, password);
-        await verifyAdminInSupabase(cfg.supabaseUrl, cfg.supabaseKey, sessionData);
+        var sessionData = await signInWithSupabaseEmail(finalSupaUrl, finalSupaKey, email, password);
+        await verifyAdminInSupabase(finalSupaUrl, finalSupaKey, sessionData);
         activeSupabaseSession = sessionData;
         if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
         errEl.className = "text-xs font-bold text-emerald-700";
