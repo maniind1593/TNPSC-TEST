@@ -2,486 +2,2776 @@
 <html lang="ta">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>TNPSC Exam Platform — Group IV &amp; Group II / IIA</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TNPSC Exam Platform V2 — Group I, II / IIA, IV &amp; VAO</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#eef2f7;--card:rgba(255,255,255,.94);--soft:rgba(248,250,252,.94);--ink:#0f172a;--muted:#475569;--border:#cbd5e1;--primary:#1d4ed8;--primary-hover:#1e40af;--sec:#0f766e;--sec-hover:#115e59;--ok:#047857;--warn:#b45309;--err:#b91c1c;--w1:rgba(226,232,240,.84);--w2:rgba(204,251,241,.78);--font-scale:1;--anim-dur:.35s;--drift:28s;box-sizing:border-box;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:rgba(15,23,42,.95);--soft:rgba(30,41,59,.95);--ink:#f1f5f9;--muted:#cbd5e1;--border:#475569;--primary:#3b82f6;--primary-hover:#2563eb;--ok:#4ade80;--warn:#fbbf24;--err:#f87171;--w1:rgba(11,18,32,.9);--w2:rgba(15,40,60,.9)}}
-:root[data-theme="dark"]{--bg:#0b1220;--card:rgba(15,23,42,.95);--soft:rgba(30,41,59,.95);--ink:#f1f5f9;--muted:#cbd5e1;--border:#475569;--primary:#3b82f6;--primary-hover:#2563eb;--ok:#4ade80;--warn:#fbbf24;--err:#f87171;--w1:rgba(11,18,32,.9);--w2:rgba(15,40,60,.9)}
-body.contrast-high{--bg:#070b14;--card:rgba(15,23,42,.97);--soft:rgba(30,41,59,.96);--ink:#f8fafc;--muted:#e2e8f0;--border:#facc15;--primary:#facc15;--primary-hover:#eab308;--sec:#38bdf8;--sec-hover:#0ea5e9;--ok:#4ade80;--warn:#fbbf24;--err:#f87171;--w1:rgba(7,11,20,.94);--w2:rgba(15,23,42,.94)}
-body.contrast-high button{color:#070b14;font-weight:800}
-body.anim-calm{--anim-dur:.2s;--drift:52s}
-body.anim-reduced{--anim-dur:.01s;--drift:0s}
-body.anim-reduced *,body.anim-reduced *::before,body.anim-reduced *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;padding:12px;min-height:100%;background:var(--bg);color:var(--ink);font-size:calc(15px*var(--font-scale));line-height:1.5;position:relative;overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
-.office-wallpaper{position:fixed;inset:-24px;z-index:0;pointer-events:none;background-image:linear-gradient(150deg,var(--w1),var(--w2)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='340'%3E%3Cg fill='none' stroke='%231e3a8a' stroke-opacity='.11' stroke-width='1.5'%3E%3Crect x='24' y='24' width='472' height='292' rx='10'/%3E%3Cpath d='M44 126H476M68 126V288M132 126V288M196 126V288M324 126V288M388 126V288M452 126V288'/%3E%3Cpolygon points='260,40 194,86 326,86'/%3E%3Ccircle cx='260' cy='105' r='12'/%3E%3Crect x='232' y='158' width='56' height='80' rx='4'/%3E%3C/g%3E%3C/svg%3E");background-size:cover,520px 340px;animation:drift var(--drift) ease-in-out infinite alternate}
-@keyframes drift{to{transform:translate3d(-12px,-8px,0) scale(1.02)}}
-@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes fill{to{width:100%}}
-@keyframes pop{50%{transform:scale(1.025)}}
-@keyframes flash{from{opacity:.3}to{opacity:1}}
-@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
-@keyframes toastIn{from{opacity:0;transform:translate(-50%,12px)}}
-@keyframes pulse{50%{box-shadow:0 0 0 8px transparent}}
-:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
-.app-wrap{position:relative;z-index:1}
-.box{max-width:860px;margin:10px auto;background:var(--card);backdrop-filter:blur(10px);padding:18px;border-radius:16px;border:1px solid var(--border);box-shadow:0 8px 24px rgba(15,23,42,.08);animation:appear var(--anim-dur) ease both}
-h1,h2,h3{margin:0 0 10px}
-label{display:block;font-weight:700;margin:10px 0 4px}
-input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;font-size:1em;box-sizing:border-box;background:var(--soft);color:var(--ink);font-family:inherit;transition:border-color var(--anim-dur)}
-input[type=radio]{width:auto}
-button{width:100%;padding:11px 14px;margin-top:10px;border:0;border-radius:10px;background:var(--primary);color:#fff;font-weight:700;font-size:.96em;cursor:pointer;transition:transform .15s,background var(--anim-dur),opacity var(--anim-dur)}
-button:hover:not(:disabled){background:var(--primary-hover);transform:translateY(-1px)}
-button:active:not(:disabled){transform:none}
-button.sec{background:var(--sec)}button.sec:hover:not(:disabled){background:var(--sec-hover)}
-button.danger{background:#b91c1c;color:#fff}
-button.ghost{background:var(--soft);color:var(--ink);border:1px solid var(--border)}
-button:disabled{opacity:.5;cursor:not-allowed}
-a.abtn{display:block;text-align:center;text-decoration:none;padding:11px 14px;margin-top:10px;border-radius:10px;background:#15803d;color:#fff;font-weight:700;transition:transform .15s}
-a.abtn:hover{transform:translateY(-1px)}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:145px}
-.row button,.row select,.row input{width:100%;margin-top:0}
-.hidden{display:none!important}
-.err{color:var(--err);font-weight:700;margin-top:8px}.ok{color:var(--ok);font-weight:700;margin-top:8px}.warn{color:var(--warn);font-weight:700;margin-top:8px}
-.muted{color:var(--muted);font-size:.9em}
-#splashOverlay{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:18px;background:linear-gradient(145deg,rgba(15,23,42,.93),rgba(29,78,216,.88),rgba(15,118,110,.88));backdrop-filter:blur(8px);color:#fff;transition:opacity var(--anim-dur),visibility var(--anim-dur)}
-#splashOverlay.is-closing{opacity:0;visibility:hidden;pointer-events:none}
-.splash-card{max-width:520px;width:100%;background:rgba(15,23,42,.84);border:1px solid rgba(255,255,255,.22);border-radius:18px;padding:24px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35);animation:appear .5s ease both}
-.splash-badge{display:inline-block;padding:5px 14px;border-radius:999px;background:rgba(56,189,248,.2);border:1px solid rgba(125,211,252,.45);color:#bae6fd;font-weight:800;font-size:.82em;margin-bottom:12px;animation:pulse 1.6s infinite}
-#splashProgress{height:100%;width:0;background:#38bdf8;animation:fill 1.7s linear forwards}
-#skipSplashBtn{width:auto;margin-top:14px;padding:9px 20px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35)}
-.timer-box{position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:20;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:11px 14px;border-radius:12px;background:var(--card);border:2px solid var(--primary);margin-bottom:8px;font-weight:800;box-shadow:0 4px 14px rgba(15,23,42,.08)}
-.timer-urgent{border-color:var(--err);color:var(--err);animation:pulse 1s infinite}
-.bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:12px}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--sec));transition:width .5s ease}
-.flash{animation:flash .6s}
-.panel-card{background:var(--soft);padding:14px;border-radius:12px;margin-bottom:14px;border:1px solid var(--border)}
-.qcard{animation:appear var(--anim-dur) ease both}
-.q-en{display:block;color:var(--muted);font-size:.92em;font-weight:600;margin-top:4px}
-body.l-en .q-en,body.l-en .opt-en{color:inherit;font-weight:inherit;margin:0}
-.sl::before{content:" / "}body.l-en .sl::before{content:none}
-body.l-ta .en,body.l-en .ta{display:none}
-.opt{display:block;padding:10px 12px;margin-top:7px;background:var(--card);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s,background .15s}
-.opt:hover{border-color:var(--primary)}
-.opt.sel{border-color:var(--primary);background:var(--soft);box-shadow:inset 4px 0 0 var(--primary);animation:pop .25s}
-.opt-en{display:block;color:var(--muted);font-size:.88em;margin-left:22px}
-.palette{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.palette .pb{width:42px;margin:0;padding:8px 0}
-.pb.a{background:var(--ok);color:#fff;border-color:var(--ok)}.pb.c{outline:3px solid var(--warn)}
-.countdown-card{text-align:center;padding:16px;border-radius:12px;background:var(--card);border:2px solid var(--primary);margin:12px 0}
-.countdown-clock{font-size:1.9em;font-weight:900;letter-spacing:.06em;color:var(--primary);font-variant-numeric:tabular-nums;margin:4px 0;animation:pulse 1s infinite}
-.banner{padding:18px;border-radius:12px;text-align:center;font-weight:800;font-size:1.18em;margin-bottom:12px;animation:appear .5s ease both}
-.champ{background:#fef08a;color:#713f12}.good{background:#dcfce7;color:#14532d}.imp{background:#fee2e2;color:#7f1d1d}.wait{background:#e0f2fe;color:#075985}
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin:10px 0}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;animation:appear .5s ease both}
-.stat-card:nth-child(2){animation-delay:.08s}.stat-card:nth-child(3){animation-delay:.16s}.stat-card:nth-child(4){animation-delay:.24s}
-.stat-card b{display:block;font-size:1.15em;color:var(--primary)}
-.table-wrap{overflow-x:auto;margin:10px 0;border:1px solid var(--border);border-radius:10px}
-table{width:100%;border-collapse:collapse;font-size:.92em;background:var(--card)}
-th,td{padding:9px 10px;border-bottom:1px solid var(--border);text-align:left}
-th{background:var(--soft);font-weight:800}
-tbody tr{animation:appear var(--anim-dur) ease both}
-tr.me{background:var(--soft);font-weight:800}
-td button{width:auto;margin:2px;padding:6px 10px}
-.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.82em;font-weight:700}
-.pill-ok{background:#dcfce7;color:#14532d}.pill-warn{background:#fef3c7;color:#92400e}.pill-info{background:#dbeafe;color:#1e40af}
-.wa-preview{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px;white-space:pre-wrap;font-size:.88em}
-.alloc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-top:8px}
-.alloc-row input{width:84px;padding:7px 9px}
-.rv{padding:8px 0;border-bottom:1px dashed var(--border)}.rv.okc{border-left:4px solid var(--ok);padding-left:8px}.rv.bad{border-left:4px solid var(--err);padding-left:8px}
-.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:120;background:#0f172a;color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;font-size:.9em;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:toastIn .3s ease both}
-.cf{position:fixed;top:-14px;width:8px;height:12px;z-index:130;pointer-events:none;animation:fall 3s linear forwards}
-.footer-bar{max-width:860px;margin:16px auto 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.footer-bar button{width:auto;margin:0;padding:8px 16px;font-size:.88em}
-.pill-bad{background:#fee2e2;color:#7f1d1d}
-.tb{margin:0}.tb.on{background:var(--primary);color:#fff;border-color:var(--primary)}
-#admTabs{margin:12px 0 0}#admTabs>*{min-width:110px}
-.dist{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:22px}
-.dist div{flex:1;position:relative;background:linear-gradient(var(--primary),var(--sec));border-radius:6px 6px 0 0;min-height:2px;transform-origin:bottom;animation:grow .7s ease both}
-.dist span{position:absolute;top:-18px;width:100%;text-align:center;font-size:.75em}
-.dist-l{display:flex;gap:6px;font-size:.75em;text-align:center;color:var(--muted);margin-bottom:8px}.dist-l span{flex:1}
-@keyframes grow{from{transform:scaleY(0)}}
+  :root {
+    --bg: #eef2f7;
+    --card: rgba(255, 255, 255, 0.94);
+    --soft: rgba(248, 250, 252, 0.96);
+    --ink: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --primary: #1d4ed8;
+    --primary-hover: #1e40af;
+    --sec: #0f766e;
+    --sec-hover: #115e59;
+    --ok: #047857;
+    --warn: #b45309;
+    --err: #b91c1c;
+    --font-scale: 1;
+    --anim-dur: 0.35s;
+    --wallpaper-drift: 30s;
+  }
+
+  body.contrast-high {
+    --bg: #050811;
+    --card: rgba(15, 23, 42, 0.98);
+    --soft: rgba(30, 41, 59, 0.98);
+    --ink: #f8fafc;
+    --muted: #e2e8f0;
+    --border: #facc15;
+    --primary: #facc15;
+    --primary-hover: #eab308;
+    --sec: #38bdf8;
+    --sec-hover: #0ea5e9;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --err: #f87171;
+  }
+
+  body.contrast-high .btn-primary,
+  body.contrast-high .btn-sec,
+  body.contrast-high .btn-wa,
+  body.contrast-high .btn-danger {
+    color: #050811 !important;
+    font-weight: 800;
+  }
+
+  body.anim-calm {
+    --anim-dur: 0.2s;
+    --wallpaper-drift: 56s;
+  }
+
+  body.anim-reduced {
+    --anim-dur: 0.01s;
+    --wallpaper-drift: 0s;
+  }
+
+  body.anim-reduced *,
+  body.anim-reduced *::before,
+  body.anim-reduced *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  body {
+    font-family: "Inter", "Noto Sans Tamil", system-ui, -apple-system, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: calc(15px * var(--font-scale));
+    line-height: 1.55;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Bespoke TNPSC Secretariat / Civil Service Architectural Wallpaper */
+  .office-wallpaper {
+    position: fixed;
+    inset: -24px;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(150deg, rgba(226, 232, 240, 0.88) 0%, rgba(219, 234, 254, 0.78) 50%, rgba(204, 251, 241, 0.82) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='360' viewBox='0 0 560 360'%3E%3Cg fill='none' stroke='%231e3a8a' stroke-opacity='0.12' stroke-width='1.5'%3E%3Crect x='20' y='20' width='520' height='320' rx='12'/%3E%3Cpath d='M42 134 H518 M68 134 V310 M132 134 V310 M196 134 V310 M364 134 V310 M428 134 V310 M492 134 V310'/%3E%3Cpath d='M82 134 Q100 94 118 134 M146 134 Q164 94 182 134 M378 134 Q396 94 414 134 M442 134 Q460 94 478 134'/%3E%3Cpolygon points='280,36 204,90 356,90'/%3E%3Ccircle cx='280' cy='110' r='14'/%3E%3Cpath d='M280 101 V110 L287 114'/%3E%3Crect x='246' y='168' width='68' height='96' rx='6'/%3E%3Cpath d='M260 186 H300 M260 202 H300 M260 218 H288'/%3E%3Ccircle cx='280' cy='242' r='8'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: cover, 560px 360px;
+    animation: officeDrift var(--wallpaper-drift) ease-in-out infinite alternate;
+  }
+
+  body.contrast-high .office-wallpaper {
+    background-image:
+      linear-gradient(150deg, rgba(5, 8, 17, 0.96) 0%, rgba(15, 23, 42, 0.96) 100%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='360' viewBox='0 0 560 360'%3E%3Cg fill='none' stroke='%23facc15' stroke-opacity='0.09' stroke-width='1.5'%3E%3Crect x='20' y='20' width='520' height='320' rx='12'/%3E%3Cpath d='M42 134 H518 M68 134 V310 M132 134 V310 M196 134 V310 M364 134 V310 M428 134 V310 M492 134 V310'/%3E%3Cpolygon points='280,36 204,90 356,90'/%3E%3Ccircle cx='280' cy='110' r='14'/%3E%3C/g%3E%3C/svg%3E");
+    animation: none;
+  }
+
+  @keyframes officeDrift {
+    0% { transform: translate3d(0, 0, 0) scale(1); }
+    100% { transform: translate3d(-14px, -10px, 0) scale(1.025); }
+  }
+
+  @keyframes cardAppear {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .glass-card {
+    background: var(--card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    animation: cardAppear var(--anim-dur) ease both;
+  }
+
+  .soft-card {
+    background: var(--soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  input, select, textarea {
+    background: var(--soft);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.96em;
+    transition: border-color var(--anim-dur) ease, box-shadow var(--anim-dur) ease;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
+  }
+
+  .btn-primary { background: var(--primary); color: #ffffff; }
+  .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+  .btn-sec { background: var(--sec); color: #ffffff; }
+  .btn-sec:hover:not(:disabled) { background: var(--sec-hover); }
+  .btn-wa { background: #15803d; color: #ffffff; }
+  .btn-wa:hover:not(:disabled) { background: #166534; }
+  .btn-danger { background: #b91c1c; color: #ffffff; }
+  .btn-danger:hover:not(:disabled) { background: #991b1b; }
+  .btn-ghost { background: var(--soft); color: var(--ink); border: 1px solid var(--border); }
+
+  button {
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.14s ease, background var(--anim-dur) ease, opacity var(--anim-dur) ease;
+  }
+  button:hover:not(:disabled) { transform: translateY(-1px); }
+  button:active:not(:disabled) { transform: translateY(0); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  #splashOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.94), rgba(29, 78, 216, 0.90), rgba(15, 118, 110, 0.90));
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    transition: opacity var(--anim-dur) ease, visibility var(--anim-dur) ease;
+  }
+
+  #splashOverlay.is-closing {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .palette-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    font-size: 0.85em;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+  }
+  .pal-unans { background: var(--soft); color: var(--ink); }
+  .pal-ans { background: #15803d; color: #ffffff; border-color: #15803d; }
+  .pal-mark { background: #d97706; color: #ffffff; border-color: #d97706; }
+  .pal-curr { outline: 3px solid var(--primary); outline-offset: 1px; }
+
+  .countdown-clock {
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+  }
 </style>
 </head>
-<body>
+<body class="p-3 sm:p-5">
+
+<!-- TNPSC Architectural Office Wallpaper Backdrop -->
 <div class="office-wallpaper" aria-hidden="true"></div>
 
+<!-- 1. OPENING SPLASH SCREEN -->
 <div id="splashOverlay" role="dialog" aria-modal="true" aria-label="TNPSC Exam Platform V2 Welcome">
-  <div class="splash-card">
-    <div class="splash-badge">TNPSC CIVIL SERVICE EXAM PLATFORM • V2</div>
-    <h2 style="color:#fff;font-size:1.42em">Group IV &amp; Group II / IIA Live Test Portal</h2>
-    <p style="color:#e2e8f0;margin:8px 0 12px;font-size:.95em">Auto-Save Answers • Scheduled Result Auto-Release Timer • Subject-Wise Question Bank &amp; WhatsApp Rank Share</p>
-    <div style="height:6px;width:100%;background:rgba(255,255,255,.16);border-radius:999px;overflow:hidden"><div id="splashProgress"></div></div>
-    <button type="button" id="skipSplashBtn">Skip →</button>
-  </div>
-</div>
-
-<div class="app-wrap">
-
-<div class="box" id="joinBox">
-  <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:6px">
-    <div><h1 style="margin:0">TNPSC Exam Platform V2</h1><div class="muted">Group IV | Group II / IIA • Live Batch • Auto-Save • Ranked Results</div></div>
-    <span class="pill pill-ok" style="flex:0 0 auto">● Live</span>
-  </div>
-  <div class="row">
-    <div><label for="examCategoryFilter">Exam Category (தேர்வு வகை)</label>
-      <select id="examCategoryFilter"><option value="All">All Categories (Group IV &amp; Group II / IIA)</option><option value="Group IV">TNPSC Group IV</option><option value="Group II / IIA">TNPSC Group II / IIA</option></select></div>
-    <div><label for="code">Test Code (Admin வழங்கிய குறியீடு)</label><input id="code" type="text" placeholder="எ.கா: G4_BATCH01" autocapitalize="characters"></div>
-  </div>
-  <label for="name">உங்கள் பெயர் (Student Name)</label>
-  <input id="name" type="text" placeholder="உங்கள் முழுப் பெயர்">
-  <div class="row">
-    <div><label for="joinPhone">Mobile Number (WhatsApp முடிவுகளுக்கு)</label><input id="joinPhone" type="tel" placeholder="919876543210"></div>
-    <div><label for="joinEmail">Email (விருப்பமெனில்)</label><input id="joinEmail" type="email" placeholder="student@example.com"></div>
-  </div>
-  <button type="button" id="joinBtn">Join / Resume Exam</button>
-  <button type="button" class="ghost hidden" id="resumeLastBtn">Resume Saved Session</button>
-  <div id="joinMsg" class="err" role="alert" aria-live="polite"></div>
-  <div id="notice" class="banner wait hidden" style="font-size:1em;margin-top:12px"></div>
-  <button type="button" class="ghost" id="accToggleBtn" aria-expanded="false">Accessibility Controls (Font / Contrast / Language / Animation)</button>
-  <div class="panel-card hidden" id="accPanel" style="margin-top:10px">
-    <div class="row">
-      <div><label for="fontSizeSel">Font Size</label><select id="fontSizeSel"><option value="1">Normal (100%)</option><option value="1.15">Large (115%)</option><option value="1.3">Extra Large (130%)</option></select></div>
-      <div><label for="contrastSel">Contrast Mode</label><select id="contrastSel"><option value="normal">Standard</option><option value="high">High Contrast</option></select></div>
-      <div><label for="langModeSel">Language View</label><select id="langModeSel"><option value="both">Tamil + English</option><option value="ta">Tamil Only</option><option value="en">English Only</option></select></div>
-      <div><label for="animModeSel">Animation Mode</label><select id="animModeSel"><option value="full">Full Motion</option><option value="calm">Calm Smooth</option><option value="reduced">Reduced Motion</option></select></div>
+  <div class="max-w-lg w-full rounded-2xl bg-slate-900/90 border border-white/20 p-6 sm:p-8 text-center shadow-2xl">
+    <!-- Civil Service Emblem SVG -->
+    <div class="mx-auto mb-4 w-16 h-16 rounded-2xl bg-sky-500/20 border border-sky-300/40 flex items-center justify-center">
+      <svg class="w-9 h-9 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M3 21h18M4 18h16M6 18V9m4 9V9m4 9V9m4 9V9M2 9l10-6 10 6H2z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
+    <span class="inline-block px-3 py-1 rounded-full text-xs font-extrabold tracking-wide bg-sky-500/20 border border-sky-400/40 text-sky-200 mb-3">
+      TNPSC CIVIL SERVICE EXAM PORTAL • V2
+    </span>
+    <h1 class="text-xl sm:text-2xl font-extrabold text-white mb-2">
+      Group I, Group II / IIA, Group IV &amp; VAO Live Test Platform
+    </h1>
+    <p class="text-slate-200 text-sm mb-5">
+      Auto-Save &amp; Refresh Resume • 8:00 PM Auto-Release Countdown • Subject-Wise AI Question Bank &amp; WhatsApp Rank Share
+    </p>
+    <div class="h-2 w-full bg-white/15 rounded-full overflow-hidden mb-5">
+      <div id="splashProgress" class="h-full w-full bg-sky-400 transition-all duration-1000 ease-linear"></div>
+    </div>
+    <button type="button" id="skipSplashBtn" class="px-6 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/35 text-white text-sm font-bold">
+      Skip &amp; Enter Portal →
+    </button>
   </div>
 </div>
 
-<div class="box hidden" id="examBox">
-  <div class="timer-box" id="timerBox" aria-live="polite">
-    <span id="timerLabel">Time Remaining: --:--</span>
-    <span id="saveStateLabel" class="ok" style="margin:0">Auto-Save: Ready</span>
-    <span id="progressLabel">Answered: 0 / 0</span>
-  </div>
-  <div class="bar"><i id="barI"></i></div>
-  <div class="panel-card">
-    <div class="row" style="align-items:center;justify-content:space-between">
-      <div id="whoTitle" style="flex:2 1 240px">பங்கேற்பாளர் விவரம்</div>
-      <div class="row" style="flex:0 1 auto;gap:6px">
-        <button type="button" class="ghost" id="examAccBtn" aria-expanded="true" style="width:auto;padding:8px 12px;font-size:.86em">⚙ Accessibility (Live)</button>
-        <button type="button" class="ghost" id="switchStudentBtn" style="width:auto;padding:8px 12px;font-size:.86em">⇄ Switch / Join</button>
+<!-- MAIN APPLICATION CONTAINER -->
+<div class="relative z-10 max-w-5xl mx-auto">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="glass-card px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-700 text-white flex items-center justify-center font-extrabold shadow">
+        TN
+      </div>
+      <div>
+        <div class="font-extrabold text-base sm:text-lg leading-tight">TNPSC Exam Platform V2</div>
+        <div class="text-xs opacity-80">Group I • Group II/IIA • Group IV • VAO</div>
       </div>
     </div>
-    <div id="examAccPanel" style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)">
-      <div class="muted" style="font-weight:700;margin-bottom:6px">Live Accessibility Controls — மாற்றங்கள் உடனே பொருந்தும்:</div>
-      <div class="row">
-        <div><label for="examFontSizeSel">Font Size</label><select id="examFontSizeSel"><option value="1">Normal (100%)</option><option value="1.15">Large (115%)</option><option value="1.3">Extra Large (130%)</option></select></div>
-        <div><label for="examContrastSel">Contrast Mode</label><select id="examContrastSel"><option value="normal">Standard</option><option value="high">High Contrast</option></select></div>
-        <div><label for="examLangModeSel">Language View</label><select id="examLangModeSel"><option value="both">Tamil + English</option><option value="ta">Tamil Only</option><option value="en">English Only</option></select></div>
-        <div><label for="examAnimModeSel">Animation Mode</label><select id="examAnimModeSel"><option value="full">Full Motion</option><option value="calm">Calm Smooth</option><option value="reduced">Reduced Motion</option></select></div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <span id="storageModeBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+        ● Local + Cloud Ready
+      </span>
+      <button type="button" id="navStudentBtn" class="btn-primary px-3.5 py-2 text-xs sm:text-sm">
+        Student Portal
+      </button>
+      <button type="button" id="navAdminBtn" class="btn-ghost px-3.5 py-2 text-xs sm:text-sm">
+        Admin V2 Panel
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. STUDENT JOIN / LOGIN SCREEN -->
+  <section id="studentJoinScreen" class="glass-card p-5 sm:p-7">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-extrabold">மாணவர் தேர்வு நுழைவு (Student Test Login)</h2>
+        <p class="text-sm opacity-80 mt-1">
+          தேர்வைத் தொடங்க பெயர், 10 இலக்க Mobile Number மற்றும் Test Batch Code உள்ளிடவும். (ஒரு Batch-ல் ஒரே Mobile Number மீண்டும் பயன்படுத்த அனுமதி இல்லை).
+        </p>
+      </div>
+      <button type="button" id="joinAccToggleBtn" class="btn-ghost px-3.5 py-2 text-xs sm:text-sm">
+        ⚙ Accessibility Settings
+      </button>
+    </div>
+
+    <!-- Pre-Exam Accessibility Panel -->
+    <div id="joinAccPanel" class="soft-card p-4 mb-5 hidden">
+      <div class="text-xs font-extrabold uppercase tracking-wider opacity-75 mb-3">
+        Accessibility &amp; Display Preferences (Saved Automatically)
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label for="fontSizeSel" class="block text-xs font-bold mb-1">Font Size</label>
+          <select id="fontSizeSel" class="w-full p-2.5">
+            <option value="1">Normal (100%)</option>
+            <option value="1.15">Large (115%)</option>
+            <option value="1.3">Extra Large (130%)</option>
+          </select>
+        </div>
+        <div>
+          <label for="contrastSel" class="block text-xs font-bold mb-1">Contrast Mode</label>
+          <select id="contrastSel" class="w-full p-2.5">
+            <option value="normal">Standard Glass</option>
+            <option value="high">High Contrast</option>
+          </select>
+        </div>
+        <div>
+          <label for="langModeSel" class="block text-xs font-bold mb-1">Language View</label>
+          <select id="langModeSel" class="w-full p-2.5">
+            <option value="both">Tamil + English</option>
+            <option value="ta">Tamil Only (தமிழ் மட்டும்)</option>
+            <option value="en">English Only</option>
+          </select>
+        </div>
+        <div>
+          <label for="animModeSel" class="block text-xs font-bold mb-1">Animation Mode</label>
+          <select id="animModeSel" class="w-full p-2.5">
+            <option value="full">Full Motion</option>
+            <option value="calm">Calm Smooth</option>
+            <option value="reduced">Reduced Motion</option>
+          </select>
+        </div>
       </div>
     </div>
-  </div>
-  <div id="qArea"></div>
-  <button type="button" class="sec" id="finishedBtn">Finished (அனைத்து கேள்விகளும் முடிந்தன)</button>
-  <div id="finishStatusMsg" class="ok" role="status" aria-live="polite"></div>
-  <div class="panel-card hidden" id="contactSubmitBox" style="border:2px solid var(--sec);margin-top:12px">
-    <h3>இறுதிச் சமர்ப்பிப்பு (Final Submit)</h3>
-    <p class="muted">Submit செய்த பிறகு பதில்களை மாற்ற முடியாது. உங்கள் முடிவுகள் இந்த விவரத்துடன் இணைக்கப்படும்.</p>
-    <div class="row">
-      <div><label for="userPhone">Mobile Number</label><input id="userPhone" type="tel" readonly></div>
-      <div><label for="userEmail">Email Address</label><input id="userEmail" type="email" readonly></div>
+
+    <!-- Active Batches Quick-Select Pills -->
+    <div class="mb-4">
+      <div class="text-xs font-bold opacity-80 mb-1.5">Available Live Test Batches (Click to auto-fill code):</div>
+      <div id="activeBatchPills" class="flex flex-wrap gap-2"></div>
     </div>
-    <button type="button" id="submitBtn">Confirm &amp; Final Submit</button>
-  </div>
-  <div id="examMsg" class="err" role="alert" aria-live="polite"></div>
-</div>
 
-<div class="box hidden" id="resBox">
-  <div class="row" style="align-items:center;justify-content:space-between;margin-bottom:10px">
-    <h2 style="margin:0">Batch நிலை &amp; தேர்வு முடிவுகள்</h2>
-    <button type="button" class="ghost" id="resSwitchBtn" style="width:auto;padding:8px 12px;font-size:.86em">⇄ Switch / Join</button>
-  </div>
-  <div id="resBody"></div>
-</div>
-
-<div class="box hidden" id="adminBox">
-  <div class="row" style="align-items:center;justify-content:space-between">
-    <h2 style="margin:0">Admin Panel</h2>
-    <button type="button" class="ghost" id="admBack" style="width:auto;padding:8px 12px;font-size:.86em">← Back</button>
-  </div>
-  <div id="admGate"><label for="admEmail">Admin Email</label><input id="admEmail" type="email" autocomplete="username"><label for="admPass">Password</label><input id="admPass" type="password" autocomplete="current-password"><button type="button" id="pinBtn">Admin Login</button></div>
-  <div id="admMain" class="hidden"><div id="dash" class="stat-grid" style="margin-top:12px"></div>
-    <div class="row" id="admTabs"><button type="button" class="ghost tb on" data-tab="tests">🧪 Tests</button><button type="button" class="ghost tb" data-tab="results">📊 Results</button><button type="button" class="ghost tb" data-tab="users">👥 Students</button><button type="button" class="ghost tb" data-tab="settings">⚙ Settings</button></div>
-    <div id="tab-results" class="hidden"><div class="panel-card" style="margin-top:12px"><h3>Test Results (தேர்வு முடிவுகள்)</h3>
-      <div class="row"><div><label for="rTest">Test</label><select id="rTest"></select></div><div><label for="rSearch">Search student</label><input id="rSearch" placeholder="Name / mobile / email"></div></div>
-      <div id="rStats"></div></div></div>
-    <div id="tab-users" class="hidden"><div class="panel-card" style="margin-top:12px"><h3>Student Management (மாணவர் நிர்வாகம்)</h3>
-      <input id="uSearch" placeholder="Search name / mobile / email" aria-label="Search students">
-      <div class="table-wrap"><table><thead><tr><th>Student</th><th>Contact</th><th>Tests</th><th>Avg</th><th>Status</th><th></th></tr></thead><tbody id="uList"></tbody></table></div></div>
-      <div id="uDetail"></div>
-      <div class="panel-card"><h3 id="uFormTitle">Add Student</h3>
-        <div class="row"><div><label for="uName">Name</label><input id="uName"></div><div><label for="uPhone">Mobile</label><input id="uPhone" type="tel"></div><div><label for="uEmail">Email</label><input id="uEmail" type="email"></div></div>
-        <button type="button" id="uSave">Save Student</button><div id="uMsg" role="status"></div></div></div>
-    <div id="tab-settings" class="hidden">
-      <div class="panel-card" style="margin-top:12px"><h3>அறிவிப்பு (Notice Board)</h3><p class="muted">Student join screen-ல் தெரியும். காலியாக விட்டால் மறையும்.</p><textarea id="sNotice" rows="2" placeholder="எ.கா: நாளை 10 மணிக்கு Group IV mock test"></textarea><button type="button" id="sNoticeBtn">Publish Notice</button></div>
-      <div class="panel-card"><h3>Danger Zone</h3><p class="muted">எல்லா results, students நீக்கப்படும் (Tests &amp; Question Bank இருக்கும்).</p><button type="button" class="danger" id="sWipe">Clear all results &amp; students</button></div><div class="panel-card"><button type="button" class="ghost" id="sOut">Sign out (Admin)</button></div></div>
-    <div id="tab-tests">
-    <div class="panel-card" style="margin-top:12px">
-      <h3>புதிய Test உருவாக்கு</h3>
-      <div class="row">
-        <div><label for="aCode">Test Code</label><input id="aCode" placeholder="G4_BATCH02"></div>
-        <div><label for="aCat">Category</label><select id="aCat"><option>Group IV</option><option>Group II / IIA</option></select></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <label for="stuNameInput" class="block text-sm font-bold mb-1">மாணவர் முழுப் பெயர் (Full Name) *</label>
+        <input id="stuNameInput" type="text" placeholder="எ.கா: கார்த்திக் ராஜா / Karthik Raja" class="w-full p-3">
       </div>
-      <div class="row">
-        <div><label for="aDur">Duration (minutes)</label><input id="aDur" type="number" min="1" value="20"></div>
-        <div><label for="aRel">Result Auto-Release Time</label><input id="aRel" type="datetime-local"></div>
+      <div>
+        <label for="stuPhoneInput" class="block text-sm font-bold mb-1">Mobile Number (10 Digits — Unique per Batch) *</label>
+        <input id="stuPhoneInput" type="tel" maxlength="15" placeholder="9876543210" class="w-full p-3">
       </div>
-      <label>Subject-wise கேள்விகள் (Question Bank)</label>
-      <div id="aAlloc"></div>
-      <button type="button" id="aCreate">Create Test</button>
-      <div id="aMsg" role="status"></div>
+      <div>
+        <label for="stuEmailInput" class="block text-sm font-bold mb-1">Email Address (Optional)</label>
+        <input id="stuEmailInput" type="email" placeholder="student@example.com" class="w-full p-3">
+      </div>
+      <div>
+        <label for="stuBatchCodeInput" class="block text-sm font-bold mb-1">Test Batch Code *</label>
+        <input id="stuBatchCodeInput" type="text" placeholder="G4_BATCH01" class="w-full p-3 uppercase font-bold">
+      </div>
     </div>
-    <div class="panel-card">
-      <h3>Tests</h3>
-      <div class="table-wrap"><table><thead><tr><th>Code</th><th>Category</th><th>Qs</th><th>Time</th><th>Result</th><th>Subs</th><th></th></tr></thead><tbody id="aTests"></tbody></table></div>
-      <div id="eBox" class="panel-card hidden" style="margin-top:12px"><h3 id="eTitle">Edit Test</h3>
-        <div class="row"><div><label for="eCat">Category</label><select id="eCat"><option>Group IV</option><option>Group II / IIA</option></select></div><div><label for="eDur">Duration (min)</label><input id="eDur" type="number" min="1"></div><div><label for="eRel">Result Release</label><input id="eRel" type="datetime-local"></div></div>
-        <div class="row"><div><label for="ePass">Pass mark (%)</label><input id="ePass" type="number" min="1" max="100"></div><div><label for="eSt">Status</label><select id="eSt"><option value="open">Open (students can join)</option><option value="closed">Closed (no new attempts)</option></select></div></div>
-        <div class="row"><button type="button" id="eSave">Save Changes</button><button type="button" class="ghost" id="eCancel">Cancel</button></div></div>
+
+    <div id="joinErrorBox" class="hidden mt-4 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-sm font-bold" role="alert"></div>
+
+    <div class="mt-5 flex flex-wrap gap-3">
+      <button type="button" id="startExamBtn" class="btn-primary flex-1 min-w-[200px] py-3.5 px-5 text-base shadow">
+        Start / Resume Test →
+      </button>
+      <button type="button" id="resumeSavedBannerBtn" class="btn-sec hidden py-3.5 px-5 text-sm">
+        Resume Saved Session
+      </button>
     </div>
-    <div class="panel-card">
-      <h3>Question Bank-ல் சேர்க்க (JSON)</h3>
-      <p class="muted">Subject keys: ta, gs, ap, sc • முதல் option = சரியான விடை (தானாக shuffle ஆகும்)</p>
-      <textarea id="aJson" rows="4" placeholder='[{"s":"gs","q":"தமிழ் | English","o":["சரி","தவறு1","தவறு2","தவறு3"]}]'></textarea>
-      <button type="button" class="ghost" id="aImp">Add to Bank</button>
-    </div></div>
-  </div>
+  </section>
+
+  <!-- 3. ACTIVE EXAM SCREEN -->
+  <section id="studentExamScreen" class="hidden space-y-4">
+    <!-- Sticky Top Status Bar -->
+    <div id="examStickyBar" class="glass-card p-3.5 sticky top-2 z-20 flex flex-wrap items-center justify-between gap-3 border-2 border-blue-600">
+      <div class="flex items-center gap-3">
+        <span id="examTimerDisplay" class="px-3 py-1.5 rounded-lg bg-blue-700 text-white font-extrabold text-sm sm:text-base tabular-nums">
+          ⏱ 00:00
+        </span>
+        <div>
+          <div id="examCandidateBanner" class="font-bold text-xs sm:text-sm">Candidate</div>
+          <div id="examAutoSaveStatus" class="text-xs font-bold text-emerald-700">✓ Auto-Saved</div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button type="button" id="examAccBtn" aria-expanded="false" class="btn-ghost px-3 py-2 text-xs sm:text-sm">
+          ⚙ Live Accessibility
+        </button>
+        <button type="button" id="examSwitchBatchBtn" class="btn-ghost px-3 py-2 text-xs sm:text-sm">
+          ⇄ Exit / Switch
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Inside-Exam Accessibility Panel -->
+    <div id="examAccPanel" class="glass-card p-4 hidden border-2 border-teal-600">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-teal-800 dark:text-teal-300">
+          Live Exam Accessibility — Immediate Effect Without Losing Progress
+        </span>
+        <button type="button" id="closeExamAccBtn" class="text-xs font-bold underline">Close</button>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label for="examFontSizeSel" class="block text-xs font-bold mb-1">Font Size</label>
+          <select id="examFontSizeSel" class="w-full p-2">
+            <option value="1">Normal (100%)</option>
+            <option value="1.15">Large (115%)</option>
+            <option value="1.3">Extra Large (130%)</option>
+          </select>
+        </div>
+        <div>
+          <label for="examContrastSel" class="block text-xs font-bold mb-1">Contrast Mode</label>
+          <select id="examContrastSel" class="w-full p-2">
+            <option value="normal">Standard Glass</option>
+            <option value="high">High Contrast</option>
+          </select>
+        </div>
+        <div>
+          <label for="examLangModeSel" class="block text-xs font-bold mb-1">Language View</label>
+          <select id="examLangModeSel" class="w-full p-2">
+            <option value="both">Tamil + English</option>
+            <option value="ta">Tamil Only</option>
+            <option value="en">English Only</option>
+          </select>
+        </div>
+        <div>
+          <label for="examAnimModeSel" class="block text-xs font-bold mb-1">Animation Mode</label>
+          <select id="examAnimModeSel" class="w-full p-2">
+            <option value="full">Full Motion</option>
+            <option value="calm">Calm Smooth</option>
+            <option value="reduced">Reduced Motion</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Question Card -->
+      <div class="glass-card p-5 lg:col-span-2 flex flex-col justify-between">
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-slate-300/70">
+            <span id="qCounterBadge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800">
+              Question 1 of 1
+            </span>
+            <span id="qSubjectBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800">
+              Subject
+            </span>
+          </div>
+
+          <div id="questionRenderArea" class="mb-5"></div>
+        </div>
+
+        <div>
+          <div id="examValidationMsg" class="hidden mb-3 p-2.5 rounded-lg bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-300/70">
+            <div class="flex gap-2">
+              <button type="button" id="prevQBtn" class="btn-ghost px-4 py-2.5 text-sm">← Previous</button>
+              <button type="button" id="markReviewBtn" class="btn-ghost px-4 py-2.5 text-sm">★ Mark Review</button>
+              <button type="button" id="clearRespBtn" class="btn-ghost px-3 py-2.5 text-xs">Clear</button>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" id="nextQBtn" class="btn-primary px-5 py-2.5 text-sm">Save &amp; Next →</button>
+              <button type="button" id="submitExamBtn" class="btn-sec px-5 py-2.5 text-sm">Submit Test ✓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Palette & Summary -->
+      <div class="glass-card p-4">
+        <h3 class="font-extrabold text-sm mb-2">Question Navigator Palette</h3>
+        <div class="grid grid-cols-2 gap-1.5 text-xs mb-3">
+          <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-700 inline-block"></span> Answered (<span id="cntAns">0</span>)</div>
+          <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-amber-600 inline-block"></span> Marked (<span id="cntMark">0</span>)</div>
+          <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded border border-slate-400 inline-block"></span> Unanswered (<span id="cntUnans">0</span>)</div>
+        </div>
+        <div id="questionPaletteGrid" class="flex flex-wrap gap-2 mb-4"></div>
+
+        <div class="soft-card p-3 text-xs space-y-1">
+          <div class="font-bold">Auto-Save Protection Active</div>
+          <p class="opacity-80">ஒவ்வொரு பதிலும் தானாகச் சேமிக்கப்படுகிறது. Browser refresh செய்தாலும் விட்ட இடத்திலிருந்து தொடரலாம்.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. WAITING COUNTDOWN & RELEASED RESULTS SCREEN -->
+  <section id="studentResultsScreen" class="hidden space-y-4">
+    <!-- WAITING PANEL (Counts down to 8:00 PM / scheduled release_at) -->
+    <div id="waitingReleaseCard" class="glass-card p-6 text-center">
+      <div class="inline-block px-4 py-1.5 rounded-full bg-sky-100 text-sky-900 font-extrabold text-xs mb-3">
+        ✓ EXAM SUBMITTED SUCCESSFULLY
+      </div>
+      <h2 class="text-xl sm:text-2xl font-extrabold mb-2">
+        உங்கள் விடைகள் பாதுகாப்பாகச் சமர்ப்பிக்கப்பட்டுவிட்டன!
+      </h2>
+      <p id="waitingCandidateInfo" class="text-sm opacity-85 mb-5">
+        முடிவுகள் வெளியாகும் நேரத்திற்காகக் காத்திருக்கிறது...
+      </p>
+
+      <div class="max-w-md mx-auto soft-card p-5 border-2 border-blue-600 mb-5">
+        <div class="text-xs font-extrabold uppercase tracking-wider opacity-75">
+          Result Auto-Release Countdown Timer
+        </div>
+        <div id="releaseCountdownTimer" class="countdown-clock text-4xl sm:text-5xl font-black my-2">
+          00:00:00
+        </div>
+        <div id="releaseTargetText" class="text-xs font-bold opacity-80">
+          Scheduled Release: Today 8:00 PM (20:00)
+        </div>
+        <div class="text-xs text-emerald-700 font-bold mt-2">
+          Timer 00:00:00 ஆனதும் அல்லது Admin வெளியிட்டதும் முடிவுகள் தானாகத் தோன்றும்.
+        </div>
+      </div>
+
+      <div class="flex flex-wrap justify-center gap-3">
+        <button type="button" id="manualCheckReleaseBtn" class="btn-sec px-5 py-2.5 text-sm">
+          ↻ Check Result Status Now
+        </button>
+        <button type="button" id="waitingHomeBtn" class="btn-ghost px-5 py-2.5 text-sm">
+          ← Back to Student Login
+        </button>
+      </div>
+    </div>
+
+    <!-- RELEASED RESULTS PANEL -->
+    <div id="releasedResultsCard" class="hidden space-y-4">
+      <div class="glass-card p-6">
+        <div id="resultGradeBanner" class="p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-emerald-100 text-emerald-900">
+          🏆 தேர்வு முடிவுகள் வெளியிடப்பட்டன!
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div class="soft-card p-3.5 text-center">
+            <div class="text-xs opacity-75 font-bold">Total Score</div>
+            <div id="resScoreVal" class="text-2xl font-black text-blue-700">0 / 0</div>
+          </div>
+          <div class="soft-card p-3.5 text-center">
+            <div class="text-xs opacity-75 font-bold">Accuracy</div>
+            <div id="resAccuracyVal" class="text-2xl font-black text-teal-700">0%</div>
+          </div>
+          <div class="soft-card p-3.5 text-center">
+            <div class="text-xs opacity-75 font-bold">Batch Rank</div>
+            <div id="resRankVal" class="text-2xl font-black text-amber-700">#1</div>
+          </div>
+          <div class="soft-card p-3.5 text-center">
+            <div class="text-xs opacity-75 font-bold">Wrong / Skipped</div>
+            <div id="resWrongSkipVal" class="text-lg font-extrabold text-rose-700">0 / 0</div>
+          </div>
+        </div>
+
+        <!-- Subject-Wise Breakdown -->
+        <div class="soft-card p-4 mb-5">
+          <h3 class="font-extrabold text-sm mb-2">Subject-Wise Performance Breakdown</h3>
+          <div id="subjectBreakdownList" class="space-y-2 text-sm"></div>
+        </div>
+
+        <!-- Working WhatsApp Result Greeting + Coaching Center Ad + Friend Share Link -->
+        <div class="soft-card p-4 border-2 border-emerald-600 mb-5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h3 class="font-extrabold text-sm text-emerald-800">
+              📲 Share Result on WhatsApp (Greetings + Center Ad + Friend Invite Link)
+            </h3>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Ready to Share</span>
+          </div>
+          <pre id="whatsappMessagePreview" class="whitespace-pre-wrap text-xs sm:text-sm p-3 rounded-lg bg-white/80 border border-slate-300 text-slate-900 font-sans mb-3"></pre>
+          <div class="flex flex-wrap gap-2.5">
+            <button type="button" id="shareWhatsappResultBtn" class="btn-wa flex-1 min-w-[200px] py-3 px-4 text-sm shadow">
+              Share Result on WhatsApp →
+            </button>
+            <button type="button" id="shareWhatsappFriendBtn" class="btn-sec py-3 px-4 text-sm">
+              Invite Friend Link →
+            </button>
+            <button type="button" id="copyWhatsappMsgBtn" class="btn-ghost py-3 px-4 text-sm">
+              Copy Message
+            </button>
+          </div>
+          <div id="waShareFeedback" class="text-xs font-bold text-emerald-700 mt-2"></div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button type="button" id="toggleAnswerReviewBtn" class="btn-primary px-5 py-2.5 text-sm">
+            View Detailed Answer Key &amp; Explanations
+          </button>
+          <button type="button" id="releasedHomeBtn" class="btn-ghost px-5 py-2.5 text-sm">
+            ← Back to Student Login
+          </button>
+        </div>
+
+        <div id="detailedReviewContainer" class="hidden mt-5 space-y-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ADMIN LOGIN GATE -->
+  <section id="adminLoginScreen" class="glass-card p-6 max-w-lg mx-auto hidden">
+    <h2 class="text-xl font-extrabold mb-1">Admin V2 Secure Access</h2>
+    <p class="text-xs opacity-80 mb-4">
+      Preview/Local Admin PIN (<code class="font-bold">admin123</code>) அல்லது One-Click Demo Admin Login பயன்படுத்தி உடனடியாக உள்நுழையலாம்.
+    </p>
+
+    <div class="space-y-3">
+      <div>
+        <label for="adminPinInput" class="block text-xs font-bold mb-1">Admin Access PIN</label>
+        <input id="adminPinInput" type="password" value="admin123" placeholder="admin123" class="w-full p-3">
+      </div>
+      <div class="flex flex-wrap gap-2.5 pt-2">
+        <button type="button" id="adminSignInBtn" class="btn-primary flex-1 py-3 px-4 text-sm">
+          Unlock Admin V2 Dashboard
+        </button>
+        <button type="button" id="adminDemoQuickBtn" class="btn-sec py-3 px-4 text-sm">
+          Demo Admin Login
+        </button>
+      </div>
+      <div id="adminLoginErr" class="text-xs font-bold text-red-700"></div>
+    </div>
+  </section>
+
+  <!-- 6. ADMIN V2 DASHBOARD -->
+  <section id="adminDashboardScreen" class="glass-card p-5 sm:p-6 hidden space-y-5">
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-300/70">
+      <div>
+        <h2 class="text-xl font-extrabold">TNPSC Admin V2 Control Center</h2>
+        <p class="text-xs opacity-80">
+          1. Create Batch &amp; Subjects → 2. Generate Subject-Wise AI Questions &amp; Approve → 3. Auto-Release Timer &amp; WhatsApp Results
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button" id="adminApiSettingsBtn" class="btn-ghost px-3 py-2 text-xs">
+          🔑 Optional API Config
+        </button>
+        <button type="button" id="adminLogoutBtn" class="btn-danger px-3 py-2 text-xs">
+          Lock Admin
+        </button>
+      </div>
+    </div>
+
+    <!-- Optional API Configuration Drawer (localStorage only, zero hardcoded secrets) -->
+    <div id="adminApiConfigDrawer" class="soft-card p-4 hidden">
+      <div class="text-xs font-extrabold uppercase tracking-wider mb-2">
+        Optional Cloud &amp; Gemini API Settings (Stored in Browser localStorage Only)
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label for="cfgGeminiKey" class="block text-xs font-bold mb-1">Gemini API Key (Optional)</label>
+          <input id="cfgGeminiKey" type="password" placeholder="AIza... (Leave blank for Built-in TNPSC AI)" class="w-full p-2.5">
+        </div>
+        <div>
+          <label for="cfgSupabaseUrl" class="block text-xs font-bold mb-1">Supabase URL (Optional)</label>
+          <input id="cfgSupabaseUrl" type="text" placeholder="https://xyz.supabase.co" class="w-full p-2.5">
+        </div>
+        <div>
+          <label for="cfgSupabaseKey" class="block text-xs font-bold mb-1">Supabase Anon Key (Optional)</label>
+          <input id="cfgSupabaseKey" type="password" placeholder="eyJ..." class="w-full p-2.5">
+        </div>
+      </div>
+      <div class="mt-3 flex gap-2">
+        <button type="button" id="saveApiConfigBtn" class="btn-sec px-4 py-2 text-xs">Save Config</button>
+        <button type="button" id="clearApiConfigBtn" class="btn-ghost px-4 py-2 text-xs">Reset to Local Mode</button>
+      </div>
+    </div>
+
+    <!-- ADMIN TABS -->
+    <div class="flex flex-wrap gap-2">
+      <button type="button" id="admTabBtn1" class="btn-primary flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm">
+        1. Test Batches &amp; Subjects
+      </button>
+      <button type="button" id="admTabBtn2" class="btn-ghost flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm">
+        2. AI Question Generator &amp; Approval
+      </button>
+      <button type="button" id="admTabBtn3" class="btn-ghost flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm">
+        3. Results, Release Timer &amp; WhatsApp
+      </button>
+    </div>
+
+    <!-- TAB 1: TEST BATCHES & DYNAMIC SUBJECT ALLOCATION -->
+    <div id="admTabPanel1" class="space-y-5">
+      <div class="soft-card p-4 sm:p-5">
+        <h3 class="font-extrabold text-base mb-1">Create New Test Batch (Batch-First Workflow)</h3>
+        <p class="text-xs opacity-80 mb-4">
+          முதலில் Test Batch மற்றும் Subject-wise கேள்வி எண்ணிக்கையை உருவாக்கவும். நேரடியாக Local + Cloud Adapter மூலம் பிழையின்றி சேமிக்கப்படும்.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label for="batchTitleInput" class="block text-xs font-bold mb-1">Batch Title *</label>
+            <input id="batchTitleInput" type="text" value="TNPSC Group IV Full Mock Test" class="w-full p-2.5">
+          </div>
+          <div>
+            <label for="batchCodeInput" class="block text-xs font-bold mb-1">Batch Code *</label>
+            <div class="flex gap-1.5">
+              <input id="batchCodeInput" type="text" placeholder="G4_MOCK02" class="w-full p-2.5 uppercase font-bold">
+              <button type="button" id="genBatchCodeBtn" class="btn-ghost px-3 text-xs whitespace-nowrap">Auto</button>
+            </div>
+          </div>
+          <div>
+            <label for="batchCategoryInput" class="block text-xs font-bold mb-1">Exam Category</label>
+            <select id="batchCategoryInput" class="w-full p-2.5">
+              <option value="Group IV">Group IV</option>
+              <option value="Group II / IIA">Group II / IIA</option>
+              <option value="Group I">Group I</option>
+              <option value="VAO">VAO</option>
+            </select>
+          </div>
+          <div>
+            <label for="batchDurationInput" class="block text-xs font-bold mb-1">Exam Duration (Minutes)</label>
+            <input id="batchDurationInput" type="number" min="1" max="300" value="15" class="w-full p-2.5">
+          </div>
+          <div>
+            <label for="batchReleaseDateInput" class="block text-xs font-bold mb-1">Result Release Date</label>
+            <input id="batchReleaseDateInput" type="date" class="w-full p-2.5">
+          </div>
+          <div>
+            <label for="batchReleaseTimeInput" class="block text-xs font-bold mb-1">Result Release Time (Default 8:00 PM)</label>
+            <input id="batchReleaseTimeInput" type="time" value="20:00" class="w-full p-2.5">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="batchCenterAdInput" class="block text-xs font-bold mb-1">Coaching Center Ad Banner (Included in WhatsApp Results)</label>
+          <input id="batchCenterAdInput" type="text" value="🏛️ VETRI TNPSC ACADEMY — Group I, II/IIA, IV &amp; VAO New Offline &amp; Online Batches Open! Call: 98765-43210" class="w-full p-2.5">
+        </div>
+
+        <!-- Dynamic Subject Allocation Builder -->
+        <div class="p-4 rounded-xl bg-white/75 border border-slate-300 mb-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div>
+              <div class="font-extrabold text-sm">Subject Allocation Builder</div>
+              <div id="subjectPlanTotalBadge" class="text-xs font-bold text-blue-700">Total Target: 0 Questions</div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <select id="subjectPresetSelect" class="p-2 text-xs sm:text-sm min-w-[180px]"></select>
+              <input id="customSubjectNameInput" type="text" placeholder="Or type custom subject..." class="p-2 text-xs sm:text-sm w-44">
+              <input id="subjectTargetCountInput" type="number" min="1" max="100" value="3" class="p-2 text-xs sm:text-sm w-20" title="Target Questions">
+              <button type="button" id="addSubjectRowBtn" class="btn-sec px-3.5 py-2 text-xs sm:text-sm">
+                + Add Subject
+              </button>
+            </div>
+          </div>
+          <div id="subjectAllocationRows" class="space-y-2"></div>
+        </div>
+
+        <div id="createBatchFeedback" class="hidden mb-3 p-3 rounded-xl text-xs font-bold"></div>
+
+        <button type="button" id="saveNewBatchBtn" class="btn-primary w-full py-3 px-5 text-sm shadow">
+          ✓ Save Test Batch &amp; Open AI Question Generator →
+        </button>
+      </div>
+
+      <!-- Existing Batches List -->
+      <div class="soft-card p-4">
+        <h3 class="font-extrabold text-base mb-3">Active &amp; Scheduled Test Batches</h3>
+        <div id="adminBatchesList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: AI SUBJECT-WISE QUESTION GENERATOR & APPROVAL QUEUE -->
+    <div id="admTabPanel2" class="hidden space-y-5">
+      <div class="soft-card p-4 sm:p-5">
+        <h3 class="font-extrabold text-base mb-1">Subject-Wise AI Question Generator</h3>
+        <p class="text-xs opacity-80 mb-4">
+          Target Batch மற்றும் Subject தேர்ந்தெடுத்து AI கேள்விகளை உருவாக்கவும். கீழே உள்ள Approval Queue-ல் Approve செய்தவுடன் அவை தானாகவே அந்த Test Batch-ல் இணையும்.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+          <div>
+            <label for="aiBatchSelect" class="block text-xs font-bold mb-1">1. Target Test Batch *</label>
+            <select id="aiBatchSelect" class="w-full p-2.5"></select>
+          </div>
+          <div>
+            <label for="aiSubjectDropdown" class="block text-xs font-bold mb-1">2. Select Subject *</label>
+            <select id="aiSubjectDropdown" class="w-full p-2.5"></select>
+          </div>
+          <div>
+            <label for="aiNumQuestionsInput" class="block text-xs font-bold mb-1">3. Question Count (1-20)</label>
+            <input id="aiNumQuestionsInput" type="number" min="1" max="20" value="3" class="w-full p-2.5">
+          </div>
+          <div>
+            <label for="aiDifficultySelect" class="block text-xs font-bold mb-1">4. Difficulty Level</label>
+            <select id="aiDifficultySelect" class="w-full p-2.5">
+              <option value="TNPSC Standard">TNPSC Standard</option>
+              <option value="Easy">Easy (Foundation)</option>
+              <option value="Moderate">Moderate (Analytical)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div>
+            <label for="aiTopicInput" class="block text-xs font-bold mb-1">Optional Topic / Syllabus Unit Focus</label>
+            <input id="aiTopicInput" type="text" placeholder="எ.கா: திருக்குறள், அடிப்படை உரிமைகள், சிந்துவெளி நாகரிகம்" class="w-full p-2.5">
+          </div>
+          <div>
+            <label for="aiQuickNewSubjInput" class="block text-xs font-bold mb-1">Add New Subject to Batch on the Spot (Optional)</label>
+            <div class="flex gap-1.5">
+              <input id="aiQuickNewSubjInput" type="text" placeholder="e.g., Current Affairs" class="w-full p-2.5">
+              <button type="button" id="aiAddNewSubjBtn" class="btn-ghost px-3 text-xs whitespace-nowrap">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="aiBatchProgressBanner" class="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold mb-4">
+          Select a batch to view subject-wise approved question status.
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+          <button type="button" id="runAiGenerateBtn" class="btn-primary flex-1 min-w-[210px] py-3 px-5 text-sm shadow">
+            ✨ Generate AI Questions Now
+          </button>
+          <button type="button" id="setRemainingCountBtn" class="btn-sec py-3 px-4 text-xs sm:text-sm">
+            Auto-Set Remaining Needed
+          </button>
+        </div>
+        <div id="aiGenerateStatusMsg" class="mt-2.5 text-xs font-bold"></div>
+      </div>
+
+      <!-- Approval Queue -->
+      <div class="soft-card p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h3 class="font-extrabold text-base">Approval Queue &amp; Batch Question Bank</h3>
+            <p class="text-xs opacity-80">Edit inline, Reject, or Approve &amp; Attach directly to the selected Test Batch.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="queueStatusFilter" class="p-2 text-xs">
+              <option value="draft">Pending Approval (Drafts)</option>
+              <option value="approved">Approved (Attached to Batch)</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button type="button" id="approveAllQueueBtn" class="btn-wa px-3.5 py-2 text-xs">
+              ✓ Approve All &amp; Attach to Batch
+            </button>
+          </div>
+        </div>
+        <div id="approvalQueueList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: RESULTS, AUTO-RELEASE TIMER & WHATSAPP DISPATCH -->
+    <div id="admTabPanel3" class="hidden space-y-5">
+      <div class="soft-card p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex-1 min-w-[220px]">
+            <label for="resTabBatchSelect" class="block text-xs font-bold mb-1">Select Batch to Manage Results</label>
+            <select id="resTabBatchSelect" class="w-full p-2.5"></select>
+          </div>
+          <div class="flex flex-wrap gap-2 pt-4">
+            <button type="button" id="releaseNowBtn" class="btn-primary px-4 py-2.5 text-xs sm:text-sm">
+              🚀 Release Results Now
+            </button>
+            <button type="button" id="exportBatchCsvBtn" class="btn-sec px-4 py-2.5 text-xs sm:text-sm">
+              ⬇ Export CSV
+            </button>
+          </div>
+        </div>
+
+        <!-- Update Scheduled Release Time -->
+        <div class="p-3.5 rounded-xl bg-white/75 border border-slate-300 mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+          <div>
+            <label for="resUpdateDateInput" class="block text-xs font-bold mb-1">Scheduled Release Date</label>
+            <input id="resUpdateDateInput" type="date" class="w-full p-2">
+          </div>
+          <div>
+            <label for="resUpdateTimeInput" class="block text-xs font-bold mb-1">Scheduled Release Time</label>
+            <input id="resUpdateTimeInput" type="time" class="w-full p-2">
+          </div>
+          <div>
+            <button type="button" id="saveResScheduleBtn" class="btn-sec w-full py-2 px-3 text-xs sm:text-sm">
+              Update Release Timer
+            </button>
+          </div>
+        </div>
+
+        <!-- Student Attempts & WhatsApp Broadcast Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-300 bg-white/90">
+          <table class="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-300 font-extrabold">
+                <th class="p-3">Rank</th>
+                <th class="p-3">Student Name</th>
+                <th class="p-3">Mobile</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Score</th>
+                <th class="p-3">WhatsApp Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminAttemptsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
-<div class="footer-bar"><span class="muted">TNPSC Exam Platform • Live</span><button type="button" class="ghost" id="adminBtn">🔒 Admin</button></div>
-</div>
+<!-- TOAST NOTIFICATION -->
+<div id="toastBanner" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-2.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-xl"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-(()=>{
-/* ====== CONFIG: Supabase Dashboard > Project Settings > API ====== */
-const SUPABASE_URL='PASTE_YOUR_SUPABASE_PROJECT_URL',SUPABASE_ANON_KEY='PASTE_YOUR_ANON_PUBLIC_KEY';
-const $=id=>document.getElementById(id);
-const sb=/^https?:/.test(SUPABASE_URL)&&window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
-const ls={g(k,d){try{const v=localStorage.getItem('tn3:'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},s(k,v){try{localStorage.setItem('tn3:'+k,JSON.stringify(v))}catch(e){}}};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const p2=n=>String(n).padStart(2,'0'),shuf=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1]);
-const fmt=ms=>{const s=Math.round(ms/1000);return p2(Math.floor(s/60))+':'+p2(s%60)};
-const lt=ms=>new Date(ms-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16);
-const bi=(s,c='')=>{const [t,e]=s.split('|').map(x=>x.trim());return e===undefined?esc(t):`<span class="ta">${esc(t)}</span><span class="en ${c}">${esc(e)}</span>`};
-const SUB={ta:'பொதுத் தமிழ் | General Tamil',gs:'பொது அறிவு | General Studies',ap:'திறனறிவு | Aptitude',sc:'அறிவியல் | Science'};
-const BANK=[
-['ta','திருக்குறளின் ஆசிரியர் யார்? | Who wrote the Thirukkural?',['திருவள்ளுவர் | Thiruvalluvar','இளங்கோவடிகள் | Ilango Adigal','கம்பர் | Kambar','ஔவையார் | Avvaiyar']],
-['ta','திருக்குறளில் எத்தனை அதிகாரங்கள் உள்ளன? | How many chapters are in the Thirukkural?',['133','100','108','150']],
-['ta','சிலப்பதிகாரத்தை இயற்றியவர் யார்? | Who composed Silappathikaram?',['இளங்கோவடிகள் | Ilango Adigal','திருவள்ளுவர் | Thiruvalluvar','கம்பர் | Kambar','பாரதியார் | Bharathiyar']],
-['gs','இந்தியாவின் முதல் பிரதமர் யார்? | Who was the first Prime Minister of India?',['ஜவஹர்லால் நேரு | Jawaharlal Nehru','சர்தார் படேல் | Sardar Patel','காந்தி | Gandhi','ராஜேந்திர பிரசாத் | Rajendra Prasad']],
-['gs','இந்திய அரசியலமைப்பு நடைமுறைக்கு வந்த ஆண்டு? | Year the Indian Constitution came into force?',['1950','1947','1949','1952']],
-['gs','தமிழ்நாட்டின் தலைநகரம் எது? | What is the capital of Tamil Nadu?',['சென்னை | Chennai','மதுரை | Madurai','கோயம்புத்தூர் | Coimbatore','திருச்சி | Tiruchirappalli']],
-['ap','200-ல் 15% எவ்வளவு? | What is 15% of 200?',['30','20','25','35']],
-['ap','தொடர்: 2, 4, 8, 16, ? | Series: 2, 4, 8, 16, ?',['32','24','30','34']],
-['ap','60 கி.மீ/மணி வேகத்தில் 3 மணி நேரத்தில் கடக்கும் தூரம்? | Distance covered at 60 km/h in 3 hours?',['180 கி.மீ | 180 km','120 கி.மீ | 120 km','150 கி.மீ | 150 km','200 கி.மீ | 200 km']],
-['sc','நீரின் வேதி வாய்ப்பாடு? | Chemical formula of water?',['H₂O','CO₂','O₂','NaCl']],
-['sc','ஒளியின் வேகம் தோராயமாக? | Approximate speed of light?',['3×10⁸ மீ/வி | 3×10⁸ m/s','3×10⁶ மீ/வி | 3×10⁶ m/s','3×10⁵ மீ/வி | 3×10⁵ m/s','3×10¹⁰ மீ/வி | 3×10¹⁰ m/s']],
-['sc','மனித உடலின் மிகப்பெரிய உறுப்பு? | Largest organ of the human body?',['தோல் | Skin','கல்லீரல் | Liver','இதயம் | Heart','நுரையீரல் | Lungs']]];
+(function() {
+  "use strict";
 
-const mk=b=>{const o=shuf(b.o.map((x,i)=>[x,i==0]));return{s:b.s,q:b.q,o:o.map(x=>x[0]),a:o.findIndex(x=>x[1])}};
-let S=null,T=null,tm,rt,st,busy=0,closed=0,off=0,C={t:[],a:[],s:[]},edC=null,edK=null;
-const now=()=>Date.now()+off,tms=x=>new Date(x).getTime(),pc=x=>Math.round(x.score/x.total*100);
-function show(id){['joinBox','examBox','resBox','adminBox'].forEach(x=>$(x).classList.toggle('hidden',x!=id));window.scrollTo(0,0)}
-function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
-function sure(b){if(b.dataset.sure)return true;const o=b.textContent;b.dataset.sure=1;b.textContent='Sure? Tap again';setTimeout(()=>{b.dataset.sure='';b.textContent=o},3000);return false}
-const Q=async p=>{const r=await p;if(r.error){toast('DB: '+r.error.message);return[]}return r.data||[]};
-/* splash */
-const sp=$('splashOverlay'),closeSp=()=>{if(closed)return;closed=1;sp.classList.add('is-closing');setTimeout(()=>sp.remove(),500)};
-$('skipSplashBtn').onclick=closeSp;setTimeout(closeSp,1800);
+  var STORE_KEY = "TNPSC_V2_UNIFIED_STORE_V1";
+  var ACTIVE_SESSION_KEY = "TNPSC_V2_STUDENT_SESSION_V1";
+  var ACC_PREFS_KEY = "TNPSC_V2_ACCESSIBILITY_V1";
+  var CONFIG_KEY = "TNPSC_V2_RUNTIME_CONFIG_V1";
+  var ADMIN_PIN_DEFAULT = "admin123";
 
-/* accessibility */
-const acc=Object.assign({f:'1',c:'normal',l:'both',a:'full'},ls.g('acc',{}));
-const AI=[['fontSizeSel','f'],['contrastSel','c'],['langModeSel','l'],['animModeSel','a']];
-const exId=id=>'exam'+id[0].toUpperCase()+id.slice(1);
-function applyAcc(){document.documentElement.style.setProperty('--font-scale',acc.f);const b=document.body.classList;
-b.toggle('contrast-high',acc.c=='high');b.toggle('l-ta',acc.l=='ta');b.toggle('l-en',acc.l=='en');b.toggle('anim-calm',acc.a=='calm');b.toggle('anim-reduced',acc.a=='reduced');
-AI.forEach(([id,k])=>{$(id).value=acc[k];$(exId(id)).value=acc[k]})}
-AI.forEach(([id,k])=>[id,exId(id)].forEach(i=>{$(i).onchange=e=>{acc[k]=e.target.value;ls.s('acc',acc);applyAcc()}}));
-$('accToggleBtn').onclick=e=>{const h=$('accPanel').classList.toggle('hidden');e.currentTarget.setAttribute('aria-expanded',!h)};
-$('examAccBtn').onclick=e=>{const h=$('examAccPanel').classList.toggle('hidden');e.currentTarget.setAttribute('aria-expanded',!h)};
-applyAcc();
+  var DEFAULT_SUBJECTS = [
+    "General Tamil",
+    "General English",
+    "Indian Polity",
+    "History & INM",
+    "Geography",
+    "Indian Economy",
+    "General Science",
+    "Aptitude & Mental Ability",
+    "Current Affairs"
+  ];
 
-/* effects */
-function confetti(){if(acc.a!='full')return;const c=['#facc15','#38bdf8','#4ade80','#f472b6','#fb923c'];for(let i=0;i<42;i++){const s=document.createElement('i');s.className='cf';s.style.cssText=`left:${Math.random()*100}vw;background:${c[i%5]};animation-delay:${Math.random()*.8}s;animation-duration:${2+Math.random()*1.5}s`;document.body.appendChild(s);setTimeout(()=>s.remove(),4800)}}
-function countUp(el,to){if(acc.a=='reduced'||!to){el.textContent=to;return}const t0=performance.now();(function f(t){const p=Math.min((t-t0)/900,1);el.textContent=Math.round(to*p);if(p<1)requestAnimationFrame(f)})(t0)}
+  // Rich Bilingual TNPSC Question Bank & Procedural Generator (Zero external failure)
+  var TNPSC_QUESTION_BANK = {
+    "General Tamil": [
+      {
+        ta: "திருக்குறளில் உள்ள மொத்த அதிகாரங்களின் எண்ணிக்கை எத்தனை?",
+        en: "How many chapters (Adhikarams) are there in Thirukkural?",
+        opts: [{ ta: "133", en: "133" }, { ta: "108", en: "108" }, { ta: "120", en: "120" }, { ta: "150", en: "150" }],
+        a: 0,
+        whyTa: "திருக்குறள் அறத்துப்பால் (38), பொருட்பால் (70), இன்பத்துப்பால் (25) என மொத்தம் 133 அதிகாரங்களைக் கொண்டுள்ளது.",
+        whyEn: "Thirukkural consists of 133 chapters across three sections (38 + 70 + 25)."
+      },
+      {
+        ta: "'யாதும் ஊரே யாவரும் கேளிர்' என்ற புகழ்பெற்ற வரி இடம்பெற்றுள்ள சங்க நூல் எது?",
+        en: "In which Sangam literary work does 'Yadhum Oore Yaavarum Kelir' appear?",
+        opts: [{ ta: "புறநானூறு", en: "Purananuru" }, { ta: "அகநானூறு", en: "Agananuru" }, { ta: "நற்றிணை", en: "Natrinai" }, { ta: "குறுந்தொகை", en: "Kurunthogai" }],
+        a: 0,
+        whyTa: "கணியன் பூங்குன்றனார் இயற்றிய இப்பாடல் புறநானூற்றின் 192-வது பாடலாகும்.",
+        whyEn: "Composed by Kaniyan Poongundranar, it appears as poem 192 in Purananuru."
+      },
+      {
+        ta: "சிலப்பதிகாரத்தை இயற்றியவர் யார்?",
+        en: "Who authored the Tamil epic Silappathikaram?",
+        opts: [{ ta: "இளங்கோவடிகள்", en: "Ilango Adigal" }, { ta: "சீத்தலைச் சாத்தனார்", en: "Seethalai Saathanar" }, { ta: "திருத்தக்கதேவர்", en: "Thiruthakkadevar" }, { ta: "கம்பர்", en: "Kambar" }],
+        a: 0,
+        whyTa: "சேர மரபைச் சேர்ந்த இளங்கோவடிகள் சிலப்பதிகாரத்தை இயற்றினார்.",
+        whyEn: "Ilango Adigal, a Chera prince, authored Silappathikaram."
+      },
+      {
+        ta: "'தமிழ் தாத்தா' என்று போற்றப்படுபவர் யார்?",
+        en: "Who is revered as 'Tamil Thaatha' (Grandfather of Tamil)?",
+        opts: [{ ta: "உ.வே. சாமிநாதையர்", en: "U.V. Swaminatha Iyer" }, { ta: "மறைமலை அடிகள்", en: "Maraimalai Adigal" }, { ta: "பரிதிமாற் கலைஞர்", en: "Parithimar Kalaignar" }, { ta: "திரு.வி.க", en: "Thiru. V. Kalyanasundaram" }],
+        a: 0,
+        whyTa: "பழந்தமிழ் ஓலைச்சுவடிகளைத் தேடிப் பதிப்பித்த உ.வே. சாமிநாதையர் 'தமிழ் தாத்தா' என அழைக்கப்படுகிறார்.",
+        whyEn: "U.V. Swaminatha Iyer is honored as Tamil Thaatha for reviving classical Sangam manuscripts."
+      }
+    ],
+    "General English": [
+      {
+        ta: "Choose the correct synonym for the word 'BENEVOLENT':",
+        en: "Choose the correct synonym for the word 'BENEVOLENT':",
+        opts: [{ ta: "Kind and generous", en: "Kind and generous" }, { ta: "Hostile", en: "Hostile" }, { ta: "Arrogant", en: "Arrogant" }, { ta: "Careless", en: "Careless" }],
+        a: 0,
+        whyTa: "'Benevolent' என்பதன் பொருள் கருணையும் தாராள மனமும் கொண்டவர் என்பதாகும்.",
+        whyEn: "'Benevolent' means well-meaning, kind, and generous."
+      },
+      {
+        ta: "Identify the figure of speech: 'The wind whispered through the trees.'",
+        en: "Identify the figure of speech: 'The wind whispered through the trees.'",
+        opts: [{ ta: "Personification", en: "Personification" }, { ta: "Simile", en: "Simile" }, { ta: "Oxymoron", en: "Oxymoron" }, { ta: "Hyperbole", en: "Hyperbole" }],
+        a: 0,
+        whyTa: "உயிரற்ற காற்றுக்கு மனிதப் பண்பான 'கிசுகிசுத்தல்' ஏற்றிக் கூறப்பட்டுள்ளதால் இது Personification ஆகும்.",
+        whyEn: "Giving human traits ('whispered') to non-human wind is Personification."
+      }
+    ],
+    "Indian Polity": [
+      {
+        ta: "இந்திய அரசியலமைப்பின் எந்தப் பகுதியில் அடிப்படை உரிமைகள் (Fundamental Rights) இடம்பெற்றுள்ளன?",
+        en: "Fundamental Rights are enshrined in which Part of the Indian Constitution?",
+        opts: [{ ta: "பகுதி III (Part III)", en: "Part III" }, { ta: "பகுதி II (Part II)", en: "Part II" }, { ta: "பகுதி IV (Part IV)", en: "Part IV" }, { ta: "பகுதி IVA (Part IVA)", en: "Part IVA" }],
+        a: 0,
+        whyTa: "அரசியலமைப்பின் பகுதி III (சரத்துகள் 12 முதல் 35 வரை) அடிப்படை உரிமைகளை வழங்குகிறது.",
+        whyEn: "Part III (Articles 12 to 35) of the Constitution guarantees Fundamental Rights."
+      },
+      {
+        ta: "மாநில அரசுப் பணியாளர் தேர்வாணையத் (TNPSC) தலைவர் மற்றும் உறுப்பினர்களை நியமிப்பவர் யார்?",
+        en: "Who appoints the Chairman and Members of a State Public Service Commission (TNPSC)?",
+        opts: [{ ta: "மாநில ஆளுநர்", en: "Governor of the State" }, { ta: "முதலமைச்சர்", en: "Chief Minister" }, { ta: "குடியரசுத் தலைவர்", en: "President of India" }, { ta: "உயர்நீதிமன்ற தலைமை நீதிபதி", en: "Chief Justice of High Court" }],
+        a: 0,
+        whyTa: "இந்திய அரசியலமைப்பு சரத்து 316-ன் கீழ் மாநில ஆளுநர் நியமிக்கிறார்.",
+        whyEn: "Under Article 316, the Governor of the State appoints the Chairman and Members."
+      },
+      {
+        ta: "இந்திய அரசியலமைப்பின் 73-வது திருத்தச் சட்டம் எதனுடன் தொடர்புடையது?",
+        en: "The 73rd Constitutional Amendment Act of 1992 is related to:",
+        opts: [{ ta: "பஞ்சாயத்து ராஜ் அமைப்புகள்", en: "Panchayati Raj Institutions" }, { ta: "நகராட்சிகள்", en: "Municipalities" }, { ta: "பொருட்கள் மற்றும் சேவை வரி", en: "Goods and Services Tax" }, { ta: "கல்வி உரிமை", en: "Right to Education" }],
+        a: 0,
+        whyTa: "73-வது திருத்தச் சட்டம் 11-வது அட்டவணையைச் சேர்த்து பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கியது.",
+        whyEn: "The 73rd Amendment added the 11th Schedule and constitutional status to Panchayati Raj."
+      }
+    ],
+    "History & INM": [
+      {
+        ta: "இந்திய தேசிய காங்கிரஸ் எந்த ஆண்டு தொடங்கப்பட்டது?",
+        en: "In which year was the Indian National Congress founded?",
+        opts: [{ ta: "1885", en: "1885" }, { ta: "1905", en: "1905" }, { ta: "1906", en: "1906" }, { ta: "1919", en: "1919" }],
+        a: 0,
+        whyTa: "1885 டிசம்பரில் பம்பாயில் A.O. ஹியூம் முயற்சியால் W.C. பானர்ஜி தலைமையில் தொடங்கப்பட்டது.",
+        whyEn: "Founded in December 1885 in Bombay with W.C. Bonnerjee as its first president."
+      },
+      {
+        ta: "வேலூர் சிப்பாய் கலகம் நடைபெற்ற ஆண்டு எது?",
+        en: "In which year did the Vellore Mutiny take place?",
+        opts: [{ ta: "1806", en: "1806" }, { ta: "1857", en: "1857" }, { ta: "1799", en: "1799" }, { ta: "1801", en: "1801" }],
+        a: 0,
+        whyTa: "1806 ஜூலை 10 அன்று வேலூர் கோட்டையில் இந்திய சிப்பாய்கள் ஆங்கிலேயர்களுக்கு எதிராகப் புரட்சி செய்தனர்.",
+        whyEn: "The Vellore Mutiny erupted on July 10, 1806, predating the 1857 revolt."
+      }
+    ],
+    "Geography": [
+      {
+        ta: "தமிழ்நாட்டின் மிக நீளமான ஆறு எது?",
+        en: "Which is the longest river in Tamil Nadu?",
+        opts: [{ ta: "காவிரி", en: "Cauvery" }, { ta: "வைகை", en: "Vaigai" }, { ta: "தாமிரபரணி", en: "Tamiraparani" }, { ta: "பாலாறு", en: "Palar" }],
+        a: 0,
+        whyTa: "காவிரி ஆறு தமிழ்நாட்டில் சுமார் 416 கி.மீ தூரம் பாயும் மிக நீளமான ஆறாகும்.",
+        whyEn: "Cauvery is the longest river in Tamil Nadu, flowing about 416 km within the state."
+      },
+      {
+        ta: "நீலகிரி மலையின் மிக உயரமான சிகரம் எது?",
+        en: "Which is the highest peak in the Nilgiri Hills?",
+        opts: [{ ta: "தொட்டபெட்டா", en: "Doddabetta" }, { ta: "ஆனைமுடி", en: "Anamudi" }, { ta: "மகேந்திரகிரி", en: "Mahendragiri" }, { ta: "சேர்வராயன்", en: "Shevaroy" }],
+        a: 0,
+        whyTa: "தொட்டபெட்டா (2,637 மீ) நீலகிரி மலைத்தொடரின் மிக உயரமான சிகரமாகும்.",
+        whyEn: "Doddabetta (2,637 m) is the highest peak in the Nilgiri Hills."
+      }
+    ],
+    "Indian Economy": [
+      {
+        ta: "நிதி ஆயோக் (NITI Aayog) எப்போது நடைமுறைக்கு வந்தது?",
+        en: "When did NITI Aayog come into existence?",
+        opts: [{ ta: "ஜனவரி 1, 2015", en: "January 1, 2015" }, { ta: "ஏப்ரல் 1, 2014", en: "April 1, 2014" }, { ta: "ஜனவரி 26, 2015", en: "January 26, 2015" }, { ta: "ஜூலை 1, 2017", en: "July 1, 2017" }],
+        a: 0,
+        whyTa: "திட்டக் குழுவிற்கு மாற்றாக ஜனவரி 1, 2015 அன்று நிதி ஆயோக் நிறுவப்பட்டது.",
+        whyEn: "NITI Aayog replaced the Planning Commission on January 1, 2015."
+      }
+    ],
+    "General Science": [
+      {
+        ta: "ஒளியின் திசைவேகம் மிக அதிகமாக உள்ள ஊடகம் எது?",
+        en: "In which medium is the speed of light maximum?",
+        opts: [{ ta: "வெற்றிடம் (Vacuum)", en: "Vacuum" }, { ta: "நீர் (Water)", en: "Water" }, { ta: "கண்ணாடி (Glass)", en: "Glass" }, { ta: "வைரம் (Diamond)", en: "Diamond" }],
+        a: 0,
+        whyTa: "வெற்றிடத்தில் ஒளியின் வேகம் 3 × 10^8 மீ/வி ஆகும்.",
+        whyEn: "Light travels fastest in a vacuum at approximately 3 × 10^8 m/s."
+      }
+    ],
+    "Aptitude & Mental Ability": [
+      {
+        ta: "2, 6, 12, 20, 30, ? என்ற தொடரில் அடுத்து வரும் எண் எது?",
+        en: "Find the next number in the series: 2, 6, 12, 20, 30, ?",
+        opts: [{ ta: "42", en: "42" }, { ta: "38", en: "38" }, { ta: "40", en: "40" }, { ta: "44", en: "44" }],
+        a: 0,
+        whyTa: "வித்தியாசம் +4, +6, +8, +10, +12 என அதிகரிப்பதால் 30 + 12 = 42.",
+        whyEn: "Differences increase by 2 each step (+4, +6, +8, +10, +12), so 30 + 12 = 42."
+      }
+    ],
+    "Current Affairs": [
+      {
+        ta: "இந்தியாவின் முதல் சூரிய ஆய்வு விண்கலம் எது?",
+        en: "Which is India's first space-based solar observatory mission?",
+        opts: [{ ta: "ஆதித்யா-L1 (Aditya-L1)", en: "Aditya-L1" }, { ta: "சந்திரயான்-3", en: "Chandrayaan-3" }, { ta: "ககன்யான்", en: "Gaganyaan" }, { ta: "மங்கள்யான்", en: "Mangalyaan" }],
+        a: 0,
+        whyTa: "இஸ்ரோவின் ஆதித்யா-L1 சூரியனை ஆய்வு செய்யும் முதல் இந்திய விண்கலமாகும்.",
+        whyEn: "ISRO's Aditya-L1 is India's first dedicated solar mission."
+      }
+    ]
+  };
 
+  function g(id) { return document.getElementById(id); }
 
-/* ====== student: join ====== */
-function chkSess(){notice();$('resumeLastBtn').classList.toggle('hidden',!ls.g('last',null))}
-async function notice(){if(!sb)return;const{data}=await sb.from('settings').select('v').eq('k','notice');const n=data&&data[0]?data[0].v:'';$('notice').textContent=n||'';$('notice').classList.toggle('hidden',!n)}
-$('joinBtn').onclick=()=>join($('code').value,$('name').value,$('joinPhone').value,$('joinEmail').value);
-$('resumeLastBtn').onclick=()=>{const l=ls.g('last',null);if(l)join(l.code,l.name,l.phone,l.email)};
-async function join(code,name,phone,email){const m=$('joinMsg'),btn=$('joinBtn');code=code.trim().toUpperCase();name=name.trim();phone=phone.replace(/\D/g,'');email=email.trim();
-if(!sb)return m.textContent='Supabase config இல்லை — index.html-ல் URL & key சேர்க்கவும்.';
-if(!code||!name)return m.textContent='Test Code மற்றும் பெயர் தேவை.';
-if(!phone&&!email)return m.textContent='Mobile அல்லது Email கட்டாயம்.';
-m.textContent='';btn.disabled=true;
-const{data:d,error}=await sb.rpc('join_exam',{p_code:code,p_name:name,p_phone:phone,p_email:email,p_cat:$('examCategoryFilter').value});btn.disabled=false;
-if(error||!d)return m.textContent='Server error — இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.';
-if(d.status=='notfound')return m.textContent='இந்த Test Code கிடைக்கவில்லை.';
-if(d.status=='wrongcat')return m.textContent='இந்த test '+d.category+' பிரிவைச் சேர்ந்தது.';
-if(d.status=='blocked')return m.textContent='இந்த கணக்கு தடை செய்யப்பட்டுள்ளது — Admin-ஐ தொடர்பு கொள்ளவும்.';
-if(d.status=='closed')return m.textContent='இந்த Test மூடப்பட்டுள்ளது (Closed).';
-ls.s('last',{code,name,phone,email});off=tms(d.now)-Date.now();
-const la=ls.g('ans:'+code+':'+d.key,null);
-S={code,key:d.key,name:d.name,phone,email,start:tms(d.attempt.started_at),ans:Object.assign({},d.attempt.ans,d.attempt.submitted?{}:la||{}),cur:0};
-T={code:d.test.code,cat:d.test.category,dur:d.test.duration,rel:tms(d.test.release_at),qs:d.test.qs};
-if(d.attempt.submitted)return showRes();
-openExam()}
+  function showToast(msg) {
+    var el = g("toastBanner");
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.remove("hidden");
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(function() { el.classList.add("hidden"); }, 3200);
+  }
 
-/* ====== student: exam ====== */
-function openExam(){clearInterval(rt);show('examBox');
-$('whoTitle').innerHTML=`<b>${esc(S.name)}</b><div class="muted">${esc(T.code)} • ${T.cat} • ${T.qs.length} Qs • ${T.dur} min</div>`;
-$('userPhone').value=S.phone||'';$('userEmail').value=S.email||'';
-$('contactSubmitBox').classList.add('hidden');$('finishStatusMsg').textContent='';$('examMsg').textContent='';
-renderQ();save();clearInterval(tm);tm=setInterval(tick,1000);tick()}
-function tick(){const left=S.start+T.dur*6e4-now();if(left<=0){clearInterval(tm);return submit(true)}
-$('timerLabel').textContent='Time Remaining: '+p2(Math.floor(left/6e4))+':'+p2(Math.floor(left%6e4/1e3));$('timerBox').classList.toggle('timer-urgent',left<6e4)}
-function save(){ls.s('ans:'+S.code+':'+S.key,S.ans);const n=Object.keys(S.ans).length;$('progressLabel').textContent=`Answered: ${n} / ${T.qs.length}`;$('barI').style.width=n/T.qs.length*100+'%';clearTimeout(st);st=setTimeout(push,800)}
-async function push(){const l=$('saveStateLabel');const{error}=await sb.rpc('save_answers',{p_code:S.code,p_key:S.key,p_ans:S.ans});
-if(error){l.className='warn';l.style.margin='0';l.textContent='Auto-Save: Offline — retrying…';st=setTimeout(push,4000);return}
-l.className='ok';l.style.margin='0';l.textContent='Auto-Save: Saved ✓ '+new Date().toLocaleTimeString();l.classList.remove('flash');void l.offsetWidth;l.classList.add('flash')}
-function renderQ(){const i=S.cur,q=T.qs[i],n=T.qs.length;
-$('qArea').innerHTML=`<div class="panel-card qcard"><div class="muted">Q ${i+1} / ${n} • ${bi(SUB[q.s]||q.s,'sl')}</div><h3 style="margin-top:6px">${bi(q.q,'q-en')}</h3>
-${q.o.map((o,j)=>`<label class="opt${S.ans[i]===j?' sel':''}"><input type="radio" name="o" value="${j}"${S.ans[i]===j?' checked':''}> ${bi(o,'opt-en')}</label>`).join('')}
-<div class="row" style="margin-top:10px"><button type="button" class="ghost" data-nav="-1"${i?'':' disabled'}>← Prev</button><button type="button" class="ghost" data-clear="1">Clear</button><button type="button" data-nav="1"${i<n-1?'':' disabled'}>Next →</button></div></div>
-<div class="palette">${T.qs.map((_,j)=>`<button type="button" class="ghost pb${S.ans[j]!=null?' a':''}${j==i?' c':''}" data-go="${j}" aria-label="Question ${j+1}">${j+1}</button>`).join('')}</div>`}
-$('qArea').onclick=e=>{const b=e.target.closest('[data-nav],[data-go],[data-clear]');if(!b||b.disabled)return;
-if(b.dataset.nav)S.cur+=+b.dataset.nav;else if(b.dataset.go)S.cur=+b.dataset.go;else delete S.ans[S.cur];save();renderQ()};
-$('qArea').onchange=e=>{if(e.target.name!='o')return;S.ans[S.cur]=+e.target.value;save();
-document.querySelectorAll('#qArea .opt').forEach(l=>l.classList.toggle('sel',l.contains(e.target)));
-document.querySelectorAll('#qArea .pb')[S.cur].classList.add('a')};
-$('finishedBtn').onclick=()=>{const un=T.qs.length-Object.keys(S.ans).length,f=$('finishStatusMsg');
-f.className=un?'warn':'ok';f.textContent=un?`${un} கேள்விகளுக்கு பதில் இல்லை (unanswered). தேவையெனில் திரும்பிச் சென்று பதிலளிக்கவும்.`:'அனைத்து கேள்விகளும் முடிந்தன ✓';
-const b=$('contactSubmitBox');b.classList.remove('hidden');b.scrollIntoView({behavior:'smooth',block:'center'})};
-$('switchStudentBtn').onclick=()=>{clearInterval(tm);show('joinBox');chkSess()};
-$('submitBtn').onclick=()=>submit(false);
-async function submit(auto){const b=$('submitBtn');b.disabled=true;clearTimeout(st);clearInterval(tm);let r;
-for(let i=0;i<3;i++){r=await sb.rpc('submit_exam',{p_code:S.code,p_key:S.key,p_ans:S.ans});if(!r.error)break;await new Promise(z=>setTimeout(z,1500))}
-b.disabled=false;
-if(r.error){$('examMsg').textContent='Submit ஆகவில்லை — இணையத்தைச் சரிபார்க்கவும். மீண்டும் முயற்சி நடக்கிறது…';tm=setInterval(tick,1000);return}
-ls.s('ans:'+S.code+':'+S.key,null);showRes()}
+  function normalizePhone10(raw) {
+    var digits = String(raw || "").replace(/\D/g, "");
+    if (digits.length > 10 && digits.indexOf("91") === 0) {
+      digits = digits.slice(2);
+    }
+    return digits;
+  }
 
-/* ====== student: results ====== */
-async function showRes(){clearInterval(tm);clearInterval(rt);show('resBox');rt=setInterval(()=>{if(now()>=T.rel)loadRes();else updCd()},1000);loadRes()}
-async function loadRes(){if(busy)return;busy=1;try{const{data:d,error}=await sb.rpc('get_result',{p_code:S.code,p_key:S.key});
-if(error||!d){$('resBody').innerHTML='<p class="err">Result load ஆகவில்லை. இணையத்தைச் சரிபார்க்கவும்.</p>';return}
-if(d.status=='waiting'){T.rel=tms(d.release_at);off=tms(d.now)-Date.now();renderWait()}else if(d.status=='ready')renderRes(d);else{clearInterval(rt);$('resBody').innerHTML='<p class="err">Result இல்லை.</p>'}}finally{busy=0}}
-function renderWait(){if($('cd'))return;$('resBody').innerHTML=`<div class="banner wait">✅ உங்கள் விடைகள் சமர்ப்பிக்கப்பட்டன!<br><small>Answers submitted • Results will auto-release</small></div>
-<div class="countdown-card"><div class="muted">Result Release Countdown (முடிவுகள் வெளியாக)</div><div class="countdown-clock" id="cd">--:--:--</div><div class="muted">${new Date(T.rel).toLocaleString()}</div></div>
-<p class="muted">இந்தப் பக்கத்தை மூட வேண்டாம் — நேரம் முடிந்ததும் முடிவுகள் தானாகத் தோன்றும். பிறகு அதே Mobile/Email உடன் Join செய்தும் பார்க்கலாம்.</p>`;updCd()}
-function updCd(){const e=$('cd');if(!e)return;const l=Math.max(0,T.rel-now());e.textContent=p2(Math.floor(l/36e5))+':'+p2(Math.floor(l%36e5/6e4))+':'+p2(Math.floor(l%6e4/1e3))}
-function renderRes(d){clearInterval(rt);const sub=d.mine,pct=pc(sub),rank=d.rank,cls=rank==1&&pct>=50?'champ':pct>=60?'good':'imp',msg={champ:'🏆 முதலிடம்! Rank #1 — Champion!',good:'👏 சிறப்பு! நல்ல மதிப்பெண் — Great score!',imp:'💪 தொடர்ந்து பயிற்சி செய்யுங்கள் — Keep practising!'}[cls];
-const wa=`🎯 TNPSC ${d.category} • ${S.code}\n👤 ${sub.name}\n📊 Score: ${sub.score}/${sub.total} (${pct}%)\n🏅 Rank: #${rank} of ${d.count}\nTNPSC Exam Platform`;
-$('resBody').innerHTML=`<div class="banner ${cls}">${msg}</div>
-<div class="stat-grid"><div class="stat-card"><span class="muted">Score</span><b><span id="sc">0</span> / ${sub.total}</b></div><div class="stat-card"><span class="muted">Percentage</span><b>${pct}%</b></div><div class="stat-card"><span class="muted">Rank</span><b>#${rank} of ${d.count}</b></div><div class="stat-card"><span class="muted">Time Taken</span><b>${fmt(sub.time_ms)}</b></div></div>
-<h3>Subject-wise (பாடவாரியாக)</h3><div class="table-wrap"><table><thead><tr><th>Subject</th><th>Correct</th><th>%</th></tr></thead><tbody>${Object.entries(sub.sb||{}).map(([k,v],i)=>`<tr style="animation-delay:${i*.07}s"><td>${bi(SUB[k]||k,'sl')}</td><td>${v[0]} / ${v[1]}</td><td><span class="pill ${v[0]/v[1]>=.6?'pill-ok':'pill-warn'}">${Math.round(v[0]/v[1]*100)}%</span></td></tr>`).join('')}</tbody></table></div>
-<h3>Leaderboard (Top 5)</h3><div class="table-wrap"><table><thead><tr><th>#</th><th>Name</th><th>Score</th><th>Time</th></tr></thead><tbody>${d.top.map((x,i)=>`<tr${x.key==S.key?' class="me"':''} style="animation-delay:${i*.07}s"><td>${i+1}</td><td>${esc(x.name)}</td><td>${x.score}/${x.total}</td><td>${fmt(x.time_ms)}</td></tr>`).join('')}</tbody></table></div>
-<details class="panel-card"><summary><b>Answer Review (விடை மதிப்பாய்வு)</b></summary>${d.qs.map((q,i)=>{const a=sub.ans[i],r=a===q.a;return`<div class="rv ${r?'okc':'bad'}">${r?'✔':'✘'} ${i+1}. ${bi(q.q,'q-en')}<div class="muted">✔ ${bi(q.o[q.a])}${a==null?' • பதில் இல்லை':r?'':' • உங்கள் பதில்: '+bi(q.o[a])}</div></div>`}).join('')}</details>
-<div class="wa-preview">${esc(wa)}</div><a class="abtn" target="_blank" rel="noopener" href="https://wa.me/${sub.phone||''}?text=${encodeURIComponent(wa)}">📲 Share on WhatsApp</a>`;
-countUp($('sc'),sub.score);if(cls!='imp')confetti()}
-$('resSwitchBtn').onclick=()=>{clearInterval(rt);show('joinBox');chkSess()};
+  function todayIsoDate() {
+    var d = new Date();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + m + "-" + day;
+  }
 
-/* ====== admin ====== */
-$('adminBtn').onclick=async()=>{show('adminBox');if(sb){const{data}=await sb.auth.getSession();if(data.session)openAdmin()}};
-$('admBack').onclick=()=>{show('joinBox');chkSess()};
-$('pinBtn').onclick=async()=>{if(!sb)return toast('Supabase config இல்லை');const{error}=await sb.auth.signInWithPassword({email:$('admEmail').value.trim(),password:$('admPass').value});if(error)return toast('Login தோல்வி: '+error.message);$('admPass').value='';openAdmin()};
-async function openAdmin(){$('admGate').classList.add('hidden');$('admMain').classList.remove('hidden');$('aRel').value=lt(Date.now()+6e5);buildAlloc();tab('tests')}
-$('sOut').onclick=async()=>{await sb.auth.signOut();$('admMain').classList.add('hidden');$('admGate').classList.remove('hidden');show('joinBox');chkSess()};
-async function load(){const[t,a,s]=await Promise.all([Q(sb.from('tests').select('*').order('created_at',{ascending:false})),Q(sb.from('attempts').select('*')),Q(sb.from('students').select('*').order('created_at',{ascending:false}))]);C={t,a,s}}
-async function refresh(){await load();renderAdmin();dash()}
-function dash(){const sub=C.a.filter(x=>x.submitted_at),avg=sub.length?Math.round(sub.reduce((p,x)=>p+pc(x),0)/sub.length)+'%':'—';
-$('dash').innerHTML=[['Tests',C.t.length],['Students',C.s.length],['Submitted',sub.length],['In progress',C.a.length-sub.length],['Avg Score',avg],['Blocked',C.s.filter(x=>x.blocked).length]].map(([a,b])=>`<div class="stat-card"><span class="muted">${a}</span><b>${b}</b></div>`).join('')}
-async function tab(n){['tests','results','users','settings'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!=n));document.querySelectorAll('#admTabs .tb').forEach(b=>b.classList.toggle('on',b.dataset.tab==n));
-await load();if(n=='tests')renderAdmin();if(n=='results')fillR();if(n=='users')renderU();if(n=='settings'){const{data}=await sb.from('settings').select('v').eq('k','notice');$('sNotice').value=data&&data[0]?data[0].v:''}dash()}
-$('admTabs').onclick=e=>{const b=e.target.closest('.tb');if(b)tab(b.dataset.tab)};
+  function buildReleaseIso(dateStr, timeStr) {
+    var dPart = dateStr || todayIsoDate();
+    var tPart = timeStr || "20:00";
+    var dt = new Date(dPart + "T" + tPart + ":00");
+    if (isNaN(dt.getTime())) {
+      dt = new Date(todayIsoDate() + "T20:00:00");
+    }
+    return dt.toISOString();
+  }
 
-/* tests */
-async function buildAlloc(){const b=await Q(sb.from('bank').select('id,s')),el=$('aAlloc');
-if(!b.length){el.innerHTML='<p class="muted">Question Bank காலியாக உள்ளது.</p><button type="button" class="ghost" id="seedBtn">Load 12 sample questions</button>';
-$('seedBtn').onclick=async()=>{const{error}=await sb.from('bank').insert(BANK.map(x=>({s:x[0],q:x[1],o:x[2]})));if(error)return toast(error.message);toast('Sample bank loaded ✓');buildAlloc()};return}
-el.innerHTML=Object.keys(SUB).map(k=>{const n=b.filter(x=>x.s==k).length;return`<div class="alloc-row"><span>${bi(SUB[k],'sl')} <span class="muted">(bank: ${n})</span></span><input type="number" min="0" max="${n}" value="${Math.min(n,3)}" data-s="${k}" aria-label="${k}"></div>`}).join('')}
-function renderAdmin(){const cnt={};C.a.forEach(x=>{if(x.submitted_at)cnt[x.test_code]=(cnt[x.test_code]||0)+1});
-$('aTests').innerHTML=C.t.map(x=>{const r=now()>=tms(x.release_at),c=esc(x.code);return`<tr><td><b>${c}</b></td><td>${esc(x.category)}</td><td>${x.qs.length}</td><td>${x.duration}m${x.closed?' <span class="pill pill-bad">Closed</span>':''}</td><td><span class="pill ${r?'pill-ok':'pill-warn'}">${r?'Released':new Date(x.release_at).toLocaleString()}</span></td><td>${cnt[x.code]||0}</td><td><button type="button" class="ghost" data-edit="${c}">Edit</button><button type="button" class="ghost" data-dup="${c}">Copy</button><button type="button" class="ghost" data-rel="${c}">Release Now</button><button type="button" class="danger" data-del="${c}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="7">No tests yet</td></tr>'}
-$('aCreate').onclick=async()=>{const code=$('aCode').value.trim().toUpperCase().replace(/\s/g,''),dur=+$('aDur').value,rel=new Date($('aRel').value).getTime(),m=$('aMsg');m.className='err';
-if(!code||!(dur>0)||isNaN(rel))return m.textContent='Code, Duration, Release time சரிபார்க்கவும்.';
-const bank=await Q(sb.from('bank').select('*'));let qs=[];
-document.querySelectorAll('#aAlloc input').forEach(i=>{qs=qs.concat(shuf(bank.filter(b=>b.s==i.dataset.s)).slice(0,+i.value||0).map(mk))});
-if(!qs.length)return m.textContent='குறைந்தது 1 கேள்வி தேவை.';
-const{error}=await sb.from('tests').insert({code,category:$('aCat').value,duration:dur,release_at:new Date(rel).toISOString(),qs});
-if(error)return m.textContent=error.code=='23505'?'இந்த Code ஏற்கனவே உள்ளது.':error.message;
-m.className='ok';m.textContent='Test உருவாக்கப்பட்டது ✓ '+code;refresh()};
-$('aTests').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
-if(d.edit)return openEdit(d.edit);
-if(d.dup){const o=C.t.find(x=>x.code==d.dup);let n=d.dup+'_COPY',i=2;while(C.t.some(x=>x.code==n))n=d.dup+'_COPY'+i++;
-const{error}=await sb.from('tests').insert({code:n,category:o.category,duration:o.duration,pass_mark:o.pass_mark,release_at:new Date(Date.now()+6e5).toISOString(),qs:o.qs});if(error)return toast(error.message);toast('Copied → '+n)}
-else if(d.rel){await sb.from('tests').update({release_at:new Date().toISOString()}).eq('code',d.rel);toast('Results released ✓')}
-else if(d.del){if(!sure(b))return;await sb.from('tests').delete().eq('code',d.del)}
-refresh()};
-function openEdit(c){const t=C.t.find(x=>x.code==c);edC=c;$('eTitle').textContent='Edit Test — '+c;$('eCat').value=t.category;$('eDur').value=t.duration;$('eRel').value=lt(tms(t.release_at));$('ePass').value=t.pass_mark;$('eSt').value=t.closed?'closed':'open';$('eBox').classList.remove('hidden');$('eBox').scrollIntoView({behavior:'smooth'})}
-$('eCancel').onclick=()=>$('eBox').classList.add('hidden');
-$('eSave').onclick=async()=>{const d=+$('eDur').value,r=new Date($('eRel').value).getTime();if(!(d>0)||isNaN(r))return toast('Duration / Release time சரிபார்க்கவும்');
-const{error}=await sb.from('tests').update({category:$('eCat').value,duration:d,release_at:new Date(r).toISOString(),pass_mark:+$('ePass').value||40,closed:$('eSt').value=='closed'}).eq('code',edC);
-if(error)return toast(error.message);$('eBox').classList.add('hidden');toast('Test updated ✓');refresh()};
-$('aImp').onclick=async()=>{const m=$('aMsg');try{const a=JSON.parse($('aJson').value);if(!Array.isArray(a))throw 0;
-const rows=a.filter(x=>SUB[x.s]&&x.q&&Array.isArray(x.o)&&x.o.length==4).map(x=>({s:x.s,q:x.q,o:x.o}));if(!rows.length)throw 0;
-const{error}=await sb.from('bank').insert(rows);if(error)throw error;buildAlloc();m.className='ok';m.textContent=rows.length+' கேள்விகள் சேர்க்கப்பட்டன ✓'}catch(e){m.className='err';m.textContent='JSON சரியில்லை '+((e&&e.message)||'')}};
+  function formatDisplayDateTime(isoStr) {
+    var dt = new Date(isoStr);
+    if (isNaN(dt.getTime())) return "Today 8:00 PM";
+    return dt.toLocaleString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
 
-/* results */
-const srt=c=>C.a.filter(x=>x.test_code==c&&x.submitted_at).sort((a,b)=>b.score-a.score||a.time_ms-b.time_ms);
-function fillR(){const sel=$('rTest'),cur=sel.value;sel.innerHTML=C.t.map(x=>`<option>${esc(x.code)}</option>`).join('');if(C.t.some(x=>x.code==cur))sel.value=cur;renderR()}
-$('rTest').onchange=renderR;$('rSearch').oninput=renderR;
-function renderR(){const code=$('rTest').value,t=C.t.find(x=>x.code==code),el=$('rStats');
-if(!t){el.innerHTML='<p class="muted">Test எதுவும் இல்லை.</p>';return}
-const all=srt(code),n=all.length,pass=t.pass_mark,s=$('rSearch').value.trim().toLowerCase(),pn=all.filter(x=>pc(x)>=pass).length,bins=[0,0,0,0,0],sa={};
-all.forEach(x=>{bins[Math.min(4,Math.floor(pc(x)/20))]++;Object.entries(x.sb||{}).forEach(([k,v])=>{const a=sa[k]=sa[k]||[0,0];a[0]+=v[0];a[1]+=v[1]})});
-const mx=Math.max(1,...bins),cards=[['Attempts',n],['Average',n?Math.round(all.reduce((a,x)=>a+pc(x),0)/n)+'%':'—'],['Highest',n?pc(all[0])+'%':'—'],['Lowest',n?Math.min(...all.map(pc))+'%':'—'],['Pass ('+pass+'%+)',n?Math.round(pn/n*100)+'%':'—'],['Avg Time',n?fmt(all.reduce((a,x)=>a+x.time_ms,0)/n):'—'],['In progress',C.a.filter(x=>x.test_code==code&&!x.submitted_at).length]];
-const rows=all.map((x,i)=>[x,i]).filter(([x])=>!s||((x.name||'')+(x.phone||'')+(x.email||'')).toLowerCase().includes(s));
-el.innerHTML=`<div class="stat-grid">${cards.map(([a,b])=>`<div class="stat-card"><span class="muted">${a}</span><b>${b}</b></div>`).join('')}</div>
-<div class="muted">Score distribution (%)</div><div class="dist">${bins.map(b=>`<div style="height:${b/mx*100}%"><span>${b}</span></div>`).join('')}</div><div class="dist-l"><span>0–20</span><span>20–40</span><span>40–60</span><span>60–80</span><span>80–100</span></div>
-<div>${Object.entries(sa).map(([k,v])=>`<span class="pill ${v[0]/v[1]>=.6?'pill-ok':'pill-warn'}">${bi(SUB[k]||k,'sl')}: ${Math.round(v[0]/v[1]*100)}%</span> `).join('')}</div>
-<div class="table-wrap"><table><thead><tr><th>#</th><th>Student</th><th>Contact</th><th>Score</th><th>%</th><th>Time</th><th>Result</th><th>Submitted</th><th></th></tr></thead><tbody>${rows.map(([x,i])=>`<tr style="animation-delay:${Math.min(i,10)*.04}s"><td>${i+1}</td><td><b>${esc(x.name||'')}</b></td><td>${esc(x.phone||'')}<br><span class="muted">${esc(x.email||'')}</span></td><td>${x.score}/${x.total}</td><td>${pc(x)}%</td><td>${fmt(x.time_ms)}</td><td><span class="pill ${pc(x)>=pass?'pill-ok':'pill-bad'}">${pc(x)>=pass?'Pass':'Fail'}</span></td><td>${new Date(x.submitted_at).toLocaleString()}</td><td><button type="button" class="ghost" data-view="${x.id}">View</button><button type="button" class="danger" data-reset="${x.id}">Reset</button></td></tr>`).join('')||'<tr><td colspan="9">Submissions இல்லை</td></tr>'}</tbody></table></div>
-<div class="row"><button type="button" class="ghost" id="rCsv">⬇ Download CSV</button><button type="button" class="sec" id="rRel">Release Results Now</button></div><div id="rDetail"></div>`}
-$('rStats').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const code=$('rTest').value,t=C.t.find(x=>x.code==code);
-if(b.id=='rCsv'){const f=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"',L=[['Rank','Name','Mobile','Email','Score','Total','Percent','Time(s)','Submitted']].concat(srt(code).map((x,i)=>[i+1,x.name,x.phone,x.email,x.score,x.total,pc(x),Math.round(x.time_ms/1000),new Date(x.submitted_at).toLocaleString()]));
-const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+L.map(r=>r.map(f).join(',')).join('\n')],{type:'text/csv'}));a.download=code+'_results.csv';a.click();return}
-if(b.id=='rRel'){await sb.from('tests').update({release_at:new Date().toISOString()}).eq('code',code);toast('Results released ✓');await load();renderR();return}
-if(b.dataset.view){const x=C.a.find(y=>y.id==b.dataset.view);$('rDetail').innerHTML=`<div class="panel-card qcard"><h3>${esc(x.name||'')} — ${x.score}/${x.total}</h3>${t.qs.map((q,i)=>{const a=x.ans[i],r=a===q.a;return`<div class="rv ${r?'okc':'bad'}">${r?'✔':'✘'} ${i+1}. ${bi(q.q,'q-en')}<div class="muted">✔ ${bi(q.o[q.a])}${a==null?' • Not answered':r?'':' • Chosen: '+bi(q.o[a])}</div></div>`}).join('')}</div>`;$('rDetail').scrollIntoView({behavior:'smooth'})}
-if(b.dataset.reset){if(!sure(b))return;await sb.from('attempts').delete().eq('id',b.dataset.reset);toast('Attempt reset — மறுமுயற்சிக்கு அனுமதி ✓');await load();renderR();dash()}};
+  function formatMMSS(totalSec) {
+    var s = Math.max(0, Math.floor(totalSec));
+    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+  }
 
-/* students */
-function renderU(){const s=$('uSearch').value.trim().toLowerCase();
-$('uList').innerHTML=C.s.filter(x=>!s||(x.name+x.phone+x.email).toLowerCase().includes(s)).map((x,i)=>{const a=C.a.filter(y=>y.key==x.key&&y.submitted_at),avg=a.length?Math.round(a.reduce((p,y)=>p+pc(y),0)/a.length)+'%':'—',k=esc(x.key);
-return`<tr style="animation-delay:${Math.min(i,10)*.04}s"><td><b>${esc(x.name)}</b></td><td>${esc(x.phone||'—')}<br><span class="muted">${esc(x.email||'')}</span></td><td>${a.length}</td><td>${avg}</td><td><span class="pill ${x.blocked?'pill-bad':'pill-ok'}">${x.blocked?'Blocked':'Active'}</span></td><td><button type="button" class="ghost" data-h="${k}">History</button><button type="button" class="ghost" data-e="${k}">Edit</button><button type="button" class="${x.blocked?'sec':'ghost'}" data-b="${k}">${x.blocked?'Unblock':'Block'}</button><button type="button" class="danger" data-d="${k}">Delete</button></td></tr>`}).join('')||'<tr><td colspan="6">Students இல்லை</td></tr>'}
-function hist(k){const u=C.s.find(x=>x.key==k),L=C.a.filter(x=>x.key==k);
-$('uDetail').innerHTML=`<div class="panel-card qcard"><h3>${esc(u.name)} — Attempt History</h3><div class="table-wrap"><table><thead><tr><th>Test</th><th>Score</th><th>Time</th><th>Date</th><th></th></tr></thead><tbody>${L.map(x=>`<tr><td>${esc(x.test_code)}</td><td>${x.submitted_at?`${x.score}/${x.total} (${pc(x)}%)`:'In progress'}</td><td>${x.submitted_at?fmt(x.time_ms):'—'}</td><td>${new Date(x.submitted_at||x.started_at).toLocaleString()}</td><td><button type="button" class="danger" data-r="${x.id}" data-k="${esc(k)}">Reset</button></td></tr>`).join('')||'<tr><td colspan="5">Attempts இல்லை</td></tr>'}</tbody></table></div><p class="muted">Last seen: ${u.seen_at?new Date(u.seen_at).toLocaleString():'—'}</p></div>`}
-$('uSearch').oninput=renderU;
-$('uDetail').onclick=async e=>{const b=e.target.closest('[data-r]');if(!b||!sure(b))return;await sb.from('attempts').delete().eq('id',b.dataset.r);await load();hist(b.dataset.k);renderU();dash();toast('Attempt reset ✓')};
-$('uList').onclick=async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
-if(d.h)return hist(d.h);
-if(d.e){const x=C.s.find(y=>y.key==d.e);edK=d.e;$('uName').value=x.name;$('uPhone').value=x.phone||'';$('uEmail').value=x.email||'';$('uFormTitle').textContent='Edit Student';$('uName').focus();return}
-if(d.b){const x=C.s.find(y=>y.key==d.b);await sb.from('students').update({blocked:!x.blocked}).eq('key',d.b);toast(x.blocked?'Unblocked ✓':'Blocked 🚫')}
-if(d.d){if(!sure(b))return;await sb.from('attempts').delete().eq('key',d.d);await sb.from('students').delete().eq('key',d.d);$('uDetail').innerHTML=''}
-await load();renderU();dash()};
-$('uSave').onclick=async()=>{const name=$('uName').value.trim(),phone=$('uPhone').value.replace(/\D/g,''),email=$('uEmail').value.trim().toLowerCase(),m=$('uMsg');m.className='err';
-if(!name||!(phone||email))return m.textContent='பெயர் + Mobile/Email தேவை.';let r;
-if(edK){r=await sb.from('students').update({name,phone,email}).eq('key',edK);if(!r.error)await sb.from('attempts').update({name,phone,email}).eq('key',edK)}
-else r=await sb.from('students').insert({key:(phone||email).toLowerCase(),name,phone,email});
-if(r.error)return m.textContent=r.error.code=='23505'?'இந்த மாணவர் ஏற்கனவே உள்ளார்.':r.error.message;
-edK=null;['uName','uPhone','uEmail'].forEach(i=>$(i).value='');$('uFormTitle').textContent='Add Student';m.className='ok';m.textContent='Saved ✓';await load();renderU();dash()};
+  function formatHHMMSS(totalSec) {
+    var s = Math.max(0, Math.floor(totalSec));
+    var h = Math.floor(s / 3600);
+    var m = Math.floor((s % 3600) / 60);
+    var r = s % 60;
+    return [h, m, r].map(function(n) { return String(n).padStart(2, "0"); }).join(":");
+  }
 
-/* settings */
-$('sNoticeBtn').onclick=async()=>{const{error}=await sb.from('settings').upsert({k:'notice',v:$('sNotice').value.trim()});toast(error?error.message:'Notice updated ✓')};
-$('sWipe').onclick=async e=>{if(!sure(e.currentTarget))return;await sb.from('attempts').delete().gt('id',0);await sb.from('students').delete().neq('key','');toast('எல்லா results & students நீக்கப்பட்டன');await load();dash()};
+  function copyTextSafe(text) {
+    // Use reliable textarea + execCommand('copy') fallback first so restricted iframes never throw unhandled Clipboard API rejections
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.left = "-9999px";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (ok) return true;
+    } catch (e) {}
 
-if(!sb)$('joinMsg').textContent='⚠ Supabase config இல்லை — index.html-ல் SUPABASE_URL & SUPABASE_ANON_KEY சேர்க்கவும்.';
-chkSess();
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+        navigator.clipboard.writeText(text).catch(function() {});
+        return true;
+      }
+    } catch (e2) {}
+
+    return false;
+  }
+
+  // Unified State & Persistent Storage (Zero permission denied errors)
+  var appState = {
+    batches: [],
+    questions: [],
+    attempts: []
+  };
+
+  function seedInitialData() {
+    var bId = "batch-g4-01";
+    var q1 = {
+      id: "q-seed-1",
+      batchId: bId,
+      subject: "General Tamil",
+      ta: TNPSC_QUESTION_BANK["General Tamil"][0].ta,
+      en: TNPSC_QUESTION_BANK["General Tamil"][0].en,
+      opts: TNPSC_QUESTION_BANK["General Tamil"][0].opts,
+      a: 0,
+      whyTa: TNPSC_QUESTION_BANK["General Tamil"][0].whyTa,
+      whyEn: TNPSC_QUESTION_BANK["General Tamil"][0].whyEn,
+      status: "approved"
+    };
+    var q2 = {
+      id: "q-seed-2",
+      batchId: bId,
+      subject: "Indian Polity",
+      ta: TNPSC_QUESTION_BANK["Indian Polity"][0].ta,
+      en: TNPSC_QUESTION_BANK["Indian Polity"][0].en,
+      opts: TNPSC_QUESTION_BANK["Indian Polity"][0].opts,
+      a: 0,
+      whyTa: TNPSC_QUESTION_BANK["Indian Polity"][0].whyTa,
+      whyEn: TNPSC_QUESTION_BANK["Indian Polity"][0].whyEn,
+      status: "approved"
+    };
+    var q3 = {
+      id: "q-seed-3",
+      batchId: bId,
+      subject: "Geography",
+      ta: TNPSC_QUESTION_BANK["Geography"][0].ta,
+      en: TNPSC_QUESTION_BANK["Geography"][0].en,
+      opts: TNPSC_QUESTION_BANK["Geography"][0].opts,
+      a: 0,
+      whyTa: TNPSC_QUESTION_BANK["Geography"][0].whyTa,
+      whyEn: TNPSC_QUESTION_BANK["Geography"][0].whyEn,
+      status: "approved"
+    };
+
+    appState.questions = [q1, q2, q3];
+    appState.batches = [
+      {
+        id: bId,
+        code: "G4_BATCH01",
+        title: "TNPSC Group IV Live Mock Batch #1",
+        category: "Group IV",
+        durationMinutes: 10,
+        releaseDate: todayIsoDate(),
+        releaseTime: "20:00",
+        releaseAt: buildReleaseIso(todayIsoDate(), "20:00"),
+        resultsReleased: false,
+        active: true,
+        centerAd: "🏛️ VETRI TNPSC ACADEMY — Group I, II/IIA, IV & VAO New Batches Open! Call: 98765-43210",
+        subjects: [
+          { name: "General Tamil", target: 2 },
+          { name: "Indian Polity", target: 2 },
+          { name: "Geography", target: 1 }
+        ],
+        questionIds: ["q-seed-1", "q-seed-2", "q-seed-3"]
+      }
+    ];
+    appState.attempts = [];
+  }
+
+  function loadAppState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.batches) && parsed.batches.length) {
+          appState.batches = parsed.batches;
+          appState.questions = parsed.questions || [];
+          appState.attempts = parsed.attempts || [];
+          return;
+        }
+      }
+    } catch (e) {}
+    seedInitialData();
+    saveAppState();
+  }
+
+  function saveAppState() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(appState));
+    } catch (e) {}
+  }
+
+  // Accessibility Manager
+  var currentLang = "both";
+
+  function applyAccPrefs(prefs) {
+    var fs = prefs.fontSize || "1";
+    var contrast = prefs.contrast || "normal";
+    var lang = prefs.lang || "both";
+    var anim = prefs.anim || "full";
+
+    document.documentElement.style.setProperty("--font-scale", fs);
+    document.body.classList.toggle("contrast-high", contrast === "high");
+    document.body.classList.remove("anim-calm", "anim-reduced");
+    if (anim === "calm") document.body.classList.add("anim-calm");
+    if (anim === "reduced") document.body.classList.add("anim-reduced");
+    currentLang = lang;
+
+    ["fontSizeSel", "examFontSizeSel"].forEach(function(id) { if (g(id)) g(id).value = fs; });
+    ["contrastSel", "examContrastSel"].forEach(function(id) { if (g(id)) g(id).value = contrast; });
+    ["langModeSel", "examLangModeSel"].forEach(function(id) { if (g(id)) g(id).value = lang; });
+    ["animModeSel", "examAnimModeSel"].forEach(function(id) { if (g(id)) g(id).value = anim; });
+
+    try {
+      localStorage.setItem(ACC_PREFS_KEY, JSON.stringify({
+        fontSize: fs,
+        contrast: contrast,
+        lang: lang,
+        anim: anim
+      }));
+    } catch (e) {}
+
+    if (!g("studentExamScreen").classList.contains("hidden")) {
+      renderCurrentQuestion();
+    }
+    if (!g("detailedReviewContainer").classList.contains("hidden")) {
+      renderDetailedAnswerReview();
+    }
+  }
+
+  function loadAccPrefs() {
+    try {
+      var raw = localStorage.getItem(ACC_PREFS_KEY);
+      if (raw) {
+        applyAccPrefs(JSON.parse(raw));
+        return;
+      }
+    } catch (e) {}
+    applyAccPrefs({ fontSize: "1", contrast: "normal", lang: "both", anim: "full" });
+  }
+
+  function renderBilingualText(ta, en, isOption) {
+    if (currentLang === "ta") {
+      return '<span class="font-bold">' + (ta || en || "") + "</span>";
+    }
+    if (currentLang === "en") {
+      return '<span class="font-bold">' + (en || ta || "") + "</span>";
+    }
+    return '<span class="font-bold block">' + (ta || "") + "</span>" +
+      (en ? '<span class="block text-xs sm:text-sm opacity-80 mt-0.5">' + en + "</span>" : "");
+  }
+
+  // Screen Switcher
+  function switchScreen(screenId) {
+    ["studentJoinScreen", "studentExamScreen", "studentResultsScreen", "adminLoginScreen", "adminDashboardScreen"].forEach(function(id) {
+      if (id === screenId) g(id).classList.remove("hidden");
+      else g(id).classList.add("hidden");
+    });
+  }
+
+  // Student Exam & Results Runtime State
+  var activeAttemptId = null;
+  var activeQuestionIndex = 0;
+  var examIntervalId = null;
+  var releaseIntervalId = null;
+
+  function getAttemptById(id) {
+    return appState.attempts.find(function(a) { return a.id === id; }) || null;
+  }
+
+  function getBatchById(id) {
+    return appState.batches.find(function(b) { return b.id === id; }) || null;
+  }
+
+  function getApprovedQuestionsForBatch(batch) {
+    if (!batch) return [];
+    return (batch.questionIds || []).map(function(qid) {
+      return appState.questions.find(function(q) { return q.id === qid && q.status === "approved"; });
+    }).filter(Boolean);
+  }
+
+  function renderActiveBatchPills() {
+    var box = g("activeBatchPills");
+    if (!box) return;
+    var activeBatches = appState.batches.filter(function(b) { return b.active !== false; });
+    if (!activeBatches.length) {
+      box.innerHTML = '<span class="text-xs opacity-70">No active batches yet. Create one in Admin V2 Panel.</span>';
+      return;
+    }
+    box.innerHTML = activeBatches.map(function(b) {
+      var qCount = getApprovedQuestionsForBatch(b).length;
+      return '<button type="button" class="batch-pill-btn btn-ghost px-3 py-1.5 text-xs flex items-center gap-1.5" data-code="' + b.code + '">' +
+        '<span class="font-extrabold text-blue-700">' + b.code + "</span>" +
+        '<span class="opacity-75">(' + b.category + " • " + qCount + " Qs)</span>" +
+        "</button>";
+    }).join("");
+
+    var btns = box.querySelectorAll(".batch-pill-btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function() {
+        g("stuBatchCodeInput").value = this.getAttribute("data-code");
+      });
+    }
+  }
+
+  function checkExistingSavedSession() {
+    try {
+      var raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+      if (!raw) return;
+      var info = JSON.parse(raw);
+      var att = getAttemptById(info.attemptId);
+      if (att) {
+        g("resumeSavedBannerBtn").textContent = "Resume: " + att.studentName + " (" + att.batchCode + ")";
+        g("resumeSavedBannerBtn").classList.remove("hidden");
+      }
+    } catch (e) {}
+  }
+
+  function handleStudentStartOrResume() {
+    var errBox = g("joinErrorBox");
+    errBox.classList.add("hidden");
+    errBox.textContent = "";
+
+    var name = g("stuNameInput").value.trim();
+    var rawPhone = g("stuPhoneInput").value.trim();
+    var phone10 = normalizePhone10(rawPhone);
+    var email = g("stuEmailInput").value.trim();
+    var code = g("stuBatchCodeInput").value.trim().toUpperCase();
+
+    if (!name) {
+      errBox.textContent = "தயவுசெய்து உங்கள் முழுப் பெயரை உள்ளிடவும்.";
+      errBox.classList.remove("hidden");
+      return;
+    }
+    if (phone10.length !== 10) {
+      errBox.textContent = "சரியான 10 இலக்க Mobile Number-ஐ உள்ளிடவும் (எ.கா: 9876543210).";
+      errBox.classList.remove("hidden");
+      return;
+    }
+    if (!code) {
+      errBox.textContent = "Test Batch Code உள்ளிடவும்.";
+      errBox.classList.remove("hidden");
+      return;
+    }
+
+    var batch = appState.batches.find(function(b) { return b.code.toUpperCase() === code; });
+    if (!batch) {
+      errBox.textContent = "Test Batch Code '" + code + "' கிடைக்கவில்லை. மேலே உள்ள Active Batch Code-ஐத் தேர்ந்தெடுக்கவும்.";
+      errBox.classList.remove("hidden");
+      return;
+    }
+
+    var batchQs = getApprovedQuestionsForBatch(batch);
+    if (!batchQs.length) {
+      errBox.textContent = "இந்த Batch-ல் இன்னும் Approved கேள்விகள் இல்லை. Admin Panel-ல் கேள்விகளை Approve செய்யவும்.";
+      errBox.classList.remove("hidden");
+      return;
+    }
+
+    // Check duplicate mobile number in the same batch
+    var existingAttempt = appState.attempts.find(function(a) {
+      return a.batchId === batch.id && a.phone === phone10;
+    });
+
+    if (existingAttempt) {
+      if (existingAttempt.studentName.toLowerCase() !== name.toLowerCase()) {
+        errBox.textContent = "இந்த Mobile Number (" + phone10 + ") ஏற்கனவே '" + batch.code + "' Test Batch-ல் வேறு மாணவரால் பயன்படுத்தப்பட்டுள்ளது. ஒரே Test-ல் Repeated Mobile Number அனுமதிக்கப்படாது.";
+        errBox.classList.remove("hidden");
+        return;
+      }
+      // Same student resuming session or viewing submitted results
+      activeAttemptId = existingAttempt.id;
+      try {
+        localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ attemptId: existingAttempt.id }));
+      } catch (e) {}
+
+      if (existingAttempt.status === "submitted") {
+        openWaitingOrResultsScreen(existingAttempt);
+        return;
+      }
+      launchExamForAttempt(existingAttempt);
+      return;
+    }
+
+    // Create fresh attempt
+    var newAttempt = {
+      id: "att-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      batchId: batch.id,
+      batchCode: batch.code,
+      studentName: name,
+      phone: phone10,
+      email: email,
+      status: "in_progress",
+      answers: {},
+      marked: {},
+      currentIndex: 0,
+      remainingSeconds: (batch.durationMinutes || batchQs.length) * 60,
+      startedAt: new Date().toISOString(),
+      submittedAt: null,
+      score: 0,
+      totalQuestions: batchQs.length,
+      wrongCount: 0,
+      skippedCount: 0
+    };
+
+    appState.attempts.push(newAttempt);
+    saveAppState();
+    activeAttemptId = newAttempt.id;
+    try {
+      localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({ attemptId: newAttempt.id }));
+    } catch (e) {}
+
+    launchExamForAttempt(newAttempt);
+  }
+
+  function launchExamForAttempt(attempt) {
+    var batch = getBatchById(attempt.batchId);
+    if (!batch) return;
+    activeAttemptId = attempt.id;
+    activeQuestionIndex = attempt.currentIndex || 0;
+
+    g("examCandidateBanner").textContent = attempt.studentName + " (" + attempt.phone + ") • " + batch.code + " [" + batch.category + "]";
+    switchScreen("studentExamScreen");
+    renderCurrentQuestion();
+    renderQuestionPalette();
+    startExamCountdown(attempt);
+  }
+
+  function startExamCountdown(attempt) {
+    clearInterval(examIntervalId);
+    function paintTimer() {
+      var el = g("examTimerDisplay");
+      if (!el) return;
+      el.textContent = "⏱ " + formatMMSS(attempt.remainingSeconds);
+      if (attempt.remainingSeconds <= 60) {
+        el.classList.remove("bg-blue-700");
+        el.classList.add("bg-red-700");
+      } else {
+        el.classList.add("bg-blue-700");
+        el.classList.remove("bg-red-700");
+      }
+    }
+    paintTimer();
+    examIntervalId = setInterval(function() {
+      var att = getAttemptById(activeAttemptId);
+      if (!att || att.status === "submitted") {
+        clearInterval(examIntervalId);
+        return;
+      }
+      att.remainingSeconds = Math.max(0, (att.remainingSeconds || 0) - 1);
+      saveAppState();
+      paintTimer();
+      if (att.remainingSeconds <= 0) {
+        clearInterval(examIntervalId);
+        finalizeExamSubmission(true);
+      }
+    }, 1000);
+  }
+
+  function renderCurrentQuestion() {
+    var att = getAttemptById(activeAttemptId);
+    if (!att) return;
+    var batch = getBatchById(att.batchId);
+    var qs = getApprovedQuestionsForBatch(batch);
+    if (!qs.length) return;
+
+    if (activeQuestionIndex < 0) activeQuestionIndex = 0;
+    if (activeQuestionIndex >= qs.length) activeQuestionIndex = qs.length - 1;
+    att.currentIndex = activeQuestionIndex;
+    saveAppState();
+
+    var q = qs[activeQuestionIndex];
+    g("qCounterBadge").textContent = "Question " + (activeQuestionIndex + 1) + " of " + qs.length;
+    g("qSubjectBadge").textContent = q.subject || "General";
+
+    var selectedIdx = att.answers[q.id];
+    var html = '<div class="mb-4 text-base sm:text-lg leading-relaxed">' +
+      renderBilingualText(q.ta, q.en, false) +
+      "</div><div class='space-y-2.5'>";
+
+    (q.opts || []).forEach(function(opt, idx) {
+      var isChecked = Number(selectedIdx) === idx;
+      var borderCls = isChecked ? "border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/30" : "border-slate-300";
+      html += '<label class="block p-3.5 rounded-xl border cursor-pointer transition ' + borderCls + '">' +
+        '<div class="flex items-start gap-3">' +
+        '<input type="radio" name="active_q_opt" value="' + idx + '"' + (isChecked ? " checked" : "") + ' class="mt-1 w-4 h-4 accent-blue-700">' +
+        '<div class="flex-1">' + renderBilingualText(opt.ta, opt.en, true) + "</div>" +
+        "</div></label>";
+    });
+
+    html += "</div>";
+    g("questionRenderArea").innerHTML = html;
+
+    var radios = g("questionRenderArea").querySelectorAll('input[type="radio"]');
+    for (var i = 0; i < radios.length; i++) {
+      radios[i].addEventListener("change", function() {
+        var val = Number(this.value);
+        att.answers[q.id] = val;
+        saveAppState();
+        g("examAutoSaveStatus").textContent = "✓ Saved (" + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) + ")";
+        renderCurrentQuestion();
+        renderQuestionPalette();
+      });
+    }
+
+    g("prevQBtn").disabled = activeQuestionIndex === 0;
+    g("nextQBtn").textContent = activeQuestionIndex === qs.length - 1 ? "Save Response ✓" : "Save & Next →";
+  }
+
+  function renderQuestionPalette() {
+    var att = getAttemptById(activeAttemptId);
+    if (!att) return;
+    var batch = getBatchById(att.batchId);
+    var qs = getApprovedQuestionsForBatch(batch);
+
+    var ansCnt = 0, markCnt = 0, unansCnt = 0;
+    var html = "";
+    qs.forEach(function(q, idx) {
+      var isAns = typeof att.answers[q.id] === "number";
+      var isMark = Boolean(att.marked[q.id]);
+      if (isAns) ansCnt++;
+      else unansCnt++;
+      if (isMark) markCnt++;
+
+      var cls = "palette-btn ";
+      if (isMark) cls += "pal-mark ";
+      else if (isAns) cls += "pal-ans ";
+      else cls += "pal-unans ";
+      if (idx === activeQuestionIndex) cls += "pal-curr";
+
+      html += '<button type="button" class="' + cls + '" data-qidx="' + idx + '">' + (idx + 1) + "</button>";
+    });
+
+    g("cntAns").textContent = String(ansCnt);
+    g("cntMark").textContent = String(markCnt);
+    g("cntUnans").textContent = String(unansCnt);
+    g("questionPaletteGrid").innerHTML = html;
+
+    var btns = g("questionPaletteGrid").querySelectorAll("button");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function() {
+        activeQuestionIndex = Number(this.getAttribute("data-qidx"));
+        renderCurrentQuestion();
+        renderQuestionPalette();
+      });
+    }
+  }
+
+  function finalizeExamSubmission(isAutoTimeUp) {
+    var att = getAttemptById(activeAttemptId);
+    if (!att) return;
+    var batch = getBatchById(att.batchId);
+    var qs = getApprovedQuestionsForBatch(batch);
+
+    if (!isAutoTimeUp) {
+      var unansweredCount = qs.filter(function(q) { return typeof att.answers[q.id] !== "number"; }).length;
+      if (unansweredCount > 0 && !att.__confirmOnce) {
+        att.__confirmOnce = true;
+        var msgEl = g("examValidationMsg");
+        msgEl.textContent = "கவனிக்கவும்: " + unansweredCount + " கேள்விகளுக்கு இன்னும் பதிலளிக்கவில்லை. இப்போதே Submit செய்ய மீண்டும் 'Submit Test ✓' அழுத்தவும்.";
+        msgEl.classList.remove("hidden");
+        return;
+      }
+    }
+
+    clearInterval(examIntervalId);
+    var score = 0, wrong = 0, skipped = 0;
+    qs.forEach(function(q) {
+      var picked = att.answers[q.id];
+      if (typeof picked !== "number") skipped++;
+      else if (picked === Number(q.a)) score++;
+      else wrong++;
+    });
+
+    att.status = "submitted";
+    att.submittedAt = new Date().toISOString();
+    att.score = score;
+    att.totalQuestions = qs.length;
+    att.wrongCount = wrong;
+    att.skippedCount = skipped;
+    delete att.__confirmOnce;
+    saveAppState();
+
+    openWaitingOrResultsScreen(att);
+  }
+
+  // Waiting Screen with 8:00 PM Countdown & Auto-Release
+  function isBatchReleasedNow(batch) {
+    if (!batch) return false;
+    if (batch.resultsReleased) return true;
+    var relTime = new Date(batch.releaseAt).getTime();
+    if (!isNaN(relTime) && Date.now() >= relTime) {
+      batch.resultsReleased = true;
+      saveAppState();
+      return true;
+    }
+    return false;
+  }
+
+  function openWaitingOrResultsScreen(attempt) {
+    clearInterval(releaseIntervalId);
+    switchScreen("studentResultsScreen");
+    var batch = getBatchById(attempt.batchId);
+    if (!batch) return;
+
+    if (isBatchReleasedNow(batch)) {
+      renderReleasedResults(attempt, batch);
+      return;
+    }
+
+    g("waitingReleaseCard").classList.remove("hidden");
+    g("releasedResultsCard").classList.add("hidden");
+    g("waitingCandidateInfo").textContent = "Student: " + attempt.studentName + " (" + attempt.phone + ") • Batch: " + batch.code;
+    g("releaseTargetText").textContent = "Scheduled Release: " + formatDisplayDateTime(batch.releaseAt);
+
+    function tickReleaseClock() {
+      var latestBatch = getBatchById(attempt.batchId);
+      if (!latestBatch) return;
+      if (isBatchReleasedNow(latestBatch)) {
+        clearInterval(releaseIntervalId);
+        renderReleasedResults(attempt, latestBatch);
+        return;
+      }
+      var diffSec = Math.max(0, Math.floor((new Date(latestBatch.releaseAt).getTime() - Date.now()) / 1000));
+      g("releaseCountdownTimer").textContent = formatHHMMSS(diffSec);
+      if (diffSec <= 0) {
+        latestBatch.resultsReleased = true;
+        saveAppState();
+        clearInterval(releaseIntervalId);
+        renderReleasedResults(attempt, latestBatch);
+      }
+    }
+
+    tickReleaseClock();
+    releaseIntervalId = setInterval(tickReleaseClock, 1000);
+  }
+
+  function computeBatchRank(attempt, batch) {
+    var subs = appState.attempts.filter(function(a) {
+      return a.batchId === batch.id && a.status === "submitted";
+    });
+    subs.sort(function(a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return (b.remainingSeconds || 0) - (a.remainingSeconds || 0);
+    });
+    var idx = subs.findIndex(function(a) { return a.id === attempt.id; });
+    return { rank: idx >= 0 ? idx + 1 : 1, total: Math.max(1, subs.length) };
+  }
+
+  function buildWhatsappResultMessage(attempt, batch, rankObj) {
+    var baseUrl = window.location.href.split("?")[0];
+    var friendLink = baseUrl + "?batch=" + encodeURIComponent(batch.code) + "&ref=" + encodeURIComponent(attempt.studentName);
+    var accPct = attempt.totalQuestions ? Math.round((attempt.score / attempt.totalQuestions) * 100) : 0;
+    return [
+      "🎉 *TNPSC தேர்வு முடிவுகள் வெளியாயின!*",
+      "வணக்கம் *" + attempt.studentName + "*! (" + batch.code + " - " + batch.category + ")",
+      "📊 *Score:* " + attempt.score + " / " + attempt.totalQuestions + " (" + accPct + "%)",
+      "🏅 *Rank:* #" + rankObj.rank + " of " + rankObj.total,
+      "🌟 *வாழ்த்துக்கள்!* தொடர்ந்து பயிற்சி செய்து அரசுப் பணியில் வெற்றி பெறுங்கள்!",
+      "",
+      batch.centerAd || "🏛️ VETRI TNPSC ACADEMY — Admissions Open!",
+      "🤝 *நண்பருக்கும் பகிரவும் (Take Test Link):* " + friendLink
+    ].join("\n");
+  }
+
+  function renderReleasedResults(attempt, batch) {
+    g("waitingReleaseCard").classList.add("hidden");
+    g("releasedResultsCard").classList.remove("hidden");
+
+    var rankObj = computeBatchRank(attempt, batch);
+    var accPct = attempt.totalQuestions ? Math.round((attempt.score / attempt.totalQuestions) * 100) : 0;
+
+    var banner = g("resultGradeBanner");
+    if (accPct >= 80) {
+      banner.className = "p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-amber-100 text-amber-900 border border-amber-300";
+      banner.textContent = "🏆 OUTSTANDING CHAMPION! (" + attempt.score + "/" + attempt.totalQuestions + ")";
+    } else if (accPct >= 50) {
+      banner.className = "p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-emerald-100 text-emerald-900 border border-emerald-300";
+      banner.textContent = "👏 GREAT PERFORMANCE! (" + attempt.score + "/" + attempt.totalQuestions + ")";
+    } else {
+      banner.className = "p-4 rounded-xl text-center font-extrabold text-lg sm:text-xl mb-5 bg-blue-100 text-blue-900 border border-blue-300";
+      banner.textContent = "📚 KEEP PRACTICING & IMPROVING! (" + attempt.score + "/" + attempt.totalQuestions + ")";
+    }
+
+    g("resScoreVal").textContent = attempt.score + " / " + attempt.totalQuestions;
+    g("resAccuracyVal").textContent = accPct + "%";
+    g("resRankVal").textContent = "#" + rankObj.rank + " / " + rankObj.total;
+    g("resWrongSkipVal").textContent = attempt.wrongCount + " / " + attempt.skippedCount;
+
+    // Subject-wise breakdown
+    var qs = getApprovedQuestionsForBatch(batch);
+    var subjStats = {};
+    qs.forEach(function(q) {
+      var s = q.subject || "General";
+      if (!subjStats[s]) subjStats[s] = { correct: 0, total: 0 };
+      subjStats[s].total++;
+      if (Number(attempt.answers[q.id]) === Number(q.a)) subjStats[s].correct++;
+    });
+
+    g("subjectBreakdownList").innerHTML = Object.keys(subjStats).map(function(s) {
+      var st = subjStats[s];
+      var pct = st.total ? Math.round((st.correct / st.total) * 100) : 0;
+      return '<div class="flex items-center justify-between p-2 rounded-lg bg-white/70 border border-slate-200">' +
+        '<span class="font-bold">' + s + "</span>" +
+        '<span class="font-extrabold text-blue-700">' + st.correct + " / " + st.total + " (" + pct + "%)</span>" +
+        "</div>";
+    }).join("");
+
+    // WhatsApp Message Preview
+    var waText = buildWhatsappResultMessage(attempt, batch, rankObj);
+    g("whatsappMessagePreview").textContent = waText;
+  }
+
+  function renderDetailedAnswerReview() {
+    var att = getAttemptById(activeAttemptId);
+    if (!att) return;
+    var batch = getBatchById(att.batchId);
+    var qs = getApprovedQuestionsForBatch(batch);
+
+    g("detailedReviewContainer").innerHTML = qs.map(function(q, idx) {
+      var picked = att.answers[q.id];
+      var isCorrect = Number(picked) === Number(q.a);
+      var pickedOpt = typeof picked === "number" ? q.opts[picked] : null;
+      var corrOpt = q.opts[q.a];
+      var pickedLabel = pickedOpt ? (pickedOpt.ta + (pickedOpt.en && pickedOpt.en !== pickedOpt.ta ? " (" + pickedOpt.en + ")" : "")) : "Not Answered";
+      var corrLabel = corrOpt ? (corrOpt.ta + (corrOpt.en && corrOpt.en !== corrOpt.ta ? " (" + corrOpt.en + ")" : "")) : "-";
+
+      return '<div class="soft-card p-4 border-l-4 ' + (isCorrect ? "border-emerald-600" : "border-rose-600") + '">' +
+        '<div class="flex items-center justify-between text-xs font-bold mb-1">' +
+        '<span>Q' + (idx + 1) + " • " + q.subject + "</span>" +
+        '<span class="' + (isCorrect ? "text-emerald-700" : "text-rose-700") + '">' + (isCorrect ? "✔ Correct" : "✘ Incorrect / Skipped") + "</span>" +
+        "</div>" +
+        '<div class="mb-2">' + renderBilingualText(q.ta, q.en, false) + "</div>" +
+        '<div class="text-xs space-y-1">' +
+        '<div><b>Your Answer:</b> ' + pickedLabel + "</div>" +
+        '<div class="text-emerald-800"><b>Correct Answer:</b> ' + corrLabel + "</div>" +
+        '<div class="opacity-85 pt-1"><b>Explanation:</b> ' + (q.whyTa || "") + (q.whyEn ? " | " + q.whyEn : "") + "</div>" +
+        "</div></div>";
+    }).join("");
+  }
+
+  // =========================================================================
+  // ADMIN V2 CONTROLLER (BATCH-FIRST, DYNAMIC SUBJECTS, AI GEN & APPROVAL)
+  // =========================================================================
+  var draftBatchSubjects = [
+    { name: "General Tamil", target: 3 },
+    { name: "Indian Polity", target: 2 }
+  ];
+
+  function populateSubjectDropdowns() {
+    var html = DEFAULT_SUBJECTS.map(function(s) {
+      return '<option value="' + s + '">' + s + "</option>";
+    }).join("");
+    if (g("subjectPresetSelect")) g("subjectPresetSelect").innerHTML = html;
+  }
+
+  function renderDraftSubjectRows() {
+    var box = g("subjectAllocationRows");
+    if (!box) return;
+    var total = draftBatchSubjects.reduce(function(sum, item) { return sum + (Number(item.target) || 0); }, 0);
+    g("subjectPlanTotalBadge").textContent = "Total Target: " + total + " Questions";
+
+    if (!draftBatchSubjects.length) {
+      box.innerHTML = '<div class="text-xs opacity-70">No subjects added yet. Use the selector above to add subjects.</div>';
+      return;
+    }
+
+    box.innerHTML = draftBatchSubjects.map(function(item, idx) {
+      return '<div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-300">' +
+        '<span class="font-bold text-xs sm:text-sm">' + item.name + "</span>" +
+        '<div class="flex items-center gap-2">' +
+        '<label class="text-xs opacity-75">Target Qs:</label>' +
+        '<input type="number" min="1" max="100" value="' + item.target + '" data-sidx="' + idx + '" class="draft-subj-cnt w-20 p-1.5 text-xs font-bold">' +
+        '<button type="button" data-sidx="' + idx + '" class="draft-subj-rm btn-danger px-2.5 py-1.5 text-xs">Remove</button>' +
+        "</div></div>";
+    }).join("");
+
+    var cntInputs = box.querySelectorAll(".draft-subj-cnt");
+    for (var i = 0; i < cntInputs.length; i++) {
+      cntInputs[i].addEventListener("change", function() {
+        var idx = Number(this.getAttribute("data-sidx"));
+        draftBatchSubjects[idx].target = Math.max(1, Number(this.value) || 1);
+        renderDraftSubjectRows();
+      });
+    }
+
+    var rmBtns = box.querySelectorAll(".draft-subj-rm");
+    for (var r = 0; r < rmBtns.length; r++) {
+      rmBtns[r].addEventListener("click", function() {
+        var idx = Number(this.getAttribute("data-sidx"));
+        draftBatchSubjects.splice(idx, 1);
+        renderDraftSubjectRows();
+      });
+    }
+  }
+
+  function handleAddSubjectToBatchDraft() {
+    var customName = g("customSubjectNameInput").value.trim();
+    var selectedName = g("subjectPresetSelect").value;
+    var finalName = customName || selectedName;
+    var count = Math.max(1, Number(g("subjectTargetCountInput").value) || 2);
+
+    if (!finalName) return;
+    var existing = draftBatchSubjects.find(function(s) {
+      return s.name.toLowerCase() === finalName.toLowerCase();
+    });
+    if (existing) {
+      existing.target += count;
+    } else {
+      draftBatchSubjects.push({ name: finalName, target: count });
+    }
+    g("customSubjectNameInput").value = "";
+    renderDraftSubjectRows();
+    showToast("Added subject: " + finalName);
+  }
+
+  function handleSaveNewTestBatch() {
+    var fb = g("createBatchFeedback");
+    fb.classList.add("hidden");
+
+    var title = g("batchTitleInput").value.trim() || "TNPSC Mock Batch";
+    var code = g("batchCodeInput").value.trim().toUpperCase();
+    var cat = g("batchCategoryInput").value;
+    var dur = Math.max(1, Number(g("batchDurationInput").value) || 15);
+    var relDate = g("batchReleaseDateInput").value || todayIsoDate();
+    var relTime = g("batchReleaseTimeInput").value || "20:00";
+    var centerAd = g("batchCenterAdInput").value.trim();
+
+    if (!code) {
+      fb.className = "mb-3 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold";
+      fb.textContent = "Batch Code உள்ளிடவும் (அல்லது Auto பொத்தானை அழுத்தவும்).";
+      fb.classList.remove("hidden");
+      return;
+    }
+    if (appState.batches.some(function(b) { return b.code.toUpperCase() === code; })) {
+      fb.className = "mb-3 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold";
+      fb.textContent = "Batch Code '" + code + "' ஏற்கனவே உள்ளது. வேறு Code கொடுக்கவும்.";
+      fb.classList.remove("hidden");
+      return;
+    }
+    if (!draftBatchSubjects.length) {
+      fb.className = "mb-3 p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold";
+      fb.textContent = "குறைந்தது 1 Subject-ஐ Batch-ல் சேர்க்கவும்.";
+      fb.classList.remove("hidden");
+      return;
+    }
+
+    var newBatch = {
+      id: "batch-" + Date.now(),
+      code: code,
+      title: title,
+      category: cat,
+      durationMinutes: dur,
+      releaseDate: relDate,
+      releaseTime: relTime,
+      releaseAt: buildReleaseIso(relDate, relTime),
+      resultsReleased: false,
+      active: true,
+      centerAd: centerAd,
+      subjects: draftBatchSubjects.map(function(s) { return { name: s.name, target: s.target }; }),
+      questionIds: []
+    };
+
+    appState.batches.unshift(newBatch);
+    saveAppState();
+    renderActiveBatchPills();
+    renderAdminBatchesList();
+
+    fb.className = "mb-3 p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold";
+    fb.textContent = "✓ Test Batch '" + code + "' வெற்றிகரமாக உருவாக்கப்பட்டது! இப்போது AI Question Generator திறக்கப்படுகிறது...";
+    fb.classList.remove("hidden");
+    showToast("Batch " + code + " created!");
+
+    setTimeout(function() {
+      switchAdminTab(2);
+      populateAiTabSelectors(newBatch.id);
+    }, 550);
+  }
+
+  function renderAdminBatchesList() {
+    var box = g("adminBatchesList");
+    if (!box) return;
+    if (!appState.batches.length) {
+      box.innerHTML = '<div class="text-xs opacity-70">No batches created yet.</div>';
+      return;
+    }
+
+    box.innerHTML = appState.batches.map(function(b) {
+      var attachedQs = getApprovedQuestionsForBatch(b);
+      var totalTarget = (b.subjects || []).reduce(function(s, x) { return s + (Number(x.target) || 0); }, 0) || attachedQs.length;
+      var subjPills = (b.subjects || []).map(function(s) {
+        var cnt = attachedQs.filter(function(q) { return q.subject === s.name; }).length;
+        return '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">' + s.name + ": " + cnt + "/" + s.target + "</span>";
+      }).join(" ");
+
+      return '<div class="p-3.5 rounded-xl bg-white/80 border border-slate-300 space-y-2">' +
+        '<div class="flex flex-wrap items-center justify-between gap-2">' +
+        '<div><span class="font-extrabold text-sm">' + b.code + '</span> <span class="text-xs opacity-75">• ' + b.title + " (" + b.category + ")</span></div>" +
+        '<div class="flex items-center gap-2">' +
+        '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold ' + (b.resultsReleased ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' +
+        (b.resultsReleased ? "Results Released" : "Release: " + formatDisplayDateTime(b.releaseAt)) +
+        "</span>" +
+        '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-800">' + attachedQs.length + "/" + totalTarget + " Qs</span>" +
+        "</div></div>" +
+        '<div class="flex flex-wrap gap-1.5">' + subjPills + "</div>" +
+        '<div class="flex flex-wrap gap-2 pt-1">' +
+        '<button type="button" data-bid="' + b.id + '" class="adm-go-ai-btn btn-primary px-3 py-1.5 text-xs">+ Generate AI Questions</button>' +
+        '<button type="button" data-bid="' + b.id + '" class="adm-rel-now-btn btn-sec px-3 py-1.5 text-xs">Release Results Now</button>' +
+        '<button type="button" data-bid="' + b.id + '" class="adm-del-batch-btn btn-danger px-3 py-1.5 text-xs">Delete</button>' +
+        "</div></div>";
+    }).join("");
+
+    var aiBtns = box.querySelectorAll(".adm-go-ai-btn");
+    for (var i = 0; i < aiBtns.length; i++) {
+      aiBtns[i].addEventListener("click", function() {
+        var bid = this.getAttribute("data-bid");
+        switchAdminTab(2);
+        populateAiTabSelectors(bid);
+      });
+    }
+
+    var relBtns = box.querySelectorAll(".adm-rel-now-btn");
+    for (var j = 0; j < relBtns.length; j++) {
+      relBtns[j].addEventListener("click", function() {
+        var bid = this.getAttribute("data-bid");
+        var b = getBatchById(bid);
+        if (b) {
+          b.resultsReleased = true;
+          b.releaseAt = new Date().toISOString();
+          saveAppState();
+          renderAdminBatchesList();
+          showToast("Results released for " + b.code + "!");
+        }
+      });
+    }
+
+    var delBtns = box.querySelectorAll(".adm-del-batch-btn");
+    for (var k = 0; k < delBtns.length; k++) {
+      delBtns[k].addEventListener("click", function() {
+        var bid = this.getAttribute("data-bid");
+        if (appState.batches.length <= 1) {
+          showToast("Keep at least one batch active.");
+          return;
+        }
+        appState.batches = appState.batches.filter(function(x) { return x.id !== bid; });
+        saveAppState();
+        renderAdminBatchesList();
+        renderActiveBatchPills();
+        showToast("Batch removed.");
+      });
+    }
+  }
+
+  // Tab 2: AI Subject-Wise Generator & Approval Queue
+  function populateAiTabSelectors(preferredBatchId) {
+    var bSel = g("aiBatchSelect");
+    if (!bSel) return;
+    var prev = preferredBatchId || bSel.value;
+    bSel.innerHTML = appState.batches.map(function(b) {
+      var cnt = getApprovedQuestionsForBatch(b).length;
+      return '<option value="' + b.id + '">' + b.code + " — " + b.title + " (" + cnt + " Approved Qs)</option>";
+    }).join("");
+    if (prev && appState.batches.some(function(b) { return b.id === prev; })) {
+      bSel.value = prev;
+    }
+    syncAiSubjectDropdownForSelectedBatch();
+    updateAiBatchBannerAndQueue();
+  }
+
+  function syncAiSubjectDropdownForSelectedBatch() {
+    var batch = getBatchById(g("aiBatchSelect").value);
+    var sSel = g("aiSubjectDropdown");
+    if (!sSel) return;
+
+    var seen = {};
+    var opts = [];
+    if (batch && Array.isArray(batch.subjects)) {
+      batch.subjects.forEach(function(s) {
+        if (!seen[s.name]) {
+          seen[s.name] = true;
+          opts.push(s.name);
+        }
+      });
+    }
+    DEFAULT_SUBJECTS.forEach(function(s) {
+      if (!seen[s]) {
+        seen[s] = true;
+        opts.push(s);
+      }
+    });
+
+    var currentSubj = sSel.value;
+    sSel.innerHTML = opts.map(function(name) {
+      return '<option value="' + name + '">' + name + "</option>";
+    }).join("");
+    if (currentSubj && seen[currentSubj]) sSel.value = currentSubj;
+  }
+
+  function updateAiBatchBannerAndQueue() {
+    var batch = getBatchById(g("aiBatchSelect").value);
+    var subj = g("aiSubjectDropdown").value;
+    if (!batch) return;
+
+    var attachedQs = getApprovedQuestionsForBatch(batch);
+    var plan = (batch.subjects || []).find(function(s) { return s.name === subj; });
+    var target = plan ? Number(plan.target) : 3;
+    var approvedForSubj = attachedQs.filter(function(q) { return q.subject === subj; }).length;
+    var need = Math.max(0, target - approvedForSubj);
+
+    g("aiBatchProgressBanner").textContent =
+      "Target Batch: " + batch.code + " (" + batch.category + ") • Subject [" + subj + "]: " +
+      approvedForSubj + " / " + target + " Approved (Remaining Needed: " + need + ") • Total Batch Qs: " + attachedQs.length;
+
+    renderApprovalQueueList();
+  }
+
+  function buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus) {
+    var bank = TNPSC_QUESTION_BANK[subject] || TNPSC_QUESTION_BANK["Indian Polity"];
+    var results = [];
+    for (var i = 0; i < count; i++) {
+      var tpl = bank[i % bank.length];
+      var cycle = Math.floor(i / bank.length);
+      var tagTa = topicFocus ? " [" + topicFocus + "]" : "";
+      var tagEn = topicFocus ? " [" + topicFocus + "]" : "";
+      var prefixTa = cycle > 0 ? "(" + subject + " - Set " + (cycle + 1) + tagTa + ") " : (topicFocus ? "[" + topicFocus + "] " : "");
+      var prefixEn = cycle > 0 ? "(" + subject + " - Set " + (cycle + 1) + tagEn + ") " : (topicFocus ? "[" + topicFocus + "] " : "");
+
+      results.push({
+        id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 10000),
+        batchId: batch.id,
+        subject: subject,
+        difficulty: difficulty,
+        ta: prefixTa + tpl.ta,
+        en: prefixEn + tpl.en,
+        opts: tpl.opts.map(function(o) { return { ta: o.ta, en: o.en }; }),
+        a: Number(tpl.a) || 0,
+        whyTa: tpl.whyTa,
+        whyEn: tpl.whyEn,
+        status: "draft"
+      });
+    }
+    return results;
+  }
+
+  async function tryGeminiApiGeneration(apiKey, batch, subject, count, difficulty, topicFocus) {
+    var prompt = "Generate " + count + " TNPSC " + batch.category + " exam MCQs for subject '" + subject +
+      "' at '" + difficulty + "' difficulty" + (topicFocus ? " focusing on '" + topicFocus + "'" : "") +
+      ". Return ONLY a valid JSON array where each element has: ta (Tamil question), en (English question), opts (array of 4 objects {ta, en}), a (correct option index 0-3), whyTa (Tamil explanation), whyEn (English explanation).";
+    var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(apiKey);
+    var res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    if (!res.ok) throw new Error("Gemini HTTP " + res.status);
+    var data = await res.json();
+    var text = (((data.candidates || [])[0] || {}).content || {}).parts[0].text || "";
+    var cleaned = text.replace(/```json|```/gi, "").trim();
+    var arr = JSON.parse(cleaned);
+    if (!Array.isArray(arr) || !arr.length) throw new Error("Invalid JSON");
+    return arr.slice(0, count).map(function(item, idx) {
+      return {
+        id: "q-gem-" + Date.now() + "-" + idx + "-" + Math.floor(Math.random() * 10000),
+        batchId: batch.id,
+        subject: subject,
+        difficulty: difficulty,
+        ta: item.ta || item.en || "Question",
+        en: item.en || "",
+        opts: Array.isArray(item.opts) && item.opts.length === 4 ? item.opts : [
+          { ta: "A", en: "A" }, { ta: "B", en: "B" }, { ta: "C", en: "C" }, { ta: "D", en: "D" }
+        ],
+        a: Number(item.a) || 0,
+        whyTa: item.whyTa || "",
+        whyEn: item.whyEn || "",
+        status: "draft"
+      };
+    });
+  }
+
+  async function handleGenerateAiQuestions() {
+    var batch = getBatchById(g("aiBatchSelect").value);
+    if (!batch) return;
+    var subject = g("aiSubjectDropdown").value;
+    var count = Math.max(1, Math.min(20, Number(g("aiNumQuestionsInput").value) || 3));
+    var difficulty = g("aiDifficultySelect").value;
+    var topicFocus = g("aiTopicInput").value.trim();
+
+    // Ensure subject exists on batch's subject list
+    if (!batch.subjects.some(function(s) { return s.name === subject; })) {
+      batch.subjects.push({ name: subject, target: count });
+    }
+
+    var btn = g("runAiGenerateBtn");
+    var msgEl = g("aiGenerateStatusMsg");
+    btn.disabled = true;
+    msgEl.className = "mt-2.5 text-xs font-bold text-blue-700";
+    msgEl.textContent = "Generating " + count + " bilingual TNPSC questions for " + subject + "...";
+
+    try {
+      var cfg = getRuntimeConfig();
+      var generated = null;
+      if (cfg.geminiKey) {
+        try {
+          generated = await tryGeminiApiGeneration(cfg.geminiKey, batch, subject, count, difficulty, topicFocus);
+        } catch (err) {
+          generated = buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus);
+        }
+      } else {
+        generated = buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus);
+      }
+
+      appState.questions = generated.concat(appState.questions);
+      saveAppState();
+
+      g("queueStatusFilter").value = "draft";
+      renderApprovalQueueList();
+      updateAiBatchBannerAndQueue();
+
+      msgEl.className = "mt-2.5 text-xs font-bold text-emerald-700";
+      msgEl.textContent = "✓ " + generated.length + " கேள்விகள் [" + subject + "] Approval Queue-ல் தயாராக உள்ளன! Approve செய்தால் '" + batch.code + "' Batch-ல் தானாக இணையும்.";
+      showToast(generated.length + " AI questions added to Approval Queue!");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function approveQuestionAndAttachToBatch(qId, targetBatchId) {
+    var q = appState.questions.find(function(item) { return item.id === qId; });
+    var batch = getBatchById(targetBatchId);
+    if (!q || !batch) return;
+
+    q.status = "approved";
+    q.batchId = batch.id;
+    batch.questionIds = batch.questionIds || [];
+    if (batch.questionIds.indexOf(q.id) === -1) {
+      batch.questionIds.push(q.id);
+    }
+    saveAppState();
+  }
+
+  function renderApprovalQueueList() {
+    var box = g("approvalQueueList");
+    if (!box) return;
+    var batch = getBatchById(g("aiBatchSelect").value);
+    var statusFilter = g("queueStatusFilter").value;
+
+    var items = appState.questions.filter(function(q) {
+      if (q.status !== statusFilter) return false;
+      if (batch && q.batchId && q.batchId !== batch.id) return false;
+      return true;
+    });
+
+    if (!items.length) {
+      box.innerHTML = '<div class="text-xs opacity-70 p-3">No questions in "' + statusFilter + '" view for this batch.</div>';
+      return;
+    }
+
+    box.innerHTML = items.map(function(q, idx) {
+      var corr = (q.opts && q.opts[q.a]) ? q.opts[q.a].ta : "-";
+      return '<div class="p-4 rounded-xl bg-white/85 border border-slate-300 space-y-2">' +
+        '<div class="flex flex-wrap items-center justify-between gap-2">' +
+        '<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-teal-100 text-teal-800">' + (idx + 1) + ". " + q.subject + "</span>" +
+        '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold ' + (q.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' +
+        q.status.toUpperCase() + (batch ? " • " + batch.code : "") +
+        "</span></div>" +
+        '<div class="font-bold text-sm">' + q.ta + "</div>" +
+        '<div class="text-xs opacity-80">' + (q.en || "") + "</div>" +
+        '<div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs pt-1">' +
+        (q.opts || []).map(function(o, oi) {
+          var isC = oi === Number(q.a);
+          return '<div class="p-2 rounded-lg border ' + (isC ? "bg-emerald-50 border-emerald-400 font-bold text-emerald-900" : "bg-slate-50 border-slate-200") + '">' +
+            String.fromCharCode(65 + oi) + ". " + o.ta + (o.en && o.en !== o.ta ? " (" + o.en + ")" : "") +
+            "</div>";
+        }).join("") +
+        "</div>" +
+        '<div class="text-xs opacity-80"><b>Explanation:</b> ' + (q.whyTa || "-") + "</div>" +
+        '<div class="flex flex-wrap gap-2 pt-2">' +
+        (q.status !== "approved" ? '<button type="button" data-qid="' + q.id + '" class="q-approve-btn btn-wa px-3.5 py-1.5 text-xs">✓ Approve &amp; Attach to Batch</button>' : "") +
+        '<button type="button" data-qid="' + q.id + '" class="q-edit-toggle-btn btn-ghost px-3 py-1.5 text-xs">✎ Edit</button>' +
+        (q.status !== "rejected" ? '<button type="button" data-qid="' + q.id + '" class="q-reject-btn btn-danger px-3 py-1.5 text-xs">✘ Reject</button>' : "") +
+        "</div>" +
+        '<div id="editForm_' + q.id + '" class="hidden pt-3 border-t border-slate-200 space-y-2">' +
+        '<input type="text" class="ed-ta w-full p-2 text-xs" value="' + q.ta.replace(/"/g, "&quot;") + '" placeholder="Tamil Question">' +
+        '<input type="text" class="ed-en w-full p-2 text-xs" value="' + (q.en || "").replace(/"/g, "&quot;") + '" placeholder="English Question">' +
+        '<button type="button" data-qid="' + q.id + '" class="q-save-edit-btn btn-primary px-3 py-1.5 text-xs">Save Edit</button>' +
+        "</div></div>";
+    }).join("");
+
+    var appBtns = box.querySelectorAll(".q-approve-btn");
+    for (var i = 0; i < appBtns.length; i++) {
+      appBtns[i].addEventListener("click", function() {
+        var qid = this.getAttribute("data-qid");
+        approveQuestionAndAttachToBatch(qid, batch.id);
+        populateAiTabSelectors(batch.id);
+        renderAdminBatchesList();
+        renderActiveBatchPills();
+        showToast("Question approved & attached to " + batch.code + "!");
+      });
+    }
+
+    var rejBtns = box.querySelectorAll(".q-reject-btn");
+    for (var j = 0; j < rejBtns.length; j++) {
+      rejBtns[j].addEventListener("click", function() {
+        var qid = this.getAttribute("data-qid");
+        var q = appState.questions.find(function(x) { return x.id === qid; });
+        if (q) {
+          q.status = "rejected";
+          saveAppState();
+          renderApprovalQueueList();
+          showToast("Question rejected.");
+        }
+      });
+    }
+
+    var editToggles = box.querySelectorAll(".q-edit-toggle-btn");
+    for (var e = 0; e < editToggles.length; e++) {
+      editToggles[e].addEventListener("click", function() {
+        var qid = this.getAttribute("data-qid");
+        var form = g("editForm_" + qid);
+        if (form) form.classList.toggle("hidden");
+      });
+    }
+
+    var saveEdits = box.querySelectorAll(".q-save-edit-btn");
+    for (var s = 0; s < saveEdits.length; s++) {
+      saveEdits[s].addEventListener("click", function() {
+        var qid = this.getAttribute("data-qid");
+        var form = g("editForm_" + qid);
+        var q = appState.questions.find(function(x) { return x.id === qid; });
+        if (q && form) {
+          q.ta = form.querySelector(".ed-ta").value.trim() || q.ta;
+          q.en = form.querySelector(".ed-en").value.trim();
+          saveAppState();
+          renderApprovalQueueList();
+          showToast("Question updated.");
+        }
+      });
+    }
+  }
+
+  // Tab 3: Results, Release Timer & WhatsApp Broadcast
+  function populateResultsTabBatches(preferredId) {
+    var sel = g("resTabBatchSelect");
+    if (!sel) return;
+    var prev = preferredId || sel.value;
+    sel.innerHTML = appState.batches.map(function(b) {
+      return '<option value="' + b.id + '">' + b.code + " — " + b.title + " (" + (b.resultsReleased ? "RELEASED" : "SCHEDULED") + ")</option>";
+    }).join("");
+    if (prev && appState.batches.some(function(b) { return b.id === prev; })) sel.value = prev;
+    renderAdminResultsTable();
+  }
+
+  function renderAdminResultsTable() {
+    var batch = getBatchById(g("resTabBatchSelect").value);
+    if (!batch) return;
+    g("resUpdateDateInput").value = batch.releaseDate || todayIsoDate();
+    g("resUpdateTimeInput").value = batch.releaseTime || "20:00";
+
+    var attempts = appState.attempts.filter(function(a) { return a.batchId === batch.id; });
+    attempts.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+
+    var tbody = g("adminAttemptsTbody");
+    if (!attempts.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center opacity-70">No student attempts recorded for this batch yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = attempts.map(function(att, idx) {
+      var rankObj = { rank: idx + 1, total: attempts.length };
+      return '<tr class="border-b border-slate-200">' +
+        '<td class="p-3 font-extrabold">#' + rankObj.rank + "</td>" +
+        '<td class="p-3 font-bold">' + att.studentName + "</td>" +
+        '<td class="p-3">' + att.phone + "</td>" +
+        '<td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-bold ' + (att.status === "submitted" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800") + '">' + att.status + "</span></td>" +
+        '<td class="p-3 font-bold">' + att.score + " / " + att.totalQuestions + "</td>" +
+        '<td class="p-3"><button type="button" data-attid="' + att.id + '" class="adm-wa-row-btn btn-wa px-3 py-1.5 text-xs">Send WhatsApp →</button></td>' +
+        "</tr>";
+    }).join("");
+
+    var waBtns = tbody.querySelectorAll(".adm-wa-row-btn");
+    for (var i = 0; i < waBtns.length; i++) {
+      waBtns[i].addEventListener("click", function() {
+        var att = getAttemptById(this.getAttribute("data-attid"));
+        if (!att) return;
+        var rankObj = computeBatchRank(att, batch);
+        var msg = buildWhatsappResultMessage(att, batch, rankObj);
+        openWhatsappUrl(msg, att.phone);
+      });
+    }
+  }
+
+  function openWhatsappUrl(message, phone10) {
+    var clean = normalizePhone10(phone10);
+    var url = clean.length === 10
+      ? "https://api.whatsapp.com/send?phone=91" + clean + "&text=" + encodeURIComponent(message)
+      : "https://api.whatsapp.com/send?text=" + encodeURIComponent(message);
+    copyTextSafe(message);
+    var win = null;
+    try { win = window.open(url, "_blank", "noopener,noreferrer"); } catch (e) {}
+    if (win) showToast("WhatsApp opened & message copied!");
+    else showToast("Message & link copied to clipboard — paste in WhatsApp!");
+  }
+
+  function switchAdminTab(tabNum) {
+    [1, 2, 3].forEach(function(n) {
+      var panel = g("admTabPanel" + n);
+      var btn = g("admTabBtn" + n);
+      if (n === tabNum) {
+        panel.classList.remove("hidden");
+        btn.className = "btn-primary flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
+      } else {
+        panel.classList.add("hidden");
+        btn.className = "btn-ghost flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
+      }
+    });
+    if (tabNum === 1) {
+      renderDraftSubjectRows();
+      renderAdminBatchesList();
+    } else if (tabNum === 2) {
+      populateAiTabSelectors();
+    } else if (tabNum === 3) {
+      populateResultsTabBatches();
+    }
+  }
+
+  function getRuntimeConfig() {
+    var winCfg = window.TNPSC_CONFIG || {};
+    var saved = {};
+    try { saved = JSON.parse(localStorage.getItem(CONFIG_KEY) || "{}"); } catch (e) {}
+    return {
+      geminiKey: saved.geminiKey || winCfg.GEMINI_API_KEY || "",
+      supabaseUrl: saved.supabaseUrl || winCfg.SUPABASE_URL || "",
+      supabaseKey: saved.supabaseKey || winCfg.SUPABASE_ANON_KEY || ""
+    };
+  }
+
+  // Bind All Event Listeners
+  function bindAllEvents() {
+    g("skipSplashBtn").addEventListener("click", function() {
+      g("splashOverlay").classList.add("is-closing");
+      setTimeout(function() { g("splashOverlay").classList.add("hidden"); }, 320);
+    });
+
+    g("navStudentBtn").addEventListener("click", function() {
+      renderActiveBatchPills();
+      switchScreen("studentJoinScreen");
+    });
+
+    g("navAdminBtn").addEventListener("click", function() {
+      switchScreen("adminLoginScreen");
+    });
+
+    g("joinAccToggleBtn").addEventListener("click", function() {
+      g("joinAccPanel").classList.toggle("hidden");
+    });
+
+    g("examAccBtn").addEventListener("click", function() {
+      var p = g("examAccPanel");
+      p.classList.toggle("hidden");
+      this.setAttribute("aria-expanded", String(!p.classList.contains("hidden")));
+    });
+
+    g("closeExamAccBtn").addEventListener("click", function() {
+      g("examAccPanel").classList.add("hidden");
+      g("examAccBtn").setAttribute("aria-expanded", "false");
+    });
+
+    ["fontSizeSel", "contrastSel", "langModeSel", "animModeSel"].forEach(function(id) {
+      g(id).addEventListener("change", function() {
+        applyAccPrefs({
+          fontSize: g("fontSizeSel").value,
+          contrast: g("contrastSel").value,
+          lang: g("langModeSel").value,
+          anim: g("animModeSel").value
+        });
+      });
+    });
+
+    ["examFontSizeSel", "examContrastSel", "examLangModeSel", "examAnimModeSel"].forEach(function(id) {
+      g(id).addEventListener("change", function() {
+        applyAccPrefs({
+          fontSize: g("examFontSizeSel").value,
+          contrast: g("examContrastSel").value,
+          lang: g("examLangModeSel").value,
+          anim: g("examAnimModeSel").value
+        });
+      });
+    });
+
+    g("startExamBtn").addEventListener("click", handleStudentStartOrResume);
+
+    g("resumeSavedBannerBtn").addEventListener("click", function() {
+      try {
+        var info = JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY) || "{}");
+        var att = getAttemptById(info.attemptId);
+        if (att) {
+          if (att.status === "submitted") openWaitingOrResultsScreen(att);
+          else launchExamForAttempt(att);
+        }
+      } catch (e) {}
+    });
+
+    g("examSwitchBatchBtn").addEventListener("click", function() {
+      clearInterval(examIntervalId);
+      renderActiveBatchPills();
+      checkExistingSavedSession();
+      switchScreen("studentJoinScreen");
+    });
+
+    g("prevQBtn").addEventListener("click", function() {
+      g("examValidationMsg").classList.add("hidden");
+      activeQuestionIndex--;
+      renderCurrentQuestion();
+      renderQuestionPalette();
+    });
+
+    g("nextQBtn").addEventListener("click", function() {
+      g("examValidationMsg").classList.add("hidden");
+      var att = getAttemptById(activeAttemptId);
+      var qs = att ? getApprovedQuestionsForBatch(getBatchById(att.batchId)) : [];
+      if (activeQuestionIndex < qs.length - 1) {
+        activeQuestionIndex++;
+        renderCurrentQuestion();
+        renderQuestionPalette();
+      } else {
+        showToast("All questions visited! Click 'Submit Test ✓' when ready.");
+      }
+    });
+
+    g("markReviewBtn").addEventListener("click", function() {
+      var att = getAttemptById(activeAttemptId);
+      if (!att) return;
+      var qs = getApprovedQuestionsForBatch(getBatchById(att.batchId));
+      var q = qs[activeQuestionIndex];
+      if (!q) return;
+      att.marked[q.id] = !att.marked[q.id];
+      saveAppState();
+      renderQuestionPalette();
+      showToast(att.marked[q.id] ? "Marked for review" : "Review mark removed");
+    });
+
+    g("clearRespBtn").addEventListener("click", function() {
+      var att = getAttemptById(activeAttemptId);
+      if (!att) return;
+      var qs = getApprovedQuestionsForBatch(getBatchById(att.batchId));
+      var q = qs[activeQuestionIndex];
+      if (!q) return;
+      delete att.answers[q.id];
+      saveAppState();
+      renderCurrentQuestion();
+      renderQuestionPalette();
+    });
+
+    g("submitExamBtn").addEventListener("click", function() {
+      finalizeExamSubmission(false);
+    });
+
+    g("manualCheckReleaseBtn").addEventListener("click", function() {
+      var att = getAttemptById(activeAttemptId);
+      if (att) openWaitingOrResultsScreen(att);
+    });
+
+    g("waitingHomeBtn").addEventListener("click", function() {
+      clearInterval(releaseIntervalId);
+      switchScreen("studentJoinScreen");
+    });
+
+    g("releasedHomeBtn").addEventListener("click", function() {
+      switchScreen("studentJoinScreen");
+    });
+
+    g("shareWhatsappResultBtn").addEventListener("click", function() {
+      var txt = g("whatsappMessagePreview").textContent || "";
+      var att = getAttemptById(activeAttemptId);
+      openWhatsappUrl(txt, att ? att.phone : "");
+      g("waShareFeedback").textContent = "✓ WhatsApp result & greetings opened (also copied to clipboard)!";
+    });
+
+    g("shareWhatsappFriendBtn").addEventListener("click", function() {
+      var att = getAttemptById(activeAttemptId);
+      var batch = att ? getBatchById(att.batchId) : appState.batches[0];
+      var baseUrl = window.location.href.split("?")[0];
+      var link = baseUrl + "?batch=" + encodeURIComponent(batch ? batch.code : "G4_BATCH01");
+      var invite = "📢 *" + (att ? att.studentName : "Your Friend") + " உங்களை TNPSC Live Test-க்கு அழைக்கிறார்!*\n" +
+        "Test Code: *" + (batch ? batch.code : "G4_BATCH01") + "*\n" +
+        (batch ? batch.centerAd : "") + "\n👉 *Join Now:* " + link;
+      openWhatsappUrl(invite, "");
+      g("waShareFeedback").textContent = "✓ Friend invite link ready on WhatsApp & copied!";
+    });
+
+    g("copyWhatsappMsgBtn").addEventListener("click", function() {
+      var txt = g("whatsappMessagePreview").textContent || "";
+      copyTextSafe(txt);
+      g("waShareFeedback").textContent = "✓ Message copied to clipboard!";
+      showToast("WhatsApp message copied!");
+    });
+
+    g("toggleAnswerReviewBtn").addEventListener("click", function() {
+      var box = g("detailedReviewContainer");
+      if (box.classList.contains("hidden")) {
+        renderDetailedAnswerReview();
+        box.classList.remove("hidden");
+        this.textContent = "Hide Detailed Answer Key";
+      } else {
+        box.classList.add("hidden");
+        this.textContent = "View Detailed Answer Key & Explanations";
+      }
+    });
+
+    // Admin Login & Controls
+    g("adminSignInBtn").addEventListener("click", function() {
+      var pin = g("adminPinInput").value.trim();
+      if (pin !== ADMIN_PIN_DEFAULT) {
+        g("adminLoginErr").textContent = "Invalid Admin PIN (Use default: admin123).";
+        return;
+      }
+      g("adminLoginErr").textContent = "";
+      switchScreen("adminDashboardScreen");
+      switchAdminTab(1);
+    });
+
+    g("adminDemoQuickBtn").addEventListener("click", function() {
+      g("adminLoginErr").textContent = "";
+      switchScreen("adminDashboardScreen");
+      switchAdminTab(1);
+    });
+
+    g("adminLogoutBtn").addEventListener("click", function() {
+      switchScreen("studentJoinScreen");
+    });
+
+    g("adminApiSettingsBtn").addEventListener("click", function() {
+      var d = g("adminApiConfigDrawer");
+      d.classList.toggle("hidden");
+      var cfg = getRuntimeConfig();
+      g("cfgGeminiKey").value = cfg.geminiKey;
+      g("cfgSupabaseUrl").value = cfg.supabaseUrl;
+      g("cfgSupabaseKey").value = cfg.supabaseKey;
+    });
+
+    g("saveApiConfigBtn").addEventListener("click", function() {
+      try {
+        localStorage.setItem(CONFIG_KEY, JSON.stringify({
+          geminiKey: g("cfgGeminiKey").value.trim(),
+          supabaseUrl: g("cfgSupabaseUrl").value.trim(),
+          supabaseKey: g("cfgSupabaseKey").value.trim()
+        }));
+        showToast("API Configuration saved to localStorage!");
+      } catch (e) {}
+    });
+
+    g("clearApiConfigBtn").addEventListener("click", function() {
+      try { localStorage.removeItem(CONFIG_KEY); } catch (e) {}
+      g("cfgGeminiKey").value = "";
+      g("cfgSupabaseUrl").value = "";
+      g("cfgSupabaseKey").value = "";
+      showToast("Reset to built-in Local Mode.");
+    });
+
+    g("admTabBtn1").addEventListener("click", function() { switchAdminTab(1); });
+    g("admTabBtn2").addEventListener("click", function() { switchAdminTab(2); });
+    g("admTabBtn3").addEventListener("click", function() { switchAdminTab(3); });
+
+    g("genBatchCodeBtn").addEventListener("click", function() {
+      var prefix = g("batchCategoryInput").value === "Group II / IIA" ? "G2_" :
+        (g("batchCategoryInput").value === "Group I" ? "G1_" : "G4_");
+      g("batchCodeInput").value = prefix + String(Date.now()).slice(-4);
+    });
+
+    g("addSubjectRowBtn").addEventListener("click", handleAddSubjectToBatchDraft);
+    g("saveNewBatchBtn").addEventListener("click", handleSaveNewTestBatch);
+
+    g("aiBatchSelect").addEventListener("change", function() {
+      syncAiSubjectDropdownForSelectedBatch();
+      updateAiBatchBannerAndQueue();
+    });
+
+    g("aiSubjectDropdown").addEventListener("change", updateAiBatchBannerAndQueue);
+
+    g("aiAddNewSubjBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("aiBatchSelect").value);
+      var newName = g("aiQuickNewSubjInput").value.trim();
+      if (!batch || !newName) return;
+      if (!batch.subjects.some(function(s) { return s.name.toLowerCase() === newName.toLowerCase(); })) {
+        batch.subjects.push({ name: newName, target: 3 });
+        saveAppState();
+      }
+      g("aiQuickNewSubjInput").value = "";
+      syncAiSubjectDropdownForSelectedBatch();
+      g("aiSubjectDropdown").value = newName;
+      updateAiBatchBannerAndQueue();
+      showToast("Added '" + newName + "' to " + batch.code);
+    });
+
+    g("setRemainingCountBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("aiBatchSelect").value);
+      var subj = g("aiSubjectDropdown").value;
+      if (!batch) return;
+      var attached = getApprovedQuestionsForBatch(batch);
+      var plan = (batch.subjects || []).find(function(s) { return s.name === subj; });
+      var target = plan ? Number(plan.target) : 3;
+      var done = attached.filter(function(q) { return q.subject === subj; }).length;
+      var rem = Math.max(1, target - done);
+      g("aiNumQuestionsInput").value = String(rem);
+      showToast("Set count to " + rem + " remaining questions");
+    });
+
+    g("runAiGenerateBtn").addEventListener("click", handleGenerateAiQuestions);
+    g("queueStatusFilter").addEventListener("change", renderApprovalQueueList);
+
+    g("approveAllQueueBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("aiBatchSelect").value);
+      if (!batch) return;
+      var drafts = appState.questions.filter(function(q) {
+        return q.status === "draft" && (!q.batchId || q.batchId === batch.id);
+      });
+      if (!drafts.length) {
+        showToast("No pending drafts to approve.");
+        return;
+      }
+      drafts.forEach(function(q) { approveQuestionAndAttachToBatch(q.id, batch.id); });
+      populateAiTabSelectors(batch.id);
+      renderAdminBatchesList();
+      renderActiveBatchPills();
+      showToast("Approved & attached all " + drafts.length + " questions to " + batch.code + "!");
+    });
+
+    g("resTabBatchSelect").addEventListener("change", renderAdminResultsTable);
+
+    g("saveResScheduleBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("resTabBatchSelect").value);
+      if (!batch) return;
+      var d = g("resUpdateDateInput").value || todayIsoDate();
+      var t = g("resUpdateTimeInput").value || "20:00";
+      batch.releaseDate = d;
+      batch.releaseTime = t;
+      batch.releaseAt = buildReleaseIso(d, t);
+      batch.resultsReleased = new Date(batch.releaseAt).getTime() <= Date.now();
+      saveAppState();
+      populateResultsTabBatches(batch.id);
+      renderAdminBatchesList();
+      showToast(batch.resultsReleased ? "Release time passed — Results auto-released!" : "Release timer updated!");
+    });
+
+    g("releaseNowBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("resTabBatchSelect").value);
+      if (!batch) return;
+      batch.resultsReleased = true;
+      batch.releaseAt = new Date().toISOString();
+      saveAppState();
+      populateResultsTabBatches(batch.id);
+      renderAdminBatchesList();
+      showToast("Results released immediately for " + batch.code + "!");
+    });
+
+    g("exportBatchCsvBtn").addEventListener("click", function() {
+      var batch = getBatchById(g("resTabBatchSelect").value);
+      if (!batch) return;
+      var attempts = appState.attempts.filter(function(a) { return a.batchId === batch.id; });
+      if (!attempts.length) {
+        showToast("No student records to export.");
+        return;
+      }
+      var lines = ["Rank,BatchCode,StudentName,Mobile,Status,Score,Total,Wrong,Skipped"];
+      attempts.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+      attempts.forEach(function(a, idx) {
+        lines.push([
+          idx + 1,
+          batch.code,
+          '"' + a.studentName.replace(/"/g, '""') + '"',
+          a.phone,
+          a.status,
+          a.score,
+          a.totalQuestions,
+          a.wrongCount,
+          a.skippedCount
+        ].join(","));
+      });
+      var blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = batch.code + "_results.csv";
+      link.click();
+      showToast("CSV downloaded!");
+    });
+  }
+
+  // Initialize Application
+  loadAppState();
+  loadAccPrefs();
+  populateSubjectDropdowns();
+  g("batchReleaseDateInput").value = todayIsoDate();
+  renderActiveBatchPills();
+  checkExistingSavedSession();
+  bindAllEvents();
+
+  // Pre-fill batch code from URL query param (?batch=CODE) if shared by friend
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var urlBatch = params.get("batch");
+    if (urlBatch) g("stuBatchCodeInput").value = urlBatch.toUpperCase();
+    else if (appState.batches[0]) g("stuBatchCodeInput").value = appState.batches[0].code;
+  } catch (e) {}
+
+  setTimeout(function() {
+    var bar = g("splashProgress");
+    if (bar) bar.style.width = "0%";
+  }, 50);
+
+  setTimeout(function() {
+    var sp = g("splashOverlay");
+    if (sp && !sp.classList.contains("hidden")) {
+      sp.classList.add("is-closing");
+      setTimeout(function() { sp.classList.add("hidden"); }, 320);
+    }
+  }, 1200);
 })();
 </script>
 </body>
