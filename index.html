@@ -792,121 +792,19 @@
         </div>
 
         <div class="flex flex-wrap gap-2.5">
-          <button type="button" id="runAiGenerateBtn" class="btn-primary flex-1 min-w-[210px] py-3 px-5 text-sm shadow">
-            ✨ Generate AI Questions Now
+          <button type="button" id="runAiGenerateBtn" class="btn-primary flex-1 min-w-[200px] py-3 px-4 text-sm shadow">
+            ✨ Generate Selected Subject
           </button>
-          <button type="button" id="setRemainingCountBtn" class="btn-sec py-3 px-4 text-xs sm:text-sm">
-            Auto-Set Remaining Needed
+          <button type="button" id="runAiGenerateAllBatchBtn" class="btn-sec flex-1 min-w-[220px] py-3 px-4 text-sm shadow">
+            ⚡ Generate All Batch Subjects (Full Plan)
+          </button>
+          <button type="button" id="setRemainingCountBtn" class="btn-ghost py-3 px-4 text-xs sm:text-sm">
+            Auto-Set Remaining
           </button>
         </div>
         <div id="aiGenerateStatusMsg" class="mt-2.5 text-xs font-bold"></div>
       </div>
-
-      <!-- Approval Queue -->
-      <div class="soft-card p-4 sm:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div>
-            <h3 class="font-extrabold text-base">Approval Queue &amp; Batch Question Bank</h3>
-            <p class="text-xs opacity-80">Edit inline, Reject, or Approve &amp; Attach directly to the selected Test Batch.</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <select id="queueStatusFilter" class="p-2 text-xs">
-              <option value="draft">Pending Approval (Drafts)</option>
-              <option value="approved">Approved (Attached to Batch)</option>
-              <option value="rejected">Rejected</option>
-            </select>
-            <button type="button" id="approveAllQueueBtn" class="btn-wa px-3.5 py-2 text-xs">
-              ✓ Approve All &amp; Attach to Batch
-            </button>
-          </div>
-        </div>
-        <div id="approvalQueueList" class="space-y-3"></div>
-      </div>
-    </div>
-
-    <!-- TAB 3: RESULTS, AUTO-RELEASE TIMER & WHATSAPP DISPATCH -->
-    <div id="admTabPanel3" class="hidden space-y-5">
-      <div class="soft-card p-4 sm:p-5">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div class="flex-1 min-w-[220px]">
-            <label for="resTabBatchSelect" class="block text-xs font-bold mb-1">Select Batch to Manage Results</label>
-            <select id="resTabBatchSelect" class="w-full p-2.5"></select>
-          </div>
-          <div class="flex flex-wrap gap-2 pt-4">
-            <button type="button" id="releaseNowBtn" class="btn-primary px-4 py-2.5 text-xs sm:text-sm">
-              🚀 Release Results Now
-            </button>
-            <button type="button" id="exportBatchCsvBtn" class="btn-sec px-4 py-2.5 text-xs sm:text-sm">
-              ⬇ Export CSV
-            </button>
-          </div>
-        </div>
-
-        <!-- Update Scheduled Release Time -->
-        <div class="p-3.5 rounded-xl bg-white/75 border border-slate-300 mb-4 grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-          <div>
-            <label for="resUpdateDateInput" class="block text-xs font-bold mb-1">Scheduled Release Date</label>
-            <input id="resUpdateDateInput" type="date" class="w-full p-2">
-          </div>
-          <div>
-            <label for="resUpdateTimeInput" class="block text-xs font-bold mb-1">Scheduled Release Time</label>
-            <input id="resUpdateTimeInput" type="time" class="w-full p-2">
-          </div>
-          <div>
-            <button type="button" id="saveResScheduleBtn" class="btn-sec w-full py-2 px-3 text-xs sm:text-sm">
-              Update Release Timer
-            </button>
-          </div>
-        </div>
-
-        <!-- Student Attempts & WhatsApp Broadcast Table -->
-        <div class="overflow-x-auto rounded-xl border border-slate-300 bg-white/90">
-          <table class="w-full text-left border-collapse text-xs sm:text-sm">
-            <thead>
-              <tr class="bg-slate-100 border-b border-slate-300 font-extrabold">
-                <th class="p-3">Rank</th>
-                <th class="p-3">Student Name</th>
-                <th class="p-3">Mobile</th>
-                <th class="p-3">Status</th>
-                <th class="p-3">Score</th>
-                <th class="p-3">WhatsApp Action</th>
-              </tr>
-            </thead>
-            <tbody id="adminAttemptsTbody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<!-- TOAST NOTIFICATION -->
-<div id="toastBanner" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-2.5 rounded-full bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-xl"></div>
-
-<script>
-(function() {
-  "use strict";
-
-  var STORE_KEY = "TNPSC_V2_UNIFIED_STORE_V1";
-  var ACTIVE_SESSION_KEY = "TNPSC_V2_STUDENT_SESSION_V1";
-  var ACC_PREFS_KEY = "TNPSC_V2_ACCESSIBILITY_V1";
-  var CONFIG_KEY = "TNPSC_V2_RUNTIME_CONFIG_V1";
-  var ADMIN_PIN_DEFAULT = "admin123";
-
-  var DEFAULT_SUBJECTS = [
-    "General Tamil",
-    "General English",
-    "Indian Polity",
-    "History & INM",
-    "Geography",
-    "Indian Economy",
-    "General Science",
-    "Aptitude & Mental Ability",
-    "Current Affairs"
-  ];
-
-  // Rich Bilingual TNPSC Question Bank & Procedural Generator (Zero external failure)
+  // Rich Bilingual TNPSC Question Bank & Non-Repeating Procedural Generator
   var TNPSC_QUESTION_BANK = {
     "General Tamil": [
       {
@@ -940,6 +838,54 @@
         a: 0,
         whyTa: "பழந்தமிழ் ஓலைச்சுவடிகளைத் தேடிப் பதிப்பித்த உ.வே. சாமிநாதையர் 'தமிழ் தாத்தா' என அழைக்கப்படுகிறார்.",
         whyEn: "U.V. Swaminatha Iyer is honored as Tamil Thaatha for reviving classical Sangam manuscripts."
+      },
+      {
+        ta: "தொல்காப்பியத்தில் உள்ள மொத்த இயல்களின் எண்ணிக்கை எத்தனை?",
+        en: "How many chapters (Iyals) are there in Tolkappiyam?",
+        opts: [{ ta: "27 இயல்கள்", en: "27 Iyals" }, { ta: "18 இயல்கள்", en: "18 Iyals" }, { ta: "30 இயல்கள்", en: "30 Iyals" }, { ta: "24 இயல்கள்", en: "24 Iyals" }],
+        a: 0,
+        whyTa: "எழுத்து, சொல், பொருள் ஆகிய மூன்று அதிகாரங்களிலும் தலா 9 இயல்கள் வீதம் 27 இயல்கள் உள்ளன.",
+        whyEn: "Tolkappiyam has 3 Adhikarams with 9 Iyals each, totaling 27 Iyals."
+      },
+      {
+        ta: "மணிமேகலை காப்பியத்தின் ஆசிரியர் யார்?",
+        en: "Who is the author of the epic Manimekalai?",
+        opts: [{ ta: "சீத்தலைச் சாத்தனார்", en: "Seethalai Saathanar" }, { ta: "இளங்கோவடிகள்", en: "Ilango Adigal" }, { ta: "நாதகுத்தனார்", en: "Nathakuthanar" }, { ta: "தோலாமொழித்தேவர்", en: "Tholamozhithevar" }],
+        a: 0,
+        whyTa: "மதுரைக் கூலவாணிகன் சீத்தலைச் சாத்தனார் மணிமேகலையை இயற்றினார்.",
+        whyEn: "Seethalai Saathanar composed Manimekalai as a sequel to Silappathikaram."
+      },
+      {
+        ta: "பாரதியார் நடத்திய இதழ்களில் ஒன்று எது?",
+        en: "Which of the following journals was edited by Subramania Bharati?",
+        opts: [{ ta: "இந்தியா", en: "India" }, { ta: "குடியரசு", en: "Kudi Arasu" }, { ta: "நவசக்தி", en: "Navasakthi" }, { ta: "தேசபக்தன்", en: "Desabakthan" }],
+        a: 0,
+        whyTa: "மகாகவி பாரதியார் 'இந்தியா', 'விஜயா' ஆகிய இதழ்களை நடத்தினார்.",
+        whyEn: "Subramania Bharati edited the nationalist weekly 'India'."
+      },
+      {
+        ta: "'புரட்சிக்கவி' என்று அழைக்கப்படுபவர் யார்?",
+        en: "Who is hailed as 'Puratchikavi' (Revolutionary Poet) in Tamil literature?",
+        opts: [{ ta: "பாரதிதாசன்", en: "Bharathidasan" }, { ta: "நாமக்கல் கவிஞர்", en: "Namakkal Kavignar" }, { ta: "கண்ணதாசன்", en: "Kannadasan" }, { ta: "வாணிதாசன்", en: "Vanidasan" }],
+        a: 0,
+        whyTa: "கனகசுப்புரத்தினம் எனும் பாரதிதாசன் 'புரட்சிக்கவி' மற்றும் 'பாவேந்தர்' எனப் போற்றப்படுகிறார்.",
+        whyEn: "Bharathidasan is celebrated as Puratchikavi and Pavendhar."
+      },
+      {
+        ta: "பத்துப்பாட்டு நூல்களுள் மிகப் பெரிய நூல் எது?",
+        en: "Which is the longest poem among the Pathuppattu (Ten Idylls)?",
+        opts: [{ ta: "மதுரைக்காஞ்சி", en: "Maduraikkanchi" }, { ta: "முல்லைப்பாட்டு", en: "Mullaippattu" }, { ta: "குறிஞ்சிப்பாட்டு", en: "Kurinjippattu" }, { ta: "நெடுநல்வாடை", en: "Nedunalvadai" }],
+        a: 0,
+        whyTa: "மாங்குடி மருதனார் இயற்றிய மதுரைக்காஞ்சி 782 அடிகளைக் கொண்ட மிகப் பெரிய நூலாகும்.",
+        whyEn: "Maduraikkanchi by Mangudi Maruthanar has 782 lines, the longest in Pathuppattu."
+      },
+      {
+        ta: "தமிழ்நாட்டின் மாநில மரம் எது?",
+        en: "Which is the official State Tree of Tamil Nadu?",
+        opts: [{ ta: "பனை மரம்", en: "Palmyra Palm" }, { ta: "ஆலமரம்", en: "Banyan Tree" }, { ta: "வேப்ப மரம்", en: "Neem Tree" }, { ta: "தென்னை மரம்", en: "Coconut Tree" }],
+        a: 0,
+        whyTa: "பனை மரம் (Borassus flabellifer) தமிழ்நாட்டின் மாநில மரமாகும்.",
+        whyEn: "Palmyra Palm is the official state tree of Tamil Nadu."
       }
     ],
     "General English": [
@@ -958,6 +904,38 @@
         a: 0,
         whyTa: "உயிரற்ற காற்றுக்கு மனிதப் பண்பான 'கிசுகிசுத்தல்' ஏற்றிக் கூறப்பட்டுள்ளதால் இது Personification ஆகும்.",
         whyEn: "Giving human traits ('whispered') to non-human wind is Personification."
+      },
+      {
+        ta: "Select the correct antonym for 'TRANSPARENT':",
+        en: "Select the correct antonym for 'TRANSPARENT':",
+        opts: [{ ta: "Opaque", en: "Opaque" }, { ta: "Lucid", en: "Lucid" }, { ta: "Clear", en: "Clear" }, { ta: "Visible", en: "Visible" }],
+        a: 0,
+        whyTa: "'Transparent' (ஒளி ஊடுருவும்) என்பதன் எதிர்ச்சொல் 'Opaque' (ஒளி ஊடுருவாத) ஆகும்.",
+        whyEn: "'Opaque' means not able to be seen through, the direct antonym of transparent."
+      },
+      {
+        ta: "Fill in the blank with the right preposition: 'He has been living in Chennai _____ 2018.'",
+        en: "Fill in the blank with the right preposition: 'He has been living in Chennai _____ 2018.'",
+        opts: [{ ta: "since", en: "since" }, { ta: "for", en: "for" }, { ta: "from", en: "from" }, { ta: "by", en: "by" }],
+        a: 0,
+        whyTa: "குறிப்பிட்ட தொடக்க ஆண்டைக் குறிக்க 'since' பயன்படுத்தப்படுகிறது.",
+        whyEn: "'Since' is used with a specific starting point in time (2018)."
+      },
+      {
+        ta: "Choose the correct passive voice: 'The committee approved the proposal.'",
+        en: "Choose the correct passive voice: 'The committee approved the proposal.'",
+        opts: [{ ta: "The proposal was approved by the committee.", en: "The proposal was approved by the committee." }, { ta: "The proposal is approved by the committee.", en: "The proposal is approved by the committee." }, { ta: "The proposal had approved by the committee.", en: "The proposal had approved by the committee." }, { ta: "The proposal were approved by the committee.", en: "The proposal were approved by the committee." }],
+        a: 0,
+        whyTa: "Simple Past Active வாக்கியம் 'was/were + V3' என Passive-ஆக மாறும்.",
+        whyEn: "Simple past active converts to 'was approved' in passive voice."
+      },
+      {
+        ta: "What is the plural form of 'CRITERION'?",
+        en: "What is the plural form of 'CRITERION'?",
+        opts: [{ ta: "Criteria", en: "Criteria" }, { ta: "Criterions", en: "Criterions" }, { ta: "Criterias", en: "Criterias" }, { ta: "Criterion", en: "Criterion" }],
+        a: 0,
+        whyTa: "கிரேக்க வேர்ச்சொல்லான 'Criterion' என்பதன் பன்மை 'Criteria' ஆகும்.",
+        whyEn: "'Criteria' is the standard plural form of 'criterion'."
       }
     ],
     "Indian Polity": [
@@ -984,6 +962,46 @@
         a: 0,
         whyTa: "73-வது திருத்தச் சட்டம் 11-வது அட்டவணையைச் சேர்த்து பஞ்சாயத்து ராஜ் அமைப்புகளுக்கு அரசியலமைப்பு அந்தஸ்து வழங்கியது.",
         whyEn: "The 73rd Amendment added the 11th Schedule and constitutional status to Panchayati Raj."
+      },
+      {
+        ta: "இந்திய அரசியலமைப்பின் எந்தச் சரத்து தீண்டாமையை ஒழிக்கிறது?",
+        en: "Which Article of the Indian Constitution abolishes Untouchability?",
+        opts: [{ ta: "சரத்து 17 (Article 17)", en: "Article 17" }, { ta: "சரத்து 14 (Article 14)", en: "Article 14" }, { ta: "சரத்து 19 (Article 19)", en: "Article 19" }, { ta: "சரத்து 21 (Article 21)", en: "Article 21" }],
+        a: 0,
+        whyTa: "சரத்து 17 தீண்டாமையை எந்த வடிவத்திலும் கடைப்பிடிப்பதைத் தடை செய்கிறது.",
+        whyEn: "Article 17 abolishes untouchability and forbids its practice in any form."
+      },
+      {
+        ta: "அரசியலமைப்பு வரைவுக் குழுவின் (Drafting Committee) தலைவர் யார்?",
+        en: "Who was the Chairman of the Drafting Committee of the Indian Constitution?",
+        opts: [{ ta: "டாக்டர் பி.ஆர். அம்பேத்கர்", en: "Dr. B.R. Ambedkar" }, { ta: "டாக்டர் ராஜேந்திர பிரசாத்", en: "Dr. Rajendra Prasad" }, { ta: "ஜவஹர்லால் நேரு", en: "Jawaharlal Nehru" }, { ta: "சர்தார் வல்லபாய் படேல்", en: "Sardar Vallabhbhai Patel" }],
+        a: 0,
+        whyTa: "1947 ஆகஸ்ட் 29 அன்று அமைக்கப்பட்ட 7 பேர் கொண்ட வரைவுக் குழுவின் தலைவராக டாக்டர் பி.ஆர். அம்பேத்கர் செயல்பட்டார்.",
+        whyEn: "Dr. B.R. Ambedkar chaired the 7-member Drafting Committee formed on August 29, 1947."
+      },
+      {
+        ta: "மாநிலங்களவை (Rajya Sabha) உறுப்பினர்களின் பதவிக்காலம் எத்தனை ஆண்டுகள்?",
+        en: "What is the term of office of a member of the Rajya Sabha?",
+        opts: [{ ta: "6 ஆண்டுகள்", en: "6 Years" }, { ta: "5 ஆண்டுகள்", en: "5 Years" }, { ta: "4 ஆண்டுகள்", en: "4 Years" }, { ta: "2 ஆண்டுகள்", en: "2 Years" }],
+        a: 0,
+        whyTa: "மாநிலங்களவை ஒரு நிரந்தர அவை; அதன் உறுப்பினர்களின் பதவிக்காலம் 6 ஆண்டுகள் ஆகும்.",
+        whyEn: "Rajya Sabha is a permanent house and each member serves a 6-year term."
+      },
+      {
+        ta: "இந்திய அரசியலமைப்பின் 42-வது திருத்தச் சட்டம் (1976) எவ்வாறு அழைக்கப்படுகிறது?",
+        en: "The 42nd Constitutional Amendment Act (1976) is popularly known as:",
+        opts: [{ ta: "குறு அரசியலமைப்பு (Mini Constitution)", en: "Mini Constitution" }, { ta: "அடிப்படை உரிமை மசோதா", en: "Bill of Rights" }, { ta: "பஞ்சாயத்து சட்டம்", en: "Panchayat Act" }, { ta: "கூட்டாட்சி சாசனம்", en: "Federal Charter" }],
+        a: 0,
+        whyTa: "முகவுரையில் சமதர்மம், மதச்சார்பின்மை, ஒருமைப்பாடு ஆகிய சொற்களைச் சேர்த்ததால் இது குறு அரசியலமைப்பு எனப்படுகிறது.",
+        whyEn: "Due to sweeping changes including Preamble amendments, it is called the Mini Constitution."
+      },
+      {
+        ta: "நிதி மசோதா (Money Bill) குறித்து இறுதி முடிவு எடுக்கும் அதிகாரம் யாருக்கு உள்ளது?",
+        en: "Who has the final authority to decide whether a bill is a Money Bill or not?",
+        opts: [{ ta: "மக்களவை சபாநாயகர்", en: "Speaker of Lok Sabha" }, { ta: "குடியரசுத் தலைவர்", en: "President of India" }, { ta: "நிதி அமைச்சர்", en: "Finance Minister" }, { ta: "துணைக் குடியரசுத் தலைவர்", en: "Vice-President" }],
+        a: 0,
+        whyTa: "சரத்து 110(3)-ன் கீழ் மக்களவை சபாநாயகரின் முடிவே இறுதியானது.",
+        whyEn: "Under Article 110(3), the decision of the Speaker of the Lok Sabha is final."
       }
     ],
     "History & INM": [
@@ -1002,6 +1020,38 @@
         a: 0,
         whyTa: "1806 ஜூலை 10 அன்று வேலூர் கோட்டையில் இந்திய சிப்பாய்கள் ஆங்கிலேயர்களுக்கு எதிராகப் புரட்சி செய்தனர்.",
         whyEn: "The Vellore Mutiny erupted on July 10, 1806, predating the 1857 revolt."
+      },
+      {
+        ta: "வேதாரண்யம் உப்பு சத்தியாகிரகத்தைத் தலைமையேற்று நடத்தியவர் யார்?",
+        en: "Who led the Vedaranyam Salt Satyagraha in Tamil Nadu in 1930?",
+        opts: [{ ta: "சி. ராஜகோபாலாச்சாரி", en: "C. Rajagopalachari" }, { ta: "கே. காமராஜர்", en: "K. Kamaraj" }, { ta: "வ.உ. சிதம்பரனார்", en: "V.O. Chidambaram Pillai" }, { ta: "சத்தியமூர்த்தி", en: "S. Satyamurti" }],
+        a: 0,
+        whyTa: "1930 ஏப்ரல் மாதம் திருச்சியிலிருந்து வேதாரண்யம் வரை ராஜாஜி உப்பு சத்தியாகிரக யாத்திரை நடத்தினார்.",
+        whyEn: "C. Rajagopalachari led the historic salt march from Trichy to Vedaranyam in April 1930."
+      },
+      {
+        ta: "'சுதேசி நீராவிக் கப்பல் நிறுவனத்தை' (Swadeshi Steam Navigation Company) நிறுவியவர் யார்?",
+        en: "Who founded the Swadeshi Steam Navigation Company in Tuticorin?",
+        opts: [{ ta: "வ.உ. சிதம்பரனார்", en: "V.O. Chidambaram Pillai" }, { ta: "சுப்பிரமணிய சிவா", en: "Subramania Siva" }, { ta: "திருப்பூர் குமரன்", en: "Tiruppur Kumaran" }, { ta: "வாஞ்சிநாதன்", en: "Vanchinathan" }],
+        a: 0,
+        whyTa: "1906-ல் தூத்துக்குடியில் வ.உ.சி. சுதேசி கப்பல் நிறுவனத்தைத் தொடங்கி 'காலியா', 'லாவோ' கப்பல்களை இயக்கினார்.",
+        whyEn: "V.O. Chidambaram Pillai launched the Swadeshi Steam Navigation Company in 1906."
+      },
+      {
+        ta: "சிந்துவெளி நாகரிகத்தின் முக்கியத் துறைமுக நகரம் எது?",
+        en: "Which was the major dockyard/port city of the Indus Valley Civilization?",
+        opts: [{ ta: "லோத்தல் (Lothal)", en: "Lothal" }, { ta: "ஹரப்பா (Harappa)", en: "Harappa" }, { ta: "காளிபங்கன் (Kalibangan)", en: "Kalibangan" }, { ta: "பனவாலி (Banawali)", en: "Banawali" }],
+        a: 0,
+        whyTa: "குஜராத்தில் உள்ள லோத்தல் சிந்துவெளி நாகரிகத்தின் புகழ்பெற்ற கப்பல் கட்டும் தளமாகும்.",
+        whyEn: "Lothal in Gujarat featured the famous tidal dockyard of the Indus Valley Civilization."
+      },
+      {
+        ta: "நீதிக்கட்சி (Justice Party) எந்த ஆண்டு தொடங்கப்பட்டது?",
+        en: "In which year was the South Indian Liberal Federation (Justice Party) founded?",
+        opts: [{ ta: "1916", en: "1916" }, { ta: "1920", en: "1920" }, { ta: "1925", en: "1925" }, { ta: "1937", en: "1937" }],
+        a: 0,
+        whyTa: "1916 நவம்பரில் டாக்டர் சி. நடேசனார், தியாகராய செட்டியார், டி.எம். நாயர் ஆகியோரால் தொடங்கப்பட்டது.",
+        whyEn: "Founded in November 1916 by Dr. C. Natesanar, Sir Pitti Theagarayar, and Dr. T.M. Nair."
       }
     ],
     "Geography": [
@@ -1020,6 +1070,38 @@
         a: 0,
         whyTa: "தொட்டபெட்டா (2,637 மீ) நீலகிரி மலைத்தொடரின் மிக உயரமான சிகரமாகும்.",
         whyEn: "Doddabetta (2,637 m) is the highest peak in the Nilgiri Hills."
+      },
+      {
+        ta: "தமிழ்நாட்டில் அதிக மழைப்பொழிவைத் தரும் பருவக்காற்று எது?",
+        en: "Which monsoon brings the maximum rainfall to Tamil Nadu?",
+        opts: [{ ta: "வடகிழக்குப் பருவக்காற்று", en: "Northeast Monsoon" }, { ta: "தென்மேற்குப் பருவக்காற்று", en: "Southwest Monsoon" }, { ta: "கோடைக்கால வெப்பச்சலன மழை", en: "Summer Convectional Rain" }, { ta: "மேற்கத்திய இடையூறுகள்", en: "Western Disturbances" }],
+        a: 0,
+        whyTa: "அக்டோபர் முதல் டிசம்பர் வரை வீசும் வடகிழக்குப் பருவக்காற்று தமிழ்நாட்டின் ஆண்டு மழையில் சுமார் 48% தருகிறது.",
+        whyEn: "The Northeast Monsoon (Oct–Dec) accounts for nearly 48% of Tamil Nadu's annual rainfall."
+      },
+      {
+        ta: "இந்தியாவின் மிகப் பழமையான மடிப்பு மலைத்தொடர் எது?",
+        en: "Which is the oldest fold mountain range in India?",
+        opts: [{ ta: "ஆரவல்லி மலைத்தொடர்", en: "Aravalli Range" }, { ta: "இமயமலை", en: "Himalayas" }, { ta: "மேற்குத் தொடர்ச்சி மலை", en: "Western Ghats" }, { ta: "சாத்பூரா மலை", en: "Satpura Range" }],
+        a: 0,
+        whyTa: "ராஜஸ்தான் வழியாகச் செல்லும் ஆரவல்லி மலைத்தொடர் இந்தியாவின் மிகப் பழமையான மடிப்பு மலையாகும்.",
+        whyEn: "The Aravalli Range is the oldest fold mountain system in India."
+      },
+      {
+        ta: "பிச்சாவரம் சதுப்புநிலக் காடுகள் எந்த மாவட்டத்தில் அமைந்துள்ளன?",
+        en: "In which district of Tamil Nadu is the Pichavaram Mangrove Forest located?",
+        opts: [{ ta: "கடலூர்", en: "Cuddalore" }, { ta: "நாகப்பட்டினம்", en: "Nagapattinam" }, { ta: "ராமநாதபுரம்", en: "Ramanathapuram" }, { ta: "தஞ்சாவூர்", en: "Thanjavur" }],
+        a: 0,
+        whyTa: "சிதம்பரத்திற்கு அருகே கடலூர் மாவட்டத்தில் பிச்சாவரம் சதுப்புநிலக் காடுகள் அமைந்துள்ளன.",
+        whyEn: "Pichavaram Mangrove Forest is located near Chidambaram in Cuddalore district."
+      },
+      {
+        ta: "பருத்தி விளைய மிகவும் ஏற்ற மண் வகை எது?",
+        en: "Which soil type is best suited for cotton cultivation?",
+        opts: [{ ta: "கரிசல் மண் (Black Soil)", en: "Black Soil (Regur)" }, { ta: "செம்மண் (Red Soil)", en: "Red Soil" }, { ta: "வண்டல் மண் (Alluvial Soil)", en: "Alluvial Soil" }, { ta: "சரளை மண் (Laterite Soil)", en: "Laterite Soil" }],
+        a: 0,
+        whyTa: "ஈரப்பதத்தை நீண்ட நேரம் தக்கவைக்கும் கரிசல் மண் பருத்தி சாகுபடிக்கு மிகவும் ஏற்றது.",
+        whyEn: "Black cotton soil (Regur) retains moisture well and is ideal for cotton."
       }
     ],
     "Indian Economy": [
@@ -1030,6 +1112,38 @@
         a: 0,
         whyTa: "திட்டக் குழுவிற்கு மாற்றாக ஜனவரி 1, 2015 அன்று நிதி ஆயோக் நிறுவப்பட்டது.",
         whyEn: "NITI Aayog replaced the Planning Commission on January 1, 2015."
+      },
+      {
+        ta: "இந்திய ரிசர்வ் வங்கி (RBI) எந்த ஆண்டு தேசியமயமாக்கப்பட்டது?",
+        en: "In which year was the Reserve Bank of India (RBI) nationalized?",
+        opts: [{ ta: "1949", en: "1949" }, { ta: "1935", en: "1935" }, { ta: "1955", en: "1955" }, { ta: "1969", en: "1969" }],
+        a: 0,
+        whyTa: "1935-ல் தொடங்கப்பட்ட RBI, 1949 ஜனவரி 1 அன்று தேசியமயமாக்கப்பட்டது.",
+        whyEn: "Established in 1935, the RBI was nationalized on January 1, 1949."
+      },
+      {
+        ta: "இந்தியாவில் சரக்கு மற்றும் சேவை வரி (GST) எப்போது அறிமுகப்படுத்தப்பட்டது?",
+        en: "When was the Goods and Services Tax (GST) implemented in India?",
+        opts: [{ ta: "ஜூலை 1, 2017", en: "July 1, 2017" }, { ta: "ஏப்ரல் 1, 2017", en: "April 1, 2017" }, { ta: "நவம்பர் 8, 2016", en: "November 8, 2016" }, { ta: "ஜனவரி 1, 2018", en: "January 1, 2018" }],
+        a: 0,
+        whyTa: "101-வது அரசியலமைப்புத் திருத்தத்தின் மூலம் 2017 ஜூலை 1 அன்று GST அமல்படுத்தப்பட்டது.",
+        whyEn: "GST was rolled out nationwide on July 1, 2017 via the 101st Amendment."
+      },
+      {
+        ta: "இந்திய பசுமைப் புரட்சியின் தந்தை என அழைக்கப்படுபவர் யார்?",
+        en: "Who is known as the Father of the Green Revolution in India?",
+        opts: [{ ta: "டாக்டர் எம்.எஸ். சுவாமிநாதன்", en: "Dr. M.S. Swaminathan" }, { ta: "டாக்டர் வர்கீஸ் குரியன்", en: "Dr. Verghese Kurien" }, { ta: "நார்மன் போர்லாக்", en: "Norman Borlaug" }, { ta: "சி. சுப்பிரமணியம்", en: "C. Subramaniam" }],
+        a: 0,
+        whyTa: "அதிக மகசூல் தரும் கோதுமை மற்றும் நெல் ரகங்களை அறிமுகப்படுத்திய எம்.எஸ். சுவாமிநாதன் இந்திய பசுமைப் புரட்சியின் தந்தை ஆவார்.",
+        whyEn: "Dr. M.S. Swaminathan spearheaded the introduction of high-yielding varieties in India."
+      },
+      {
+        ta: "மனித மேம்பாட்டுக் குறியீட்டை (HDI) வெளியிடும் சர்வதேச அமைப்பு எது?",
+        en: "Which international organization publishes the Human Development Index (HDI)?",
+        opts: [{ ta: "UNDP", en: "UNDP" }, { ta: "IMF", en: "IMF" }, { ta: "World Bank", en: "World Bank" }, { ta: "WTO", en: "WTO" }],
+        a: 0,
+        whyTa: "ஐக்கிய நாடுகள் வளர்ச்சித் திட்டம் (UNDP) ஆண்டுதோறும் மனித மேம்பாட்டு அறிக்கையை வெளியிடுகிறது.",
+        whyEn: "The United Nations Development Programme (UNDP) publishes the annual HDI report."
       }
     ],
     "General Science": [
@@ -1040,6 +1154,38 @@
         a: 0,
         whyTa: "வெற்றிடத்தில் ஒளியின் வேகம் 3 × 10^8 மீ/வி ஆகும்.",
         whyEn: "Light travels fastest in a vacuum at approximately 3 × 10^8 m/s."
+      },
+      {
+        ta: "மனித இரத்தத்தின் சராசரி pH மதிப்பு என்ன?",
+        en: "What is the normal pH range of human blood?",
+        opts: [{ ta: "7.35 – 7.45", en: "7.35 – 7.45" }, { ta: "6.0 – 6.5", en: "6.0 – 6.5" }, { ta: "5.5 – 6.0", en: "5.5 – 6.0" }, { ta: "8.2 – 8.6", en: "8.2 – 8.6" }],
+        a: 0,
+        whyTa: "மனித இரத்தம் சற்று காரத்தன்மை கொண்டது; இதன் pH 7.35 முதல் 7.45 வரை இருக்கும்.",
+        whyEn: "Human blood is slightly alkaline with a tightly regulated pH of 7.35–7.45."
+      },
+      {
+        ta: "சூரிய ஒளியிலிருந்து நமக்குக் கிடைக்கும் வைட்டமின் எது?",
+        en: "Which vitamin is synthesized in human skin upon exposure to sunlight?",
+        opts: [{ ta: "வைட்டமின் D", en: "Vitamin D" }, { ta: "வைட்டமின் C", en: "Vitamin C" }, { ta: "வைட்டமின் A", en: "Vitamin A" }, { ta: "வைட்டமின் B12", en: "Vitamin B12" }],
+        a: 0,
+        whyTa: "சூரியனின் புற ஊதாக் கதிர்கள் தோலில் வைட்டமின் D உற்பத்திக்கு உதவுகின்றன.",
+        whyEn: "UV-B rays from sunlight trigger Vitamin D synthesis in the skin."
+      },
+      {
+        ta: "மின்னோட்டத்தை (Electric Current) அளவிடப் பயன்படும் கருவி எது?",
+        en: "Which instrument is used to measure electric current in a circuit?",
+        opts: [{ ta: "அம்மீட்டர் (Ammeter)", en: "Ammeter" }, { ta: "வோல்ட்மீட்டர் (Voltmeter)", en: "Voltmeter" }, { ta: "பாரோமீட்டர் (Barometer)", en: "Barometer" }, { ta: "ஹைக்ரோமீட்டர் (Hygrometer)", en: "Hygrometer" }],
+        a: 0,
+        whyTa: "மின்னோட்டத்தை ஆம்பியர் அலகில் அளவிட அம்மீட்டர் தொடரிணைப்பில் இணைக்கப்படுகிறது.",
+        whyEn: "An ammeter is connected in series to measure electric current in amperes."
+      },
+      {
+        ta: "செல்லின் 'ஆற்றல் மையம்' (Powerhouse of the Cell) என அழைக்கப்படுவது எது?",
+        en: "Which cell organelle is known as the 'Powerhouse of the Cell'?",
+        opts: [{ ta: "மைட்டோகாண்ட்ரியா", en: "Mitochondria" }, { ta: "ரைபோசோம்", en: "Ribosome" }, { ta: "கோல்கை உறுப்புகள்", en: "Golgi Apparatus" }, { ta: "லைசோசோம்", en: "Lysosome" }],
+        a: 0,
+        whyTa: "மைட்டோகாண்ட்ரியா ATP வடிவில் ஆற்றலை உற்பத்தி செய்வதால் செல்லின் ஆற்றல் மையம் எனப்படுகிறது.",
+        whyEn: "Mitochondria generate ATP energy molecules and are called the powerhouse of the cell."
       }
     ],
     "Aptitude & Mental Ability": [
@@ -1050,6 +1196,38 @@
         a: 0,
         whyTa: "வித்தியாசம் +4, +6, +8, +10, +12 என அதிகரிப்பதால் 30 + 12 = 42.",
         whyEn: "Differences increase by 2 each step (+4, +6, +8, +10, +12), so 30 + 12 = 42."
+      },
+      {
+        ta: "ஒரு பொருளின் அடக்க விலை ₹800 மற்றும் விற்பனை விலை ₹920 எனில் இலாப சதவீதம் என்ன?",
+        en: "If the Cost Price of an article is ₹800 and Selling Price is ₹920, what is the profit percentage?",
+        opts: [{ ta: "15%", en: "15%" }, { ta: "12%", en: "12%" }, { ta: "18%", en: "18%" }, { ta: "20%", en: "20%" }],
+        a: 0,
+        whyTa: "இலாபம் = 920 - 800 = ₹120; இலாப % = (120 / 800) × 100 = 15%.",
+        whyEn: "Profit = ₹120; Profit % = (120 / 800) × 100 = 15%."
+      },
+      {
+        ta: "A ஒரு வேலையை 10 நாட்களிலும், B அதே வேலையை 15 நாட்களிலும் முடிப்பார் எனில் இருவரும் சேர்ந்து எத்தனை நாட்களில் முடிப்பார்கள்?",
+        en: "A can finish a work in 10 days and B in 15 days. In how many days can they finish it together?",
+        opts: [{ ta: "6 நாட்கள்", en: "6 Days" }, { ta: "5 நாட்கள்", en: "5 Days" }, { ta: "8 நாட்கள்", en: "8 Days" }, { ta: "12 நாட்கள்", en: "12 Days" }],
+        a: 0,
+        whyTa: "(10 × 15) / (10 + 15) = 150 / 25 = 6 நாட்கள்.",
+        whyEn: "Combined time = (10 × 15) / (10 + 15) = 150 / 25 = 6 days."
+      },
+      {
+        ta: "₹5,000-க்கு ஆண்டுக்கு 8% தனிவட்டி வீதம் 3 ஆண்டுகளுக்குக் கிடைக்கும் வட்டி எவ்வளவு?",
+        en: "Find the Simple Interest on ₹5,000 at 8% per annum for 3 years.",
+        opts: [{ ta: "₹1,200", en: "₹1,200" }, { ta: "₹1,000", en: "₹1,000" }, { ta: "₹1,500", en: "₹1,500" }, { ta: "₹800", en: "₹800" }],
+        a: 0,
+        whyTa: "SI = (P × N × R) / 100 = (5000 × 3 × 8) / 100 = ₹1,200.",
+        whyEn: "SI = (5000 × 3 × 8) / 100 = ₹1,200."
+      },
+      {
+        ta: "12, 18, 24 ஆகிய எண்களின் மீச்சிறு பொது மடங்கு (LCM) என்ன?",
+        en: "What is the LCM of 12, 18, and 24?",
+        opts: [{ ta: "72", en: "72" }, { ta: "36", en: "36" }, { ta: "48", en: "48" }, { ta: "144", en: "144" }],
+        a: 0,
+        whyTa: "12, 18, 24 ஆகியவற்றால் வகுபடும் மிகச்சிறிய எண் 72 ஆகும்.",
+        whyEn: "72 is the smallest common multiple divisible by 12, 18, and 24."
       }
     ],
     "Current Affairs": [
@@ -1060,6 +1238,30 @@
         a: 0,
         whyTa: "இஸ்ரோவின் ஆதித்யா-L1 சூரியனை ஆய்வு செய்யும் முதல் இந்திய விண்கலமாகும்.",
         whyEn: "ISRO's Aditya-L1 is India's first dedicated solar mission."
+      },
+      {
+        ta: "தமிழ்நாடு அரசின் 'புதுமைப் பெண்' திட்டம் எதற்காகச் செயல்படுத்தப்படுகிறது?",
+        en: "What is the primary objective of the Tamil Nadu Government's 'Pudhumai Penn' scheme?",
+        opts: [{ ta: "அரசுப் பள்ளி மாணவிகளின் உயர்கல்விக்கு மாதம் ₹1,000 உதவித்தொகை", en: "₹1,000 monthly assistance for government school girls pursuing higher education" }, { ta: "மகளிர் சுயஉதவிக் குழு கடன் தள்ளுபடி", en: "SHG loan waiver" }, { ta: "இலவச மடிக்கணினி திட்டம்", en: "Free laptop scheme" }, { ta: "விவசாய மானியத் திட்டம்", en: "Agricultural subsidy" }],
+        a: 0,
+        whyTa: "6 முதல் 12-ம் வகுப்பு வரை அரசுப் பள்ளிகளில் படித்த மாணவிகள் உயர்கல்வி பயில மாதம் ₹1,000 வழங்கப்படுகிறது.",
+        whyEn: "Provides ₹1,000/month to female students who studied in govt schools (Classes 6–12) entering higher education."
+      },
+      {
+        ta: "கீழடி அகழாய்வு தளம் தமிழ்நாட்டின் எந்த மாவட்டத்தில் அமைந்துள்ளது?",
+        en: "In which district of Tamil Nadu is the Keeladi archaeological site located?",
+        opts: [{ ta: "சிவகங்கை", en: "Sivaganga" }, { ta: "மதுரை", en: "Madurai" }, { ta: "தூத்துக்குடி", en: "Thoothukudi" }, { ta: "திருநெல்வேலி", en: "Tirunelveli" }],
+        a: 0,
+        whyTa: "வைகை ஆற்றங்கரையில் சிவகங்கை மாவட்டத்தில் கீழடி அகழாய்வு நடைபெறுகிறது.",
+        whyEn: "Keeladi excavation site is situated along the Vaigai River in Sivaganga district."
+      },
+      {
+        ta: "இந்திய அரசியலமைப்பின் 106-வது திருத்தச் சட்டம் (நாரி சக்தி வந்தன் அதிநியம்) எதனுடன் தொடர்புடையது?",
+        en: "The 106th Constitutional Amendment Act (Nari Shakti Vandan Adhiniyam) provides:",
+        opts: [{ ta: "மக்களவை மற்றும் சட்டமன்றங்களில் மகளிருக்கு 33% இடஒதுக்கீடு", en: "33% reservation for women in Lok Sabha and State Assemblies" }, { ta: "பொருளாதாரத்தில் பின்தங்கியோருக்கு 10% இடஒதுக்கீடு", en: "10% EWS reservation" }, { ta: "டிஜிட்டல் தனிநபர் தரவு பாதுகாப்பு", en: "Digital Personal Data Protection" }, { ta: "ஒரே நாடு ஒரே தேர்தல்", en: "One Nation One Election" }],
+        a: 0,
+        whyTa: "மக்களவை மற்றும் மாநில சட்டமன்றங்களில் பெண்களுக்கு 33% இடஒதுக்கீடு வழங்கும் வரலாற்றுச் சட்டமாகும்.",
+        whyEn: "Reserves one-third of all seats for women in Lok Sabha and State Legislative Assemblies."
       }
     ]
   };
@@ -2074,24 +2276,94 @@
 
   function buildProceduralTnpscQuestions(batch, subject, count, difficulty, topicFocus) {
     var bank = TNPSC_QUESTION_BANK[subject] || TNPSC_QUESTION_BANK["Indian Polity"];
+
+    // Track already-existing questions in this batch so we never pick the same question twice
+    var existingTexts = {};
+    appState.questions.forEach(function(q) {
+      if (q.batchId === batch.id) {
+        existingTexts[String(q.ta || "").trim()] = true;
+      }
+    });
+
+    // Shuffle unused pool first, then used pool if count exceeds bank size
+    var unused = [];
+    var used = [];
+    bank.forEach(function(item) {
+      var candidateTa = (topicFocus ? "[" + topicFocus + "] " : "") + item.ta;
+      if (existingTexts[candidateTa.trim()] || existingTexts[item.ta.trim()]) {
+        used.push(item);
+      } else {
+        unused.push(item);
+      }
+    });
+
+    function shuffleArr(arr) {
+      var copy = arr.slice();
+      for (var i = copy.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    var orderedPool = shuffleArr(unused).concat(shuffleArr(used));
     var results = [];
+
     for (var i = 0; i < count; i++) {
-      var tpl = bank[i % bank.length];
-      var cycle = Math.floor(i / bank.length);
-      var tagTa = topicFocus ? " [" + topicFocus + "]" : "";
-      var tagEn = topicFocus ? " [" + topicFocus + "]" : "";
-      var prefixTa = cycle > 0 ? "(" + subject + " - Set " + (cycle + 1) + tagTa + ") " : (topicFocus ? "[" + topicFocus + "] " : "");
-      var prefixEn = cycle > 0 ? "(" + subject + " - Set " + (cycle + 1) + tagEn + ") " : (topicFocus ? "[" + topicFocus + "] " : "");
+      var tpl = orderedPool[i % orderedPool.length];
+      var overflowCycle = Math.floor(i / orderedPool.length);
+
+      // Generate dynamic arithmetic variations if Aptitude bank overflows
+      if (overflowCycle > 0 && subject === "Aptitude & Mental Ability") {
+        var baseP = (i + 2) * 1000;
+        var rate = 5 + (i % 6);
+        var yrs = 2 + (i % 4);
+        var ansSi = (baseP * rate * yrs) / 100;
+        results.push({
+          id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
+          batchId: batch.id,
+          subject: subject,
+          difficulty: difficulty,
+          ta: "₹" + baseP + "-க்கு ஆண்டுக்கு " + rate + "% தனிவட்டி வீதம் " + yrs + " ஆண்டுகளுக்குக் கிடைக்கும் வட்டி எவ்வளவு?",
+          en: "Calculate the Simple Interest on ₹" + baseP + " at " + rate + "% per annum for " + yrs + " years.",
+          opts: [
+            { ta: "₹" + ansSi, en: "₹" + ansSi },
+            { ta: "₹" + (ansSi + 150), en: "₹" + (ansSi + 150) },
+            { ta: "₹" + Math.max(100, ansSi - 100), en: "₹" + Math.max(100, ansSi - 100) },
+            { ta: "₹" + (ansSi + 300), en: "₹" + (ansSi + 300) }
+          ],
+          a: 0,
+          whyTa: "SI = (P × N × R) / 100 = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
+          whyEn: "SI = (" + baseP + " × " + yrs + " × " + rate + ") / 100 = ₹" + ansSi + ".",
+          status: "draft"
+        });
+        continue;
+      }
+
+      // Shuffle options for variety while preserving exact correct index
+      var optWithFlag = tpl.opts.map(function(o, oi) {
+        return { ta: o.ta, en: o.en, isCorrect: oi === Number(tpl.a) };
+      });
+      var shuffledOpts = shuffleArr(optWithFlag);
+      var newCorrectIdx = 0;
+      shuffledOpts.forEach(function(o, idx) {
+        if (o.isCorrect) newCorrectIdx = idx;
+      });
+
+      var prefixTa = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " #" + (i + 1) + "] " : "");
+      var prefixEn = topicFocus ? "[" + topicFocus + "] " : (overflowCycle > 0 ? "[" + subject + " #" + (i + 1) + "] " : "");
 
       results.push({
-        id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 10000),
+        id: "q-ai-" + Date.now() + "-" + i + "-" + Math.floor(Math.random() * 100000),
         batchId: batch.id,
         subject: subject,
         difficulty: difficulty,
         ta: prefixTa + tpl.ta,
         en: prefixEn + tpl.en,
-        opts: tpl.opts.map(function(o) { return { ta: o.ta, en: o.en }; }),
-        a: Number(tpl.a) || 0,
+        opts: shuffledOpts.map(function(o) { return { ta: o.ta, en: o.en }; }),
+        a: newCorrectIdx,
         whyTa: tpl.whyTa,
         whyEn: tpl.whyEn,
         status: "draft"
@@ -2149,10 +2421,12 @@
     }
 
     var btn = g("runAiGenerateBtn");
+    var allBtn = g("runAiGenerateAllBatchBtn");
     var msgEl = g("aiGenerateStatusMsg");
     btn.disabled = true;
+    if (allBtn) allBtn.disabled = true;
     msgEl.className = "mt-2.5 text-xs font-bold text-blue-700";
-    msgEl.textContent = "Generating " + count + " bilingual TNPSC questions for " + subject + "...";
+    msgEl.textContent = "Generating " + count + " unique bilingual TNPSC questions for " + subject + "...";
 
     try {
       var cfg = getRuntimeConfig();
@@ -2175,10 +2449,75 @@
       updateAiBatchBannerAndQueue();
 
       msgEl.className = "mt-2.5 text-xs font-bold text-emerald-700";
-      msgEl.textContent = "✓ " + generated.length + " கேள்விகள் [" + subject + "] Approval Queue-ல் தயாராக உள்ளன! Approve செய்தால் '" + batch.code + "' Batch-ல் தானாக இணையும்.";
-      showToast(generated.length + " AI questions added to Approval Queue!");
+      msgEl.textContent = "✓ " + generated.length + " தனித்துவமான கேள்விகள் [" + subject + "] Approval Queue-ல் தயாராக உள்ளன! Approve செய்தால் '" + batch.code + "' Batch-ல் தானாக இணையும்.";
+      showToast(generated.length + " unique AI questions added to Approval Queue!");
     } finally {
       btn.disabled = false;
+      if (allBtn) allBtn.disabled = false;
+    }
+  }
+
+  async function handleGenerateAllBatchSubjects() {
+    var batch = getBatchById(g("aiBatchSelect").value);
+    if (!batch) return;
+    var subjectsPlan = Array.isArray(batch.subjects) && batch.subjects.length
+      ? batch.subjects
+      : [{ name: g("aiSubjectDropdown").value || "General Tamil", target: Math.max(1, Number(g("aiNumQuestionsInput").value) || 3) }];
+
+    var difficulty = g("aiDifficultySelect").value;
+    var topicFocus = g("aiTopicInput").value.trim();
+    var btn = g("runAiGenerateBtn");
+    var allBtn = g("runAiGenerateAllBatchBtn");
+    var msgEl = g("aiGenerateStatusMsg");
+
+    btn.disabled = true;
+    allBtn.disabled = true;
+    msgEl.className = "mt-2.5 text-xs font-bold text-blue-700";
+    msgEl.textContent = "Generating subject-wise questions for all " + subjectsPlan.length + " subjects in " + batch.code + "...";
+
+    try {
+      var cfg = getRuntimeConfig();
+      var totalGenerated = 0;
+      var summaryParts = [];
+
+      for (var sIdx = 0; sIdx < subjectsPlan.length; sIdx++) {
+        var item = subjectsPlan[sIdx];
+        var subjName = item.name;
+        var targetCnt = Math.max(1, Number(item.target) || 2);
+
+        // Calculate remaining needed for this subject (considering already approved + already drafted in this batch)
+        var existingCount = appState.questions.filter(function(q) {
+          return q.batchId === batch.id && q.subject === subjName && (q.status === "approved" || q.status === "draft");
+        }).length;
+        var toGen = Math.max(1, targetCnt - existingCount);
+
+        var batchGenerated = null;
+        if (cfg.geminiKey) {
+          try {
+            batchGenerated = await tryGeminiApiGeneration(cfg.geminiKey, batch, subjName, toGen, difficulty, topicFocus);
+          } catch (e) {
+            batchGenerated = buildProceduralTnpscQuestions(batch, subjName, toGen, difficulty, topicFocus);
+          }
+        } else {
+          batchGenerated = buildProceduralTnpscQuestions(batch, subjName, toGen, difficulty, topicFocus);
+        }
+
+        appState.questions = batchGenerated.concat(appState.questions);
+        totalGenerated += batchGenerated.length;
+        summaryParts.push(subjName + " (" + batchGenerated.length + ")");
+      }
+
+      saveAppState();
+      g("queueStatusFilter").value = "draft";
+      renderApprovalQueueList();
+      updateAiBatchBannerAndQueue();
+
+      msgEl.className = "mt-2.5 text-xs font-bold text-emerald-700";
+      msgEl.textContent = "✓ மொத்தம் " + totalGenerated + " கேள்விகள் Subject-wise உருவாக்கப்பட்டுள்ளன: " + summaryParts.join(", ") + ". 'Approve All & Attach to Batch' அழுத்தினால் அனைத்தும் Batch-ல் இணையும்!";
+      showToast("Generated " + totalGenerated + " questions across all subjects!");
+    } finally {
+      btn.disabled = false;
+      allBtn.disabled = false;
     }
   }
 
@@ -2664,6 +3003,7 @@
     });
 
     g("runAiGenerateBtn").addEventListener("click", handleGenerateAiQuestions);
+    g("runAiGenerateAllBatchBtn").addEventListener("click", handleGenerateAllBatchSubjects);
     g("queueStatusFilter").addEventListener("change", renderApprovalQueueList);
 
     g("approveAllQueueBtn").addEventListener("click", function() {
