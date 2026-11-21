@@ -815,6 +815,105 @@
         </div>
         <div id="aiGenerateStatusMsg" class="mt-2.5 text-xs font-bold"></div>
       </div>
+
+      <!-- Approval Queue Panel -->
+      <div class="soft-card p-4 sm:p-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <h3 class="font-extrabold text-base">Question Approval Queue (Approve → Auto-Attach to Batch)</h3>
+            <p class="text-xs opacity-75">Draft கேள்விகளை சரிபார்த்து Approve செய்தால் உடனே தேர்ந்தெடுக்கப்பட்ட Batch-ல் சேரும்.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="queueStatusFilter" class="p-2 text-xs font-bold">
+              <option value="draft">Pending Drafts</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button type="button" id="approveAllQueueBtn" class="btn-wa px-3.5 py-2 text-xs">
+              ✓ Approve All &amp; Attach to Batch
+            </button>
+          </div>
+        </div>
+        <div id="approvalQueueList" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: RESULTS, RELEASE TIMER & WHATSAPP -->
+    <div id="admTabPanel3" class="hidden space-y-5">
+      <div class="soft-card p-4 sm:p-5 space-y-4">
+        <h3 class="font-extrabold text-base">Result Release Timer, Auto-Release &amp; WhatsApp Dispatch</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="lg:col-span-2">
+            <label for="resTabBatchSelect" class="block text-xs font-bold mb-1">Select Batch</label>
+            <select id="resTabBatchSelect" class="w-full p-2.5"></select>
+          </div>
+          <div>
+            <label for="resUpdateDateInput" class="block text-xs font-bold mb-1">Release Date</label>
+            <input id="resUpdateDateInput" type="date" class="w-full p-2.5">
+          </div>
+          <div>
+            <label for="resUpdateTimeInput" class="block text-xs font-bold mb-1">Release Time (8:00 PM = 20:00)</label>
+            <input id="resUpdateTimeInput" type="time" value="20:00" class="w-full p-2.5">
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2.5">
+          <button type="button" id="saveResScheduleBtn" class="btn-primary px-4 py-2.5 text-xs sm:text-sm">
+            Save / Auto-Release If Due
+          </button>
+          <button type="button" id="releaseNowBtn" class="btn-wa px-4 py-2.5 text-xs sm:text-sm">
+            Release Results Immediately
+          </button>
+          <button type="button" id="exportBatchCsvBtn" class="btn-sec px-4 py-2.5 text-xs sm:text-sm">
+            ⬇ Export CSV
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-300 bg-white/80">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-100 border-b border-slate-300">
+              <tr>
+                <th class="p-3">Rank</th>
+                <th class="p-3">Student Name</th>
+                <th class="p-3">Mobile</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Score</th>
+                <th class="p-3">WhatsApp</th>
+              </tr>
+            </thead>
+            <tbody id="adminAttemptsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- Toast Notification Banner -->
+<div id="toastBanner" class="hidden fixed bottom-4 right-4 z-50 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs sm:text-sm font-bold shadow-xl border border-white/15" role="status" aria-live="polite"></div>
+
+<script>
+(function() {
+  "use strict";
+
+  var STORE_KEY = "tnpsc_v2_state_v1";
+  var ACC_PREFS_KEY = "tnpsc_v2_acc_prefs_v1";
+  var ACTIVE_SESSION_KEY = "tnpsc_v2_active_session_v1";
+  var CONFIG_KEY = "tnpsc_v2_runtime_cfg_v1";
+  var ADMIN_PIN_DEFAULT = "admin123";
+  var DEFAULT_SUBJECTS = [
+    "General Tamil",
+    "General English",
+    "Indian Polity",
+    "History & INM",
+    "Geography",
+    "Indian Economy",
+    "General Science",
+    "Aptitude & Mental Ability",
+    "Current Affairs"
+  ];
+
   // Rich Bilingual TNPSC Question Bank & Non-Repeating Procedural Generator
   var TNPSC_QUESTION_BANK = {
     "General Tamil": [
