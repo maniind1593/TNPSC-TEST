@@ -1974,6 +1974,7 @@
           var sessionData = await signInWithSupabaseEmail(supaUrl, supaKey, email, password);
           await verifyAdminInSupabase(supaUrl, supaKey, sessionData);
           activeSupabaseSession = sessionData;
+          aiKeysLoad();
           markConfigSetupDone();
           if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
           switchScreen("adminDashboardScreen");
@@ -2075,6 +2076,7 @@
 
     if (g("adminLogoutBtn")) {
       g("adminLogoutBtn").addEventListener("click", function() {
+      aiStore = {}; aiDirty = {}; aiRenderManager();
         activeSupabaseSession = null;
         if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
         switchScreen("adminLoginScreen");
@@ -3225,6 +3227,341 @@
     sync();
   }
   /* ===== END ADDED 5 ===== */
+
+  /* ===== ADDED 6: many AI providers, keys + expiry saved in Supabase, fallback confirm ===== */
+  var AI_PROVIDERS = {
+    gemini: { name: "Google Gemini", kind: "gemini", model: "gemini-3.8-flash" },
+    claude: { name: "Claude (Anthropic)", kind: "claude", model: "claude-haiku-5-5" },
+    grok: { name: "Grok (xAI)", kind: "openai", base: "https://api.x.ai/v1", model: "grok-4.3" },
+    deepseek: { name: "DeepSeek", kind: "openai", base: "https://api.deepseek.com", model: "deepseek-flash" },
+    openai: { name: "OpenAI", kind: "openai", base: "https://api.openai.com/v1", model: "" },
+    groq: { name: "Groq", kind: "openai", base: "https://api.groq.com/openai/v1", model: "" },
+    mistral: { name: "Mistral", kind: "openai", base: "https://api.mistral.ai/v1", model: "" },
+    openrouter: { name: "OpenRouter", kind: "openai", base: "https://openrouter.ai/api/v1", model: "" },
+    custom: { name: "Custom AI Link", kind: "openai", base: "", model: "" }
+  };
+  var aiStore = {}, aiDirty = {};
+
+  function aiToday() { var d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function aiExpired(r) { return !!(r && r.expires_on && r.expires_on < aiToday()); }
+  function aiDaysLeft(r) { return r && r.expires_on ? Math.ceil((Date.parse(r.expires_on + "T23:59:59") - Date.now()) / 864e5) : null; }
+  function aiUsable(p) {
+    var r = aiStore[p], P = AI_PROVIDERS[p];
+    return !!(r && r.api_key && r.enabled !== false && !aiExpired(r) && (r.model || P.model) && (P.kind !== "openai" || r.base_url || P.base));
+  }
+  function aiCurrentKey() { return (aiStore[aiProvider] && aiStore[aiProvider].api_key) || ""; }
+  function aiModelName() { var r = aiStore[aiProvider]; return (r && r.model) || AI_PROVIDERS[aiProvider].model || "?"; }
+  function aiKeysSay(msg, kind) {
+    var s = g("aiKeyStatus");
+    if (!s) return;
+    s.className = "text-xs font-bold " + (kind === "ok" ? "text-emerald-700" : kind === "err" ? "text-red-700" : kind === "warn" ? "text-amber-700" : "text-slate-600");
+    s.textContent = msg;
+  }
+
+  /* ---- Supabase REST (admin session token, auto-refresh) ---- */
+  async function supaDb(method, path, body, prefer) {
+    var cfg = getRuntimeConfig(), base = cfg.supabaseUrl.replace(/\/+$/, "");
+    if (!activeSupabaseSession) throw new Error("Admin login venum.");
+    function go(tok) {
+      var hd = { apikey: cfg.supabaseKey, Authorization: "Bearer " + tok, "Content-Type": "application/json" };
+      if (prefer) hd.Prefer = prefer;
+      return fetch(base + "/rest/v1/" + path, { method: method, headers: hd, body: body ? JSON.stringify(body) : undefined });
+    }
+    var r = await go(activeSupabaseSession.access_token);
+    if (r.status === 401 && activeSupabaseSession.refresh_token) {
+      var rr = await fetch(base + "/auth/v1/token?grant_type=refresh_token", {
+        method: "POST", headers: { apikey: cfg.supabaseKey, "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: activeSupabaseSession.refresh_token })
+      });
+      var d = await rr.json().catch(function() { return {}; });
+      if (rr.ok && d.access_token) { activeSupabaseSession = d; r = await go(d.access_token); }
+    }
+    var data = await r.json().catch(function() { return null; });
+    if (!r.ok) throw new Error((data && (data.message || data.hint)) || ("Supabase HTTP " + r.status));
+    return data;
+  }
+
+  function aiWarnExpiry() {
+    var w = [];
+    Object.keys(aiStore).forEach(function(p) {
+      var r = aiStore[p], d = aiDaysLeft(r);
+      if (!r.api_key || d === null) return;
+      if (d < 0) w.push(AI_PROVIDERS[p].name + " key expire aayiduchu");
+      else if (d <= 7) w.push(AI_PROVIDERS[p].name + " key " + d + " naal-la expire aagum");
+    });
+    if (w.length) showToast("⚠ " + w.join(" • "));
+  }
+
+  async function aiKeysLoad() {
+    aiKeysSay("Supabase-la irundhu AI keys load aagudhu…", "");
+    try {
+      var rows = await supaDb("GET", "ai_api_keys?select=*&order=priority.asc,provider.asc");
+      aiStore = {};
+      aiDirty = {};
+      (rows || []).forEach(function(r) { if (AI_PROVIDERS[r.provider]) aiStore[r.provider] = r; });
+      aiKeysSay((rows || []).length + " AI key(s) Supabase-la irundhu load aachu ✓", "ok");
+      aiWarnExpiry();
+    } catch (e) {
+      var m = String(e && e.message ? e.message : e);
+      aiKeysSay(/ai_api_keys|PGRST205|relation|schema cache/i.test(m) ? "⚠ Supabase-la 'ai_api_keys' table illa. supabase_ai_keys.sql-ai SQL Editor-la run pannunga." : "AI keys load error: " + m, "err");
+    }
+    aiRenderManager();
+  }
+
+  function aiDraft() {
+    var p = aiProvider, r = aiStore[p] || (aiStore[p] = { provider: p, priority: (Object.keys(AI_PROVIDERS).indexOf(p) + 1) * 10 });
+    r.api_key = g("aiKeyIn").value.trim();
+    r.model = g("aiModelIn").value.trim();
+    r.base_url = g("aiBaseIn").value.trim();
+    r.expires_on = g("aiExpIn").value || null;
+    r.enabled = g("aiEnIn").checked;
+    aiDirty[p] = true;
+    aiKeysSay("● unsaved — 'Save to Supabase' click pannunga", "warn");
+    aiRenderList();
+  }
+
+  async function aiKeySave() {
+    var p = aiProvider, P = AI_PROVIDERS[p], r = aiStore[p];
+    if (!r || !r.api_key) return aiKeysSay("API Key podunga.", "err");
+    if (!(r.model || P.model)) return aiKeysSay("Model peyar podunga.", "err");
+    if (P.kind === "openai" && !/^https:\/\//i.test(r.base_url || P.base || "")) return aiKeysSay("Base URL https:// nu aarambikkanum.", "err");
+    var u = activeSupabaseSession && activeSupabaseSession.user;
+    var row = { provider: p, api_key: r.api_key, model: r.model || null, base_url: P.kind === "openai" ? (r.base_url || P.base) : null, label: P.name,
+      expires_on: r.expires_on || null, enabled: r.enabled !== false, priority: r.priority || 100, updated_by: (u && u.email) || null, updated_at: new Date().toISOString() };
+    try {
+      var saved = await supaDb("POST", "ai_api_keys?on_conflict=provider", row, "resolution=merge-duplicates,return=representation");
+      aiStore[p] = (saved && saved[0]) || row;
+      aiDirty[p] = false;
+      aiKeysSay("✓ " + P.name + " key Supabase-la save aachu" + (row.expires_on ? " (expiry " + row.expires_on + ")" : ""), "ok");
+    } catch (e) {
+      aiKeysSay("Save fail: " + (e && e.message ? e.message : e) + (/ai_api_keys|PGRST205|relation|schema cache/i.test(String(e && e.message)) ? " — supabase_ai_keys.sql run pannunga." : ""), "err");
+    }
+    aiRenderSelect();
+    aiRenderList();
+  }
+
+  async function aiKeyDelete() {
+    var p = aiProvider;
+    if (!aiStore[p] || !confirm(AI_PROVIDERS[p].name + " key-ai Supabase-la irundhu delete pannava?")) return;
+    try {
+      await supaDb("DELETE", "ai_api_keys?provider=eq." + encodeURIComponent(p));
+      delete aiStore[p];
+      delete aiDirty[p];
+      aiKeysSay("🗑 " + AI_PROVIDERS[p].name + " key delete aachu.", "ok");
+    } catch (e) { aiKeysSay("Delete fail: " + (e && e.message ? e.message : e), "err"); }
+    aiRenderManager();
+  }
+
+  function aiRenderSelect() {
+    var sel = g("aiProvSel");
+    if (!sel) return;
+    sel.innerHTML = Object.keys(AI_PROVIDERS).map(function(p) {
+      var r = aiStore[p], mark = !r || !r.api_key ? "— " : aiExpired(r) ? "✕ " : r.enabled === false ? "⏸ " : "✓ ";
+      return "<option value='" + p + "'" + (p === aiProvider ? " selected" : "") + ">" + mark + esc(AI_PROVIDERS[p].name) + "</option>";
+    }).join("");
+  }
+  function aiFillForm() {
+    var P = AI_PROVIDERS[aiProvider], r = aiStore[aiProvider] || {};
+    if (!g("aiKeyIn")) return;
+    g("aiKeyIn").value = r.api_key || "";
+    g("aiModelIn").value = r.model || P.model || "";
+    g("aiModelIn").placeholder = P.model || "Model peyar (required)";
+    g("aiBaseIn").value = r.base_url || P.base || "";
+    g("aiBaseRow").classList.toggle("hidden", P.kind !== "openai");
+    g("aiExpIn").value = r.expires_on || "";
+    g("aiEnIn").checked = r.enabled !== false;
+  }
+  function aiRenderList() {
+    var box = g("aiKeyList");
+    if (!box) return;
+    var ks = Object.keys(aiStore).filter(function(p) { return aiStore[p].api_key; });
+    box.innerHTML = ks.length ? ks.map(function(p) {
+      var r = aiStore[p], d = aiDaysLeft(r);
+      var st = aiExpired(r) ? "✕ expired" : r.enabled === false ? "⏸ disabled" : (d !== null && d <= 7) ? "⚠ " + d + " naal-la expire" : "✓ ready";
+      return "<div class='flex justify-between gap-2 p-1.5 rounded bg-white/70 border'><span class='font-bold'>" + esc(AI_PROVIDERS[p].name) +
+        " <span class='opacity-70 font-semibold'>" + esc(r.model || AI_PROVIDERS[p].model) + "</span></span><span>" + st +
+        (r.expires_on ? " • " + esc(r.expires_on) : "") + (aiDirty[p] ? " ●" : "") + "</span></div>";
+    }).join("") : "<div class='opacity-70'>Innum AI key save aagala.</div>";
+  }
+  function aiRenderManager() { aiRenderSelect(); aiFillForm(); aiRenderList(); }
+
+  function aiBindInputs() {
+    var oldSel = g("inlineAiProvider");
+    if (!oldSel) return;
+    ["inlineGeminiKey", "inlineGeminiModel"].forEach(function(id) { if (g(id)) g(id).remove(); });
+    var m = document.createElement("div");
+    m.className = "rounded-xl border p-3 space-y-2 bg-white/60";
+    m.innerHTML = "<div class='font-extrabold text-sm'>🔑 AI Providers — keys Supabase-la save aagum (GitHub / local illa)</div>" +
+      "<select id='aiProvSel' class='w-full p-2.5 text-xs'></select>" +
+      "<input id='aiKeyIn' type='password' autocomplete='off' placeholder='API Key' class='w-full p-2.5 text-xs'>" +
+      "<div class='grid grid-cols-2 gap-2'><input id='aiModelIn' placeholder='Model' class='p-2.5 text-xs'>" +
+      "<input id='aiExpIn' type='date' title='Key expiry date' class='p-2.5 text-xs'></div>" +
+      "<div id='aiBaseRow'><input id='aiBaseIn' placeholder='Base URL (https://…/v1)' class='w-full p-2.5 text-xs'></div>" +
+      "<label class='text-xs font-bold flex items-center gap-2'><input type='checkbox' id='aiEnIn' checked> Enabled</label>" +
+      "<div class='flex flex-wrap gap-2'><button type='button' id='aiSaveBtn' class='btn-wa px-3 py-1.5 text-xs'>💾 Save to Supabase</button>" +
+      "<button type='button' id='aiDelBtn' class='btn-danger px-3 py-1.5 text-xs'>🗑 Delete</button>" +
+      "<button type='button' id='aiReloadBtn' class='btn-ghost px-3 py-1.5 text-xs'>↻ Reload</button></div>" +
+      "<div id='aiKeyStatus' class='text-xs font-bold'>Admin login pannina Supabase-la irundhu keys load aagum.</div>" +
+      "<div id='aiKeyList' class='space-y-1 text-xs'></div>";
+    oldSel.replaceWith(m);
+    g("aiProvSel").addEventListener("change", function(e) { aiProvider = e.target.value; aiFillForm(); aiKeysSay("", ""); });
+    ["aiKeyIn", "aiModelIn", "aiBaseIn", "aiExpIn"].forEach(function(id) { g(id).addEventListener("input", aiDraft); });
+    g("aiExpIn").addEventListener("change", aiDraft);
+    g("aiEnIn").addEventListener("change", aiDraft);
+    g("aiSaveBtn").addEventListener("click", aiKeySave);
+    g("aiDelBtn").addEventListener("click", aiKeyDelete);
+    g("aiReloadBtn").addEventListener("click", aiKeysLoad);
+    aiRenderManager();
+  }
+
+  /* ---- calling the AI ---- */
+  async function aiHttp(url, headers, body) {
+    var ctl = new AbortController(), timedOut = false;
+    if (aiRun) aiRun.ctl = ctl;
+    var timer = setTimeout(function() { timedOut = true; ctl.abort(); }, AI_TIMEOUT_MS);
+    try {
+      var res = await fetch(url, { method: "POST", headers: Object.assign({ "Content-Type": "application/json" }, headers), body: JSON.stringify(body), signal: ctl.signal });
+      return { res: res, data: await res.json().catch(function() { return {}; }) };
+    } catch (e) {
+      if (e && e.name === "AbortError") throw new Error(timedOut ? "Timeout — " + (AI_TIMEOUT_MS / 1000) + " sec-la respond pannala." : "Stopped.");
+      throw new Error("Network / CORS error (" + (e && e.message ? e.message : e) + ") — internet illa, allathu indha AI browser-la irundhu direct call-ai block pannalaam.");
+    } finally { clearTimeout(timer); }
+  }
+  function aiErr(P, res, data) {
+    var m = data && ((data.error && (data.error.message || data.error)) || data.message) || "";
+    if (typeof m !== "string") m = JSON.stringify(m);
+    var s = res.status, tag = s === 429 ? "Limit / quota mugindhuchu" : (s === 401 || s === 403) ? "API key thappu / reject" : s === 402 ? "Balance / credits illa" : "Error";
+    return new Error(P.name + ": " + tag + " (HTTP " + s + ")" + (m ? " — " + m.slice(0, 160) : ""));
+  }
+
+  async function callAi(prompt) {
+    var P = AI_PROVIDERS[aiProvider], r = aiStore[aiProvider];
+    if (!r || !r.api_key) throw new Error(P.name + " API Key illa.");
+    if (r.enabled === false) throw new Error(P.name + " disabled-ah irukku.");
+    if (aiExpired(r)) throw new Error(P.name + " key " + r.expires_on + "-la expire aayiduchu.");
+    var model = r.model || P.model, o, txt = "";
+    if (!model) throw new Error(P.name + ": model peyar podunga.");
+    if (P.kind === "gemini") {
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent";
+      var gen = { responseMimeType: "application/json", temperature: 1, thinkingConfig: { thinkingLevel: "low" } };
+      var hd = { "x-goog-api-key": r.api_key };
+      o = await aiHttp(url, hd, { contents: [{ parts: [{ text: prompt }] }], generationConfig: gen });
+      if (!o.res.ok && /think/i.test(JSON.stringify(o.data))) {
+        delete gen.thinkingConfig;
+        o = await aiHttp(url, hd, { contents: [{ parts: [{ text: prompt }] }], generationConfig: gen });
+      }
+      if (!o.res.ok) throw aiErr(P, o.res, o.data);
+      var c = o.data.candidates && o.data.candidates[0];
+      txt = c && c.content && c.content.parts ? c.content.parts.map(function(x) { return x.text || ""; }).join("") : "";
+      if (!txt) throw new Error(P.name + ": empty response" + (o.data.promptFeedback && o.data.promptFeedback.blockReason ? " (blocked: " + o.data.promptFeedback.blockReason + ")" : ""));
+    } else if (P.kind === "claude") {
+      o = await aiHttp("https://api.anthropic.com/v1/messages", { "x-api-key": r.api_key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        { model: model, max_tokens: 8000, messages: [{ role: "user", content: prompt }] });
+      if (!o.res.ok) throw aiErr(P, o.res, o.data);
+      txt = (o.data.content || []).map(function(b) { return b.type === "text" ? b.text : ""; }).join("");
+      if (o.data.stop_reason === "max_tokens") throw new Error(P.name + ": response cut aachu — Question Count kuraichu try pannunga.");
+      if (!txt) throw new Error(P.name + ": empty response");
+    } else {
+      o = await aiHttp((r.base_url || P.base).replace(/\/+$/, "") + "/chat/completions", { Authorization: "Bearer " + r.api_key },
+        { model: model, messages: [{ role: "user", content: prompt }] });
+      if (!o.res.ok) throw aiErr(P, o.res, o.data);
+      var ch = o.data.choices && o.data.choices[0];
+      txt = (ch && ch.message && ch.message.content) || "";
+      if (ch && ch.finish_reason === "length") throw new Error(P.name + ": response cut aachu (length) — Question Count kuraichu try pannunga.");
+      if (!txt) throw new Error(P.name + ": empty response");
+    }
+    return txt;
+  }
+
+  async function aiGenerateForSubject(batch, job, diff, topic, onProg) {
+    var tries = 0, maxTries = Math.ceil(job.count / 5) + 2;
+    while (job.got < job.count && tries < maxTries && !(aiRun && aiRun.stopped)) {
+      tries++;
+      var need = Math.min(5, job.count - job.got);
+      onProg(job.subject + " — " + job.got + "/" + job.count + " ready, next " + need + " generate aagudhu");
+      var existing = appState.questions.filter(function(q) {
+        return q.batchId === batch.id && q.subject === job.subject && q.status !== "rejected";
+      }).slice(0, 40).map(function(q) { return q.questionEn || q.questionTa; });
+      var prompt = "You are a TNPSC exam question setter. Create " + need + " NEW, factually correct multiple-choice questions for " +
+        batch.category + ", subject \"" + job.subject + "\"" + (topic ? ", topic \"" + topic + "\"" : "") + ", difficulty " + diff +
+        ". Every question must differ from each other and from these existing ones: " + JSON.stringify(existing) +
+        ". Variation seed: " + Math.random().toString(36).slice(2) +
+        ". Return ONLY a JSON array (no markdown, no commentary) of {\"questionTa\":\"\",\"questionEn\":\"\",\"options\":[{\"ta\":\"\",\"en\":\"\"} x4],\"correctIndex\":0-3,\"explanationTa\":\"\",\"explanationEn\":\"\"}. Exactly 4 options; vary the correct position.";
+      job.got += addDrafts(parseJsonLoose(await callAi(prompt)).slice(0, need), batch, job.subject, true).added;
+      updateAiBatchBannerAndQueue();
+    }
+  }
+
+  async function aiPickFallback(failed, why) {
+    var cands = Object.keys(AI_PROVIDERS).filter(function(p) { return !failed[p] && aiUsable(p); })
+      .sort(function(a, b) { return (aiStore[a].priority || 100) - (aiStore[b].priority || 100); });
+    for (var i = 0; i < cands.length; i++) {
+      var c = cands[i];
+      if (confirm("⚠ " + AI_PROVIDERS[aiProvider].name + " fail aachu:\n" + why + "\n\n" + AI_PROVIDERS[c].name + " (" + (aiStore[c].model || AI_PROVIDERS[c].model) + ")-la continue pannava?")) return c;
+    }
+    return "";
+  }
+
+  async function handleAiGen(all) {
+    if (aiRun) return;
+    var batch = getBatchById(g("aiBatchSelect").value);
+    if (!batch) return setGenStatus("Mudhalla Test Batch select pannunga.", "err");
+    if (!Object.keys(aiStore).some(function(p) { return aiStore[p].api_key; })) {
+      return setGenStatus("AI key illa. 'AI Providers' section-la key podunga → 💾 Save to Supabase. Illana JSON paste / Manual-ah questions add pannunga.", "err");
+    }
+    var diff = g("aiDifficultySelect").value, topic = g("aiTopicInput").value.trim(), jobs = [];
+    if (all) {
+      (batch.subjects || []).forEach(function(s) {
+        var have = appState.questions.filter(function(q) { return q.batchId === batch.id && q.subject === s.name && q.status !== "rejected"; }).length;
+        var n = Math.min(20, Number(s.target) - have);
+        if (n > 0) jobs.push({ subject: s.name, count: n, got: 0 });
+      });
+    } else {
+      jobs.push({ subject: g("aiSubjectDropdown").value, count: Math.max(1, Math.min(20, parseInt(g("aiNumQuestionsInput").value, 10) || 3)), got: 0 });
+    }
+    if (!jobs.length) return setGenStatus("Ellaa subjects-kum target questions already irukku.", "ok");
+    var ids = ["runAiGenerateAllBatchBtn", "runAiGenerateBtn"], failed = {};
+    aiRun = { stopped: false, ctl: null, msg: "", t0: Date.now() };
+    var run = aiRun, stop = aiStopBtn(), idx = 0;
+    function sum() { return jobs.reduce(function(a, j) { return a + j.got; }, 0); }
+    function show() { setGenStatus("⏳ " + AI_PROVIDERS[aiProvider].name + " / " + aiModelName() + " • " + run.msg + " • " + Math.round((Date.now() - run.t0) / 1000) + "s"); }
+    var tick = setInterval(show, 1000);
+    ids.forEach(function(id) { g(id).disabled = true; });
+    stop.classList.remove("hidden");
+    try {
+      for (idx = 0; idx < jobs.length && !run.stopped; idx++) {
+        var job = jobs[idx];
+        while (job.got < job.count && !run.stopped) {
+          try {
+            await aiGenerateForSubject(batch, job, diff, topic, function(m) { run.msg = m + " (" + (idx + 1) + "/" + jobs.length + ")"; show(); });
+            break;
+          } catch (e) {
+            if (run.stopped) break;
+            failed[aiProvider] = 1;
+            var nxt = await aiPickFallback(failed, String(e && e.message ? e.message : e));
+            if (!nxt) throw e;
+            aiProvider = nxt;
+            aiRenderSelect();
+            aiFillForm();
+          }
+        }
+      }
+      var total = sum();
+      if (run.stopped) setGenStatus("■ Stop pannittinga — " + total + " questions Preview Queue-la irukku.", total ? "ok" : "err");
+      else setGenStatus(total ? "✓ " + total + " questions (" + AI_PROVIDERS[aiProvider].name + ") Preview Queue-la ready. Approve / Edit / Reject pannunga." : "Pudhu unique questions kidaikkala — marubadi try pannunga.", total ? "ok" : "err");
+    } catch (e) {
+      var others = Object.keys(AI_PROVIDERS).filter(function(p) { return !failed[p] && aiUsable(p); }).length;
+      setGenStatus("AI error: " + (e && e.message ? e.message : e) + (sum() ? " (" + sum() + " questions already add aayiduchu)" : "") + (others ? "" : " — vera AI key ready-ah illa; 'AI Providers'-la innoru key save pannunga."), "err");
+    } finally {
+      clearInterval(tick);
+      aiRun = null;
+      stop.classList.add("hidden");
+      ids.forEach(function(id) { g(id).disabled = false; });
+      g("queueStatusFilter").value = "draft";
+      updateAiBatchBannerAndQueue();
+    }
+  }
+  /* ===== END ADDED 6 ===== */
 
   loadAppState();
   loadAccPrefs();
