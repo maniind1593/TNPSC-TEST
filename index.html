@@ -3292,6 +3292,13 @@
     if (w.length) showToast("⚠ " + w.join(" • "));
   }
 
+  function aiDbHint(m) {
+    if (/row-level security/i.test(m)) return "RLS policy block pannuthu — ungal email public.admin_users-la irukka nu paarunga.";
+    if (/permission denied/i.test(m)) return "Table-ku permission illa — supabase_ai_keys.sql-la irukkura 'grant … to authenticated' lines-ai SQL Editor-la run pannunga.";
+    if (/ai_api_keys|PGRST205|relation|schema cache/i.test(m)) return "'ai_api_keys' table illa — supabase_ai_keys.sql-ai SQL Editor-la run pannunga.";
+    return "";
+  }
+
   async function aiKeysLoad() {
     aiKeysSay("Supabase-la irundhu AI keys load aagudhu…", "");
     try {
@@ -3303,7 +3310,7 @@
       aiWarnExpiry();
     } catch (e) {
       var m = String(e && e.message ? e.message : e);
-      aiKeysSay(/ai_api_keys|PGRST205|relation|schema cache/i.test(m) ? "⚠ Supabase-la 'ai_api_keys' table illa. supabase_ai_keys.sql-ai SQL Editor-la run pannunga." : "AI keys load error: " + m, "err");
+      aiKeysSay(aiDbHint(m) ? "⚠ " + aiDbHint(m) : "AI keys load error: " + m, "err");
     }
     aiRenderManager();
   }
@@ -3334,7 +3341,7 @@
       aiDirty[p] = false;
       aiKeysSay("✓ " + P.name + " key Supabase-la save aachu" + (row.expires_on ? " (expiry " + row.expires_on + ")" : ""), "ok");
     } catch (e) {
-      aiKeysSay("Save fail: " + (e && e.message ? e.message : e) + (/ai_api_keys|PGRST205|relation|schema cache/i.test(String(e && e.message)) ? " — supabase_ai_keys.sql run pannunga." : ""), "err");
+      aiKeysSay("Save fail: " + (e && e.message ? e.message : e) + (aiDbHint(String(e && e.message)) ? " — " + aiDbHint(String(e && e.message)) : ""), "err");
     }
     aiRenderSelect();
     aiRenderList();
