@@ -1072,7 +1072,8 @@
   function saveAppState() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify(appState));
-    } catch (e) { showToast("⚠ Storage full — image size kuraichu upload pannunga."); }
+    } catch (e) { if (!activeSupabaseSession) showToast("⚠ Storage full — image size kuraichu upload pannunga."); }
+    dbQueueSync();
   }
 
   function loadAppState() {
@@ -1085,6 +1086,7 @@
           appState.questions = Array.isArray(parsed.questions) ? parsed.questions : [];
           appState.attempts = Array.isArray(parsed.attempts) ? parsed.attempts : [];
           appState.usedQuestionIds = Array.isArray(parsed.usedQuestionIds) ? parsed.usedQuestionIds : [];
+          appState.blocked = Array.isArray(parsed.blocked) ? parsed.blocked : [];
         }
       }
     } catch (e) {}
@@ -1187,7 +1189,7 @@
     });
   }
 
-  function getAttemptById(id) {
+  function getAttemptByIdLocal(id) {
     if (!id) return null;
     for (var i = 0; i < appState.attempts.length; i++) {
       if (appState.attempts[i].id === id) return appState.attempts[i];
@@ -1407,7 +1409,7 @@
     }
   }
 
-  function getBatchById(id) {
+  function getBatchByIdLocal(id) {
     if (!id) return null;
     for (var i = 0; i < appState.batches.length; i++) {
       if (appState.batches[i].id === id) return appState.batches[i];
@@ -1678,7 +1680,8 @@
   }
 
   function switchAdminTab(tabNum) {
-    [1, 2, 3].forEach(function(n) {
+    dbTabHook(tabNum);
+    [1, 2, 3, 4].forEach(function(n) {
       var panel = g("admTabPanel" + n);
       var btn = g("admTabBtn" + n);
       if (panel) panel.classList.toggle("hidden", n !== tabNum);
@@ -1688,6 +1691,8 @@
       populateAiTabSelectors(g("aiBatchSelect") ? g("aiBatchSelect").value : "");
       syncAiSubjectDropdownForSelectedBatch();
       updateAiBatchBannerAndQueue();
+    } else if (tabNum === 4) {
+      renderMaintenance();
     } else if (tabNum === 3) {
       populateResultsTabBatches(g("resTabBatchSelect") ? g("resTabBatchSelect").value : "");
       renderAdminResultsTable();
@@ -1975,6 +1980,7 @@
           await verifyAdminInSupabase(supaUrl, supaKey, sessionData);
           activeSupabaseSession = sessionData;
           aiKeysLoad();
+          dbLoadAll();
           markConfigSetupDone();
           if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
           switchScreen("adminDashboardScreen");
@@ -2077,6 +2083,7 @@
     if (g("adminLogoutBtn")) {
       g("adminLogoutBtn").addEventListener("click", function() {
       aiStore = {}; aiDirty = {}; aiRenderManager();
+      dbSnap = null; dbBadge("☁ Supabase sync: Admin login pannina start aagum", "");
         activeSupabaseSession = null;
         if (g("adminPasswordInput")) g("adminPasswordInput").value = "";
         switchScreen("adminLoginScreen");
@@ -2195,7 +2202,7 @@
   function batchIsReleased(b) {
     return !!b && (b.resultsReleased || new Date(b.releaseAt).getTime() <= Date.now());
   }
-  function questionsOf(att) {
+  function questionsOfLocal(att) {
     return (att.qIds || []).map(function(id) {
       return appState.questions.filter(function(q) { return q.id === id; })[0];
     }).filter(Boolean);
@@ -2243,6 +2250,10 @@
   }
 
   function openAttempt(att) {
+    if (att.status !== "submitted" && (batchState(S.att === att && S.batch ? S.batch : getBatchById(att.batchId)) !== "live" || isBlocked(att.phone))) {
+      showToast("இந்த Test இப்போது கிடைக்கவில்லை (Closed / Blocked).");
+      return goStudentHome();
+    }
     activeAttemptId = att.id;
     activeQuestionIndex = att.cursor || 0;
     setActiveSession(att.id);
@@ -2394,7 +2405,7 @@
       else if (a === q.correctIndex) subj[q.subject].ok++;
       else wrong++;
     });
-    var total = qs.length, acc = total ? Math.round(att.score / total * 100) : 0, rank = batchRank(att);
+    var total = qs.length, acc = total ? Math.round(att.score / total * 100) : 0, rank = S.rank || batchRank(att);
     g("resScoreVal").textContent = att.score + " / " + total;
     g("resAccuracyVal").textContent = acc + "%";
     g("resRankVal").textContent = "#" + rank;
@@ -2433,6 +2444,7 @@
     clearInterval(examIntervalId);
     clearInterval(releaseIntervalId);
     switchScreen("studentJoinScreen");
+    renderActiveBatchPills();
     checkExistingSavedSession();
   }
 
@@ -2448,9 +2460,7 @@
     on("startExamBtn", handleStartExam);
     on("resumeSavedBannerBtn", function() {
       try {
-        var info = JSON.parse(localStorage.getItem(ACTIVE_SESSION_KEY) || "null");
-        var att = getAttemptById(info && info.attemptId);
-        if (att) openAttempt(att);
+        resumeRemote();
       } catch (e) {}
     });
     on("prevQBtn", function() { if (activeQuestionIndex > 0) { activeQuestionIndex--; renderQuestion(); } });
@@ -2494,11 +2504,8 @@
     on("waitingHomeBtn", goStudentHome);
     on("releasedHomeBtn", goStudentHome);
     on("manualCheckReleaseBtn", function() {
-      loadAppState();
       var att = getAttemptById(activeAttemptId);
-      if (!att) return;
-      showResultsScreen(att);
-      if (!batchIsReleased(getBatchById(att.batchId))) showToast("முடிவுகள் இன்னும் வெளியாகவில்லை.");
+      if (att) resultCheck(att, true);
     });
     on("toggleAnswerReviewBtn", function() { g("detailedReviewContainer").classList.toggle("hidden"); });
     on("shareWhatsappResultBtn", function() { openWhatsApp(waText("result")); });
@@ -3339,12 +3346,24 @@
       var saved = await supaDb("POST", "ai_api_keys?on_conflict=provider", row, "resolution=merge-duplicates,return=representation");
       aiStore[p] = (saved && saved[0]) || row;
       aiDirty[p] = false;
-      aiKeysSay("✓ " + P.name + " key Supabase-la save aachu" + (row.expires_on ? " (expiry " + row.expires_on + ")" : ""), "ok");
+      var pre = { gemini: "AIza", claude: "sk-ant-", grok: "xai-", deepseek: "sk-" }[p];
+      aiKeysSay("✓ " + P.name + " key Supabase-la save aachu" + (row.expires_on ? " (expiry " + row.expires_on + ")" : "") +
+        (pre && row.api_key.indexOf(pre) !== 0 ? " — ⚠ idhu pola key '" + pre + "' nu aarambikkum; sariyaana key-ah nu check pannunga, 🧪 Test Key click pannunga." : ""), pre && row.api_key.indexOf(pre) !== 0 ? "warn" : "ok");
     } catch (e) {
       aiKeysSay("Save fail: " + (e && e.message ? e.message : e) + (aiDbHint(String(e && e.message)) ? " — " + aiDbHint(String(e && e.message)) : ""), "err");
     }
     aiRenderSelect();
     aiRenderList();
+  }
+
+  async function aiKeyTest() {
+    var p = aiProvider, P = AI_PROVIDERS[p], t0 = Date.now();
+    if (!aiStore[p] || !aiStore[p].api_key) return aiKeysSay("Mudhalla API Key podunga.", "err");
+    aiKeysSay("🧪 " + P.name + " test aagudhu…", "");
+    try {
+      await callAi('Return exactly this JSON and nothing else: {"ok":true}');
+      aiKeysSay("✓ " + P.name + " key work aagudhu (" + ((Date.now() - t0) / 1000).toFixed(1) + "s)", "ok");
+    } catch (e) { aiKeysSay("✕ " + (e && e.message ? e.message : e), "err"); }
   }
 
   async function aiKeyDelete() {
@@ -3407,7 +3426,7 @@
       "<label class='text-xs font-bold flex items-center gap-2'><input type='checkbox' id='aiEnIn' checked> Enabled</label>" +
       "<div class='flex flex-wrap gap-2'><button type='button' id='aiSaveBtn' class='btn-wa px-3 py-1.5 text-xs'>💾 Save to Supabase</button>" +
       "<button type='button' id='aiDelBtn' class='btn-danger px-3 py-1.5 text-xs'>🗑 Delete</button>" +
-      "<button type='button' id='aiReloadBtn' class='btn-ghost px-3 py-1.5 text-xs'>↻ Reload</button></div>" +
+      "<button type='button' id='aiTestBtn' class='btn-primary px-3 py-1.5 text-xs'>🧪 Test Key</button><button type='button' id='aiReloadBtn' class='btn-ghost px-3 py-1.5 text-xs'>↻ Reload</button></div>" +
       "<div id='aiKeyStatus' class='text-xs font-bold'>Admin login pannina Supabase-la irundhu keys load aagum.</div>" +
       "<div id='aiKeyList' class='space-y-1 text-xs'></div>";
     oldSel.replaceWith(m);
@@ -3418,6 +3437,7 @@
     g("aiSaveBtn").addEventListener("click", aiKeySave);
     g("aiDelBtn").addEventListener("click", aiKeyDelete);
     g("aiReloadBtn").addEventListener("click", aiKeysLoad);
+    g("aiTestBtn").addEventListener("click", aiKeyTest);
     aiRenderManager();
   }
 
@@ -3437,7 +3457,9 @@
   function aiErr(P, res, data) {
     var m = data && ((data.error && (data.error.message || data.error)) || data.message) || "";
     if (typeof m !== "string") m = JSON.stringify(m);
-    var s = res.status, tag = s === 429 ? "Limit / quota mugindhuchu" : (s === 401 || s === 403) ? "API key thappu / reject" : s === 402 ? "Balance / credits illa" : "Error";
+    var s = res.status, badKey = /incorrect api key|invalid api key|invalid x-api-key|api key not valid|invalid.*key/i.test(m);
+    var tag = s === 429 ? "Limit / quota mugindhuchu" : (s === 401 || s === 403 || badKey) ? "API key thappu / reject" : s === 402 ? "Balance / credits illa" : "Error";
+    if (badKey || s === 401 || s === 403) m += " → provider console-la irundhu key-ai thirumba full-ah copy panni, 'AI Providers'-la save pannunga (🧪 Test Key click pannunga).";
     return new Error(P.name + ": " + tag + " (HTTP " + s + ")" + (m ? " — " + m.slice(0, 160) : ""));
   }
 
@@ -3570,6 +3592,549 @@
   }
   /* ===== END ADDED 6 ===== */
 
+  /* ===== ADDED 7: batch Open/Closed, live-only student access, student maintenance ===== */
+  function batchState(b) { return !b || b.status === "closed" ? "closed" : b.resultsReleased ? "ended" : "live"; }
+  function blockedList() { if (!Array.isArray(appState.blocked)) appState.blocked = []; return appState.blocked; }
+  function isBlocked(phone) { return blockedList().indexOf(String(phone)) >= 0; }
+
+  function renderActiveBatchPills() {
+    var wrap = g("activeBatchPills"), codeInp = g("stuBatchCodeInput");
+    if (!wrap) return;
+    var ph = g("stuPhoneInput") ? g("stuPhoneInput").value.replace(/\D/g, "").slice(-10) : "";
+    var live = appState.batches.filter(function(b) {
+      if (batchState(b) !== "live") return false;
+      return !(ph.length === 10 && appState.attempts.some(function(a) { return a.batchId === b.id && a.phone === ph && a.status === "submitted"; }));
+    });
+    wrap.innerHTML = "";
+    if (!live.length) { wrap.innerHTML = "<span class='text-xs font-bold opacity-75'>இப்போது Live Test எதுவும் இல்லை (No live test right now).</span>"; return; }
+    live.forEach(function(b) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-50 text-emerald-900 border border-emerald-300 hover:bg-emerald-100";
+      btn.textContent = "🟢 " + b.code + " • " + b.category;
+      btn.addEventListener("click", function() { if (codeInp) codeInp.value = b.code; });
+      wrap.appendChild(btn);
+    });
+    if (live.length === 1 && codeInp && !codeInp.value.trim()) codeInp.value = live[0].code;
+  }
+
+  function handleStartExam() {
+    showJoinError("");
+    var name = g("stuNameInput").value.trim();
+    var phone = g("stuPhoneInput").value.replace(/\D/g, "").slice(-10);
+    var code = g("stuBatchCodeInput").value.trim().toUpperCase();
+    var email = g("stuEmailInput").value.trim();
+    if (!name) return showJoinError("பெயர் உள்ளிடவும் (Name required).");
+    if (!/^[6-9]\d{9}$/.test(phone)) return showJoinError("சரியான 10 இலக்க Mobile Number உள்ளிடவும்.");
+    if (isBlocked(phone)) return showJoinError("இந்த Mobile Number-க்கு அணுகல் தடை செய்யப்பட்டுள்ளது (Blocked). Admin-ஐ தொடர்பு கொள்ளவும்.");
+    var batch = appState.batches.filter(function(b) { return b.code === code; })[0];
+    if (!batch) return showJoinError("Batch Code '" + code + "' கிடைக்கவில்லை. Live Test-ஐ மேலே தேர்ந்தெடுக்கவும்.");
+    var st = batchState(batch);
+    var att = appState.attempts.filter(function(a) { return a.batchId === batch.id && a.phone === phone; })[0];
+    if (att) {
+      if (att.studentName.toLowerCase() !== name.toLowerCase()) return showJoinError("இந்த Mobile Number இந்த Batch-ல் ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது.");
+      if (att.status !== "submitted" && st !== "live") return showJoinError(st === "closed" ? "இந்த Test Closed — தொடர முடியாது." : "இந்த Test முடிந்துவிட்டது.");
+      return openAttempt(att);
+    }
+    if (st === "closed") return showJoinError("🔴 இந்த Test Closed — இப்போது எழுத முடியாது. Live Test-ஐ தேர்ந்தெடுக்கவும்.");
+    if (st === "ended") return showJoinError("இந்த Test முடிந்துவிட்டது (முடிவுகள் வெளியிடப்பட்டன).");
+    var order = (batch.subjects || []).map(function(s) { return s.name; });
+    var qs = getApprovedQuestionsForBatch(batch).slice().sort(function(a, b) { return order.indexOf(a.subject) - order.indexOf(b.subject); });
+    if (!qs.length) return showJoinError("இந்த Batch-ல் இன்னும் Approved கேள்விகள் இல்லை. Admin-ஐ தொடர்பு கொள்ளவும்.");
+    att = { id: "att_" + Date.now(), batchId: batch.id, batchCode: batch.code, studentName: name, phone: phone, email: email, status: "in_progress",
+      qIds: qs.map(function(q) { return q.id; }), answers: {}, marked: {}, cursor: 0, startedAt: Date.now(),
+      endsAt: Date.now() + batch.durationMinutes * 60000, score: 0, totalQuestions: qs.length };
+    appState.attempts.push(att);
+    saveAppState();
+    openAttempt(att);
+  }
+
+  /* ---- admin: batch Open / Close ---- */
+  function setBatchStatus(b, status) {
+    b.status = status;
+    saveAppState();
+    renderAdminBatchesList();
+    renderActiveBatchPills();
+    showToast(status === "closed" ? "🔒 '" + b.code + "' Closed — students login panna mudiyaadhu." :
+      b.resultsReleased ? "🔓 Open aachu, aana results already released — Tab 3-la release time maathunga." : "🔓 '" + b.code + "' Open — Live!");
+  }
+  function addBtn(parent, label, cls, fn) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = cls + " px-3 py-1.5 text-xs mr-1";
+    b.textContent = label;
+    b.addEventListener("click", fn);
+    parent.appendChild(b);
+  }
+  function renderAdminBatchesList() {
+    var wrap = g("adminBatchesList");
+    if (!wrap) return;
+    wrap.innerHTML = "";
+    appState.batches.forEach(function(b) {
+      var st = batchState(b), n = appState.attempts.filter(function(a) { return a.batchId === b.id; }).length;
+      var qn = appState.questions.filter(function(q) { return q.batchId === b.id && q.status === "approved"; }).length;
+      var chip = st === "live" ? ["🟢 LIVE", "bg-emerald-100 text-emerald-800"] : st === "closed" ? ["🔴 CLOSED", "bg-red-100 text-red-800"] : ["🟠 ENDED", "bg-amber-100 text-amber-800"];
+      var card = document.createElement("div");
+      card.className = "p-3 rounded-xl bg-white/80 border border-slate-200 flex flex-wrap items-center justify-between gap-2";
+      card.innerHTML = "<div class='min-w-0'><div class='font-extrabold text-sm'>" + esc(b.code) + " — " + esc(b.title) +
+        " <span class='ml-1 px-2 py-0.5 rounded-full text-[11px] font-extrabold " + chip[1] + "'>" + chip[0] + "</span></div>" +
+        "<div class='text-xs opacity-75'>" + esc(b.category) + " • " + esc(b.durationMinutes) + " mins • " + qn + " approved Qs • " + n + " attempts • Release: " + esc(b.releaseDate || "") + " " + esc(b.releaseTime || "") + "</div></div>";
+      var bar = document.createElement("div");
+      if (b.status === "closed") addBtn(bar, "🔓 Open", "btn-wa", function() { setBatchStatus(b, "open"); });
+      else addBtn(bar, "🔒 Close", "btn-danger", function() { setBatchStatus(b, "closed"); });
+      addBtn(bar, "🗑 Delete", "btn-ghost", function() {
+        if (n) return showToast("Attempts irukku — Delete pannaama 🔒 Close pannunga.");
+        if (!confirm("'" + b.code + "' batch-aiyum adhan questions-aiyum delete pannava?")) return;
+        appState.batches = appState.batches.filter(function(x) { return x.id !== b.id; });
+        appState.questions = appState.questions.filter(function(q) { return q.batchId !== b.id; });
+        saveAppState();
+        renderAdminBatchesList();
+        renderActiveBatchPills();
+        populateAiTabSelectors();
+      });
+      card.appendChild(bar);
+      wrap.appendChild(card);
+    });
+  }
+
+  /* ---- admin: Student (user) maintenance ---- */
+  function renderMaintenance() {
+    if (!g("stuTableBody")) return;
+    var sel = g("stuBatchFilter"), cur = sel.value;
+    sel.innerHTML = "<option value=''>All batches</option>" + appState.batches.map(function(b) { return "<option value='" + esc(b.id) + "'>" + esc(b.code) + "</option>"; }).join("");
+    sel.value = cur;
+    var q = g("stuSearchIn").value.trim().toLowerCase(), bf = sel.value, sf = g("stuStatusFilter").value;
+    var rows = appState.attempts.slice().sort(function(a, b) { return (b.startedAt || 0) - (a.startedAt || 0); }).filter(function(a) {
+      if (bf && a.batchId !== bf) return false;
+      if (sf === "blocked" ? !isBlocked(a.phone) : (sf && a.status !== sf)) return false;
+      return !q || (a.studentName || "").toLowerCase().indexOf(q) >= 0 || String(a.phone).indexOf(q) >= 0;
+    });
+    g("stuSummary").textContent = rows.length + " / " + appState.attempts.length + " attempts • " +
+      appState.batches.filter(function(b) { return batchState(b) === "live"; }).length + " live test(s) • " + blockedList().length + " blocked";
+    var body = g("stuTableBody");
+    body.innerHTML = rows.length ? "" : "<tr><td colspan='8' class='p-3 opacity-70'>Students illa.</td></tr>";
+    rows.forEach(function(a, i) {
+      var b = getBatchById(a.batchId), bl = isBlocked(a.phone), tr = document.createElement("tr");
+      tr.className = "border-t border-slate-200" + (bl ? " bg-red-50" : "");
+      tr.innerHTML = "<td class='p-2'>" + (i + 1) + "</td><td class='p-2 font-bold'>" + esc(a.studentName) + (bl ? " 🚫" : "") + "</td><td class='p-2'>" + esc(a.phone) +
+        "</td><td class='p-2'>" + esc(a.email || "—") + "</td><td class='p-2'>" + esc(b ? b.code : a.batchCode) + "</td><td class='p-2'>" +
+        (a.status === "submitted" ? "✅ Submitted" : "⏳ In progress") + "</td><td class='p-2'>" +
+        (a.status === "submitted" ? esc(a.score) + "/" + esc(a.totalQuestions) : Object.keys(a.answers || {}).length + " ans") + "</td><td class='p-2 whitespace-nowrap'></td>";
+      var cell = tr.lastChild;
+      addBtn(cell, bl ? "✓ Unblock" : "🚫 Block", bl ? "btn-wa" : "btn-ghost", function() {
+        var l = blockedList(), k = l.indexOf(String(a.phone));
+        if (k >= 0) l.splice(k, 1); else l.push(String(a.phone));
+        saveAppState();
+        renderMaintenance();
+      });
+      addBtn(cell, "↺ Reset", "btn-danger", function() {
+        if (!confirm(a.studentName + " (" + a.phone + ") attempt delete aagum — student marubadi test ezhudha mudiyum. Seri-ya?")) return;
+        appState.attempts = appState.attempts.filter(function(x) { return x.id !== a.id; });
+        saveAppState();
+        renderMaintenance();
+        renderActiveBatchPills();
+      });
+      body.appendChild(tr);
+    });
+    var bw = g("stuBlockedList");
+    bw.innerHTML = blockedList().length ? "" : "<span class='opacity-70'>Yaarum block aagala.</span>";
+    blockedList().forEach(function(ph) {
+      var c = document.createElement("span");
+      c.className = "inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-50 border border-red-300 font-bold mr-1";
+      c.textContent = ph + " ";
+      var x = document.createElement("button");
+      x.type = "button";
+      x.textContent = "✕";
+      x.title = "Unblock";
+      x.addEventListener("click", function() { blockedList().splice(blockedList().indexOf(ph), 1); saveAppState(); renderMaintenance(); });
+      c.appendChild(x);
+      bw.appendChild(c);
+    });
+  }
+
+  function initMaintenanceUi() {
+    var b3 = g("admTabBtn3"), p3 = g("admTabPanel3");
+    if (!b3 || !p3 || g("admTabBtn4")) return;
+    var b4 = document.createElement("button");
+    b4.type = "button";
+    b4.id = "admTabBtn4";
+    b4.className = "btn-ghost flex-1 min-w-[170px] py-2.5 px-4 text-xs sm:text-sm";
+    b4.textContent = "4. Students (User Maintenance)";
+    b3.insertAdjacentElement("afterend", b4);
+    var p4 = document.createElement("div");
+    p4.id = "admTabPanel4";
+    p4.className = "hidden space-y-5";
+    p4.innerHTML = "<div class='soft-card p-4 sm:p-5 space-y-3'><h3 class='font-extrabold text-base'>👥 Student Maintenance</h3>" +
+      "<div class='flex flex-wrap gap-2'><input id='stuSearchIn' placeholder='Search name / mobile' class='p-2.5 text-xs flex-1 min-w-[160px]'>" +
+      "<select id='stuBatchFilter' class='p-2.5 text-xs'></select>" +
+      "<select id='stuStatusFilter' class='p-2.5 text-xs'><option value=''>All status</option><option value='in_progress'>In progress</option><option value='submitted'>Submitted</option><option value='blocked'>Blocked</option></select></div>" +
+      "<div id='stuSummary' class='text-xs font-bold'></div>" +
+      "<div class='overflow-x-auto'><table class='w-full text-xs text-left'><thead><tr class='font-extrabold'><th class='p-2'>#</th><th class='p-2'>Name</th><th class='p-2'>Mobile</th><th class='p-2'>Email</th><th class='p-2'>Batch</th><th class='p-2'>Status</th><th class='p-2'>Score</th><th class='p-2'>Actions</th></tr></thead><tbody id='stuTableBody'></tbody></table></div></div>" +
+      "<div class='soft-card p-4 sm:p-5 space-y-2'><div class='font-extrabold text-sm'>🚫 Block a mobile number</div>" +
+      "<div class='flex gap-2'><input id='stuBlockIn' placeholder='10-digit mobile' class='p-2.5 text-xs flex-1'><button type='button' id='stuBlockBtn' class='btn-danger px-4 py-2 text-xs'>Block</button></div>" +
+      "<div id='stuBlockedList' class='text-xs'></div></div>";
+    p3.insertAdjacentElement("afterend", p4);
+    b4.addEventListener("click", function() { switchAdminTab(4); });
+    ["stuSearchIn"].forEach(function(id) { g(id).addEventListener("input", renderMaintenance); });
+    ["stuBatchFilter", "stuStatusFilter"].forEach(function(id) { g(id).addEventListener("change", renderMaintenance); });
+    g("stuBlockBtn").addEventListener("click", function() {
+      var ph = g("stuBlockIn").value.replace(/\D/g, "").slice(-10);
+      if (!/^[6-9]\d{9}$/.test(ph)) return showToast("Sariyaana 10 digit mobile podunga.");
+      if (!isBlocked(ph)) { blockedList().push(ph); saveAppState(); }
+      g("stuBlockIn").value = "";
+      renderMaintenance();
+    });
+    if (g("stuPhoneInput")) g("stuPhoneInput").addEventListener("input", renderActiveBatchPills);
+    if (g("navStudentBtn")) g("navStudentBtn").addEventListener("click", renderActiveBatchPills);
+  }
+  /* ===== END ADDED 7 ===== */
+
+  /* ===== ADDED 8: shared Supabase database (students -> secure RPC, admin -> synced tables) ===== */
+  var S = { att: null, batch: null, qs: [], rank: 0, t: null, poll: null, busy: false };
+  function studentMode() {
+    return !!S.att && (!activeSupabaseSession || !g("studentExamScreen").classList.contains("hidden") || !g("studentResultsScreen").classList.contains("hidden"));
+  }
+  function getBatchById(id) { return (id && S.batch && S.batch.id === id && studentMode()) ? S.batch : getBatchByIdLocal(id); }
+  function getAttemptById(id) { return (id && S.att && S.att.id === id && studentMode()) ? S.att : getAttemptByIdLocal(id); }
+  function questionsOf(att) { return (att === S.att && studentMode()) ? S.qs : questionsOfLocal(att); }
+
+  async function rpc(name, args) {
+    var cfg = getRuntimeConfig();
+    if (!cfg.supabaseUrl || !cfg.supabaseKey) cfg = await loadExternalConfigJs();
+    if (!cfg || !cfg.supabaseUrl || !cfg.supabaseKey) throw new Error("Server config (config.js) illa.");
+    var ctl = new AbortController(), timer = setTimeout(function() { ctl.abort(); }, 20000);
+    try {
+      var r = await fetch(cfg.supabaseUrl.replace(/\/+$/, "") + "/rest/v1/rpc/" + name, {
+        method: "POST", signal: ctl.signal, body: JSON.stringify(args || {}),
+        headers: { apikey: cfg.supabaseKey, Authorization: "Bearer " + cfg.supabaseKey, "Content-Type": "application/json" }
+      });
+      var d = await r.json().catch(function() { return null; });
+      if (!r.ok) throw new Error((d && (d.message || d.hint)) || ("HTTP " + r.status));
+      return d;
+    } catch (e) {
+      if (e && e.name === "AbortError") throw new Error("Server respond pannala (timeout).");
+      throw e;
+    } finally { clearTimeout(timer); }
+  }
+
+  /* ---------- student side ---------- */
+  var JOIN_ERR = {
+    phone: "சரியான 10 இலக்க Mobile Number உள்ளிடவும்.", name: "பெயர் உள்ளிடவும் (Name required).",
+    blocked: "இந்த Mobile Number-க்கு அணுகல் தடை செய்யப்பட்டுள்ளது (Blocked). Admin-ஐ தொடர்பு கொள்ளவும்.",
+    nobatch: "Batch Code கிடைக்கவில்லை. Live Test-ஐ மேலே தேர்ந்தெடுக்கவும்.",
+    phone_used: "இந்த Mobile Number இந்த Batch-ல் வேறு பெயரில் ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது.",
+    closed: "🔴 இந்த Test Closed — இப்போது எழுத முடியாது. Live Test-ஐ தேர்ந்தெடுக்கவும்.",
+    ended: "இந்த Test முடிந்துவிட்டது (முடிவுகள் வெளியிடப்பட்டன).",
+    noq: "இந்த Batch-ல் இன்னும் Approved கேள்விகள் இல்லை. Admin-ஐ தொடர்பு கொள்ளவும்."
+  };
+  function savedCreds() { try { return JSON.parse(localStorage.getItem("tn_student_creds") || "null"); } catch (e) { return null; } }
+
+  async function startWith(c) {
+    var btn = g("startExamBtn");
+    if (btn) btn.disabled = true;
+    try {
+      var res = await rpc("tn_start", { p_code: c.code, p_name: c.name, p_phone: c.phone, p_email: c.email || "" });
+      if (res.error) return showJoinError(JOIN_ERR[res.error] || res.error);
+      var skew = Date.parse(res.now) - Date.now(), a = res.attempt;
+      a.endsAt = Date.parse(a.endsAt) - skew;
+      a.answers = a.answers || {};
+      a.marked = a.marked || {};
+      S.att = a; S.batch = res.batch; S.qs = res.questions || []; S.rank = 0;
+      try { localStorage.setItem("tn_student_creds", JSON.stringify(c)); } catch (e) {}
+      if (res.mode === "submitted") return showResultsScreen(a);
+      openAttempt(a);
+    } catch (e) {
+      showJoinError("Server error: " + (e && e.message ? e.message : e) + " — internet check panni marubadi try pannunga.");
+    } finally { if (btn) btn.disabled = false; }
+  }
+  function handleStartExam() {
+    showJoinError("");
+    var name = g("stuNameInput").value.trim(), phone = g("stuPhoneInput").value.replace(/\D/g, "").slice(-10);
+    if (!name) return showJoinError(JOIN_ERR.name);
+    if (!/^[6-9]\d{9}$/.test(phone)) return showJoinError(JOIN_ERR.phone);
+    return startWith({ code: g("stuBatchCodeInput").value.trim().toUpperCase(), name: name, phone: phone, email: g("stuEmailInput").value.trim() });
+  }
+  function resumeRemote() { var c = savedCreds(); if (c) startWith(c); }
+  function checkExistingSavedSession() {
+    var btn = g("resumeSavedBannerBtn"), c = savedCreds();
+    if (!btn) return;
+    if (!c) return btn.classList.add("hidden");
+    btn.classList.remove("hidden");
+    btn.textContent = "Resume / View Result (" + c.name + " • " + c.code + ")";
+  }
+
+  function persistAttempt() {
+    var att = S.att;
+    if (!att) return;
+    var el = g("examAutoSaveStatus");
+    if (el) el.textContent = "⏳ Saving…";
+    clearTimeout(S.t);
+    S.t = setTimeout(pushSave, 1200);
+  }
+  async function pushSave() {
+    var att = S.att, el = g("examAutoSaveStatus");
+    if (!att || att.status === "submitted") return;
+    try {
+      await rpc("tn_save", { p_attempt: att.id, p_phone: att.phone, p_answers: att.answers, p_marked: att.marked, p_cursor: att.cursor || 0 });
+      if (el) el.textContent = "✓ Saved to server " + new Date().toLocaleTimeString();
+    } catch (e) {
+      if (el) el.textContent = "⚠ Offline — marubadi save pannum";
+      S.t = setTimeout(pushSave, 5000);
+    }
+  }
+
+  async function finishExam(id) {
+    var att = S.att;
+    if (!att || att.id !== id || att.status === "submitted" || S.busy) return;
+    S.busy = true;
+    clearTimeout(S.t);
+    try {
+      var r = await rpc("tn_submit", { p_attempt: att.id, p_phone: att.phone, p_answers: att.answers });
+      if (!r || r.error) throw new Error(r && r.error ? r.error : "submit failed");
+      att.status = "submitted"; att.score = r.score; att.totalQuestions = r.total;
+      clearInterval(examIntervalId);
+      S.busy = false;
+      showResultsScreen(att);
+    } catch (e) {
+      S.busy = false;
+      showToast("⚠ Submit aagala (" + (e && e.message ? e.message : e) + ") — 5 sec-la marubadi try pannum.");
+      setTimeout(function() { finishExam(id); }, 5000);
+    }
+  }
+
+  function showResultsScreen(att) {
+    clearInterval(releaseIntervalId);
+    clearTimeout(S.poll);
+    activeAttemptId = att.id;
+    setActiveSession(att.id);
+    switchScreen("studentResultsScreen");
+    g("waitingCandidateInfo").textContent = att.studentName + " • " + att.batchCode;
+    g("waitingReleaseCard").classList.remove("hidden");
+    g("releasedResultsCard").classList.add("hidden");
+    g("releaseCountdownTimer").textContent = "--:--:--";
+    return resultCheck(att);
+  }
+  function schedulePoll(att) {
+    clearTimeout(S.poll);
+    S.poll = setTimeout(function() {
+      if (!g("studentResultsScreen").classList.contains("hidden") && !g("waitingReleaseCard").classList.contains("hidden")) resultCheck(att);
+    }, 20000);
+  }
+  async function resultCheck(att, manual) {
+    var res;
+    try { res = await rpc("tn_result", { p_attempt: att.id, p_phone: att.phone }); }
+    catch (e) { if (manual) showToast("Server error: " + (e && e.message ? e.message : e)); return schedulePoll(att); }
+    if (res.error) return showToast("Result error: " + res.error);
+    if (res.released) return showReleasedRemote(att, res);
+    var skew = Date.parse(res.now) - Date.now(), target = res.releaseAt ? Date.parse(res.releaseAt) - skew : 0;
+    g("releaseTargetText").textContent = res.releaseAt ? "Scheduled Release: " + new Date(res.releaseAt).toLocaleString() : "Admin release pannum varai kaathirukkavum.";
+    clearInterval(releaseIntervalId);
+    if (target) {
+      var tick = function() {
+        var left = Math.ceil((target - Date.now()) / 1000);
+        if (left <= 0) { clearInterval(releaseIntervalId); resultCheck(att); return; }
+        g("releaseCountdownTimer").textContent = fmtClock(left, true);
+      };
+      tick();
+      releaseIntervalId = setInterval(tick, 1000);
+    }
+    if (manual) showToast("முடிவுகள் இன்னும் வெளியாகவில்லை.");
+    schedulePoll(att);
+  }
+  function showReleasedRemote(att, res) {
+    clearInterval(releaseIntervalId);
+    clearTimeout(S.poll);
+    S.qs = res.review.map(function(it) { return it.q; });
+    att.answers = {};
+    res.review.forEach(function(it) { if (it.answer !== null && it.answer !== undefined) att.answers[it.q.id] = it.answer; });
+    att.score = res.score; att.totalQuestions = res.total; S.rank = res.rank; S.batch = res.batch;
+    showReleasedResult(att, S.batch);
+  }
+
+  var pillsT = null;
+  function renderActiveBatchPills() { clearTimeout(pillsT); pillsT = setTimeout(doPills, 350); }
+  async function doPills() {
+    var wrap = g("activeBatchPills"), ci = g("stuBatchCodeInput");
+    if (!wrap) return;
+    var ph = g("stuPhoneInput") ? g("stuPhoneInput").value.replace(/\D/g, "").slice(-10) : "", list;
+    try { list = await rpc("tn_live_batches", { p_phone: ph.length === 10 ? ph : null }); }
+    catch (e) { wrap.innerHTML = "<span class='text-xs font-bold text-red-700'>Live tests load aagala — internet / Supabase config check pannunga.</span>"; return; }
+    if (ci && !ci.dataset.bound) { ci.dataset.bound = "1"; ci.addEventListener("input", function() { ci.dataset.touched = "1"; }); }
+    wrap.innerHTML = "";
+    if (!list || !list.length) {
+      wrap.innerHTML = "<span class='text-xs font-bold opacity-75'>இப்போது Live Test எதுவும் இல்லை (No live test right now).</span>";
+      if (ci && !ci.dataset.touched) ci.value = "";
+      return;
+    }
+    list.forEach(function(b) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "px-3 py-1.5 rounded-lg text-xs font-extrabold bg-emerald-50 text-emerald-900 border border-emerald-300 hover:bg-emerald-100";
+      btn.textContent = "🟢 " + b.code + " • " + b.category;
+      btn.addEventListener("click", function() { if (ci) { ci.value = b.code; ci.dataset.touched = "1"; } });
+      wrap.appendChild(btn);
+    });
+    if (ci && !ci.dataset.touched) ci.value = list.length === 1 ? list[0].code : "";
+  }
+
+  /* ---------- admin side: tables kept in sync with appState ---------- */
+  var dbSnap = null, dbTimer = null, dbBusy = false, dbDirty = false;
+  var DB_TBL = { batches: ["tn_batches", "id"], questions: ["tn_questions", "id"], blocked: ["tn_blocked", "phone"] };
+  function dbBadge(msg, kind) {
+    var s = g("dbSyncBadge");
+    if (!s) return;
+    s.className = kind === "ok" ? "text-emerald-700" : kind === "err" ? "text-red-700" : "text-slate-600";
+    s.textContent = msg;
+  }
+  function dbIso(v) { var d = new Date(v); return isNaN(d.getTime()) ? null : d.toISOString(); }
+  function dbCurrent() {
+    var m = { batches: {}, questions: {}, blocked: {}, attempts: {} };
+    appState.batches.forEach(function(b) {
+      m.batches[b.id] = { id: b.id, code: b.code, status: b.status === "closed" ? "closed" : "open", results_released: !!b.resultsReleased, release_at: dbIso(b.releaseAt), data: b };
+    });
+    appState.questions.forEach(function(q) { m.questions[q.id] = { id: q.id, batch_id: q.batchId || "", status: q.status || "draft", data: q }; });
+    blockedList().forEach(function(p) { m.blocked[p] = { phone: p }; });
+    appState.attempts.forEach(function(a) { m.attempts[a.id] = 1; });
+    return m;
+  }
+  function dbSnapOf(cur) {
+    var s = { batches: {}, questions: {}, blocked: {}, attempts: cur.attempts };
+    ["batches", "questions", "blocked"].forEach(function(t) { Object.keys(cur[t]).forEach(function(k) { s[t][k] = JSON.stringify(cur[t][k]); }); });
+    return s;
+  }
+  function dbQueueSync() {
+    if (!dbSnap || !activeSupabaseSession) return;
+    clearTimeout(dbTimer);
+    dbTimer = setTimeout(dbSync, 900);
+  }
+  function inList(ids) { return encodeURIComponent("in.(" + ids.map(function(i) { return '"' + String(i).replace(/"/g, "") + '"'; }).join(",") + ")"); }
+  function chunks(a, n) { var o = []; for (var i = 0; i < a.length; i += n) o.push(a.slice(i, i + n)); return o; }
+
+  async function dbSync() {
+    dbTimer = null;
+    if (!dbSnap || !activeSupabaseSession) return;
+    if (dbBusy) { dbDirty = true; return; }
+    dbBusy = true;
+    dbBadge("⏳ Syncing…", "");
+    try {
+      var cur = dbCurrent(), t, i, k;
+      for (t in DB_TBL) {
+        var up = Object.keys(cur[t]).filter(function(x) { return JSON.stringify(cur[t][x]) !== dbSnap[t][x]; });
+        var parts = chunks(up, 15);
+        for (i = 0; i < parts.length; i++) {
+          await supaDb("POST", DB_TBL[t][0] + "?on_conflict=" + DB_TBL[t][1], parts[i].map(function(x) { return cur[t][x]; }), "resolution=merge-duplicates");
+          parts[i].forEach(function(x) { dbSnap[t][x] = JSON.stringify(cur[t][x]); });
+        }
+      }
+      for (t in DB_TBL) {
+        var del = Object.keys(dbSnap[t]).filter(function(x) { return !cur[t][x]; }), dp = chunks(del, 40);
+        for (i = 0; i < dp.length; i++) {
+          await supaDb("DELETE", DB_TBL[t][0] + "?" + DB_TBL[t][1] + "=" + inList(dp[i]));
+          dp[i].forEach(function(x) { delete dbSnap[t][x]; });
+        }
+      }
+      var ad = Object.keys(dbSnap.attempts).filter(function(x) { return !cur.attempts[x]; }), ap = chunks(ad, 40);
+      for (i = 0; i < ap.length; i++) {
+        await supaDb("DELETE", "tn_attempts?id=" + inList(ap[i]));
+        ap[i].forEach(function(x) { delete dbSnap.attempts[x]; });
+      }
+      dbBadge("☁ Synced " + new Date().toLocaleTimeString(), "ok");
+    } catch (e) {
+      var m = String(e && e.message ? e.message : e);
+      dbBadge("⚠ Sync error: " + m + (/tn_|PGRST205|relation|permission denied/i.test(m) ? " — supabase_sync.sql run pannunga." : "") + " (10 sec-la retry)", "err");
+      dbTimer = setTimeout(dbSync, 10000);
+    }
+    dbBusy = false;
+    if (dbDirty) { dbDirty = false; dbQueueSync(); }
+  }
+
+  function dbRowToBatch(r) { var b = Object.assign({}, r.data); b.id = r.id; b.code = r.code; b.status = r.status; b.resultsReleased = !!r.results_released; return b; }
+  function dbRowToAttempt(r) {
+    return { id: r.id, batchId: r.batch_id, batchCode: r.batch_code, studentName: r.student_name, phone: r.phone, email: r.email || "", status: r.status,
+      qIds: r.qids || [], answers: r.answers || {}, marked: r.marked || {}, cursor: r.cursor || 0, startedAt: Date.parse(r.started_at),
+      endsAt: Date.parse(r.ends_at), submittedAt: r.submitted_at ? Date.parse(r.submitted_at) : 0, score: r.score || 0, totalQuestions: r.total || 0 };
+  }
+  function dbRerenderAll() {
+    try { renderAdminBatchesList(); } catch (e) {}
+    try { renderMaintenance(); } catch (e) {}
+    try { renderAdminResultsTable(); } catch (e) {}
+    try { updateAiBatchBannerAndQueue(); } catch (e) {}
+    try { populateAiTabSelectors(); } catch (e) {}
+  }
+
+  async function dbLoadAll(force) {
+    dbBadge("⏳ Supabase-la irundhu load aagudhu…", "");
+    try {
+      var r = await Promise.all([supaDb("GET", "tn_batches?select=*&order=updated_at.asc"), supaDb("GET", "tn_questions?select=*&order=updated_at.desc"),
+        supaDb("GET", "tn_attempts?select=*&order=started_at.desc"), supaDb("GET", "tn_blocked?select=*")]);
+      var bs = r[0] || [], qs = r[1] || [];
+      if (!force && !bs.length && !qs.length && (appState.batches.length || appState.questions.length)) {
+        dbSnap = { batches: {}, questions: {}, blocked: {}, attempts: {} };
+        appState.attempts = [];
+        await dbSync();
+        dbBadge("☁ First sync: local data Supabase-ku upload aachu ✓", "ok");
+      } else {
+        appState.batches = bs.map(dbRowToBatch);
+        appState.questions = qs.map(function(x) { var q = x.data; q.status = x.status; return q; });
+        appState.attempts = (r[2] || []).map(dbRowToAttempt);
+        appState.blocked = (r[3] || []).map(function(x) { return x.phone; });
+        dbSnap = dbSnapOf(dbCurrent());
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(appState)); } catch (e) {}
+        dbBadge("☁ Loaded from Supabase " + new Date().toLocaleTimeString(), "ok");
+      }
+      dbRerenderAll();
+    } catch (e) {
+      var m = String(e && e.message ? e.message : e);
+      dbBadge("⚠ Supabase load error: " + m + (/tn_|PGRST205|relation|permission denied/i.test(m) ? " — supabase_sync.sql run pannunga." : ""), "err");
+    }
+  }
+
+  async function dbRefreshAttempts() {
+    if (!dbSnap || !activeSupabaseSession || dbBusy || dbTimer) return false;
+    try {
+      var r = await Promise.all([supaDb("GET", "tn_attempts?select=*&order=started_at.desc"), supaDb("GET", "tn_blocked?select=*"), supaDb("GET", "tn_batches?select=*&order=updated_at.asc")]);
+      if (dbBusy || dbTimer) return false;
+      appState.attempts = (r[0] || []).map(dbRowToAttempt);
+      appState.blocked = (r[1] || []).map(function(x) { return x.phone; });
+      appState.batches = (r[2] || []).map(dbRowToBatch);
+      var cur = dbCurrent();
+      dbSnap.attempts = cur.attempts;
+      ["blocked", "batches"].forEach(function(t) { dbSnap[t] = {}; Object.keys(cur[t]).forEach(function(k) { dbSnap[t][k] = JSON.stringify(cur[t][k]); }); });
+      return true;
+    } catch (e) { return false; }
+  }
+  function dbTabHook(n) {
+    if (n !== 1 && n !== 3 && n !== 4) return;
+    dbRefreshAttempts().then(function(ok) {
+      if (!ok) return;
+      if (n === 1) renderAdminBatchesList();
+      if (n === 3) renderAdminResultsTable();
+      if (n === 4) renderMaintenance();
+    });
+  }
+  async function dbFullReload() {
+    if (!dbSnap) return showToast("Mudhalla Admin login pannunga.");
+    await dbSync();
+    await dbLoadAll(true);
+  }
+  function dbPoll() {
+    if (!dbSnap || !activeSupabaseSession || document.hidden) return;
+    var t3 = g("admTabPanel3") && !g("admTabPanel3").classList.contains("hidden"), t4 = g("admTabPanel4") && !g("admTabPanel4").classList.contains("hidden");
+    if (!t3 && !t4) return;
+    dbRefreshAttempts().then(function(ok) { if (ok) { if (t3) renderAdminResultsTable(); else renderMaintenance(); } });
+  }
+  function initSyncBadge() {
+    var b1 = g("admTabBtn1");
+    if (!b1 || g("dbSyncBadge")) return;
+    var w = document.createElement("div");
+    w.className = "flex items-center gap-2 text-xs font-bold mb-2";
+    w.innerHTML = "<span id='dbSyncBadge' class='text-slate-600'>☁ Supabase sync: Admin login pannina start aagum</span><button type='button' id='dbSyncBtn' class='btn-ghost px-3 py-1 text-xs'>↻ Sync</button>";
+    b1.parentElement.insertAdjacentElement("beforebegin", w);
+    g("dbSyncBtn").addEventListener("click", dbFullReload);
+    setInterval(dbPoll, 15000);
+  }
+  /* ===== END ADDED 8 ===== */
+
   loadAppState();
   loadAccPrefs();
   populateSubjectDropdowns();
@@ -3582,6 +4147,8 @@
   bindAllEvents();
   bindExtraEvents();
   initQuestionTools();
+  initMaintenanceUi();
+  initSyncBadge();
 
   try {
     var params = new URLSearchParams(window.location.search);
